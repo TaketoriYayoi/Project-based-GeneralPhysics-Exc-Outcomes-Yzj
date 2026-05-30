@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3-7 磁介质 — 电磁学</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Times New Roman","Microsoft YaHei","PingFang SC",serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;color:#fff}
+    canvas#particles{position:fixed;inset:0;pointer-events:none;z-index:0}
+    .topbar{position:relative;z-index:10;display:flex;align-items:center;gap:14px;padding:18px 36px;border-bottom:1px solid rgba(255,255,255,0.07);background:rgba(15,12,41,0.7);backdrop-filter:blur(12px);font-family:"Microsoft YaHei",sans-serif}
+    .back-btn{color:rgba(255,255,255,0.5);font-size:14px;cursor:pointer;text-decoration:none;transition:color .2s}.back-btn:hover{color:#818cf8}
+    .topbar-title{font-size:16px;font-weight:700;letter-spacing:1px}
+    .topbar-sub{margin-left:auto;font-size:12px;color:rgba(255,255,255,0.3)}
+    .tabs{display:flex;gap:10px;margin-bottom:32px;font-family:"Microsoft YaHei",sans-serif;flex-wrap:wrap}
+    .tab{padding:9px 22px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.5);transition:all .2s}
+    .tab.active{background:linear-gradient(135deg,#6366f1,#818cf8);border-color:transparent;color:#fff;box-shadow:0 4px 16px rgba(99,102,241,0.4)}
+    .tab-panel{display:none}.tab-panel.active{display:block}
+    .page{position:relative;z-index:10;max-width:860px;margin:0 auto;padding:36px 24px 80px}
+    .card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:16px;padding:28px 32px;margin-bottom:20px}
+    .card-title{font-size:16px;font-weight:700;color:#818cf8;margin-bottom:14px;display:flex;align-items:center;gap:8px;font-family:"Microsoft YaHei",sans-serif}
+    .card-title::before{content:"";display:inline-block;width:4px;height:18px;border-radius:2px;background:linear-gradient(#6366f1,#818cf8);flex-shrink:0}
+    .card p{font-size:15px;color:rgba(255,255,255,0.8);line-height:2}.card p+p{margin-top:10px}
+    .hl{color:#fbbf24;font-weight:600}.hl-blue{color:#38bdf8;font-weight:600}.hl-green{color:#34d399;font-weight:600}.hl-red{color:#f87171;font-weight:600}.hl-purple{color:#c084fc;font-weight:600}
+    .katex{color:#e2e8f0;font-size:1.05em}.katex-display{margin:14px 0}.katex-display>.katex{color:#93c5fd}
+    .prop-list{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:12px}
+    .prop-item{display:flex;gap:14px;align-items:flex-start;background:rgba(255,255,255,0.03);border-radius:10px;padding:14px 18px;border-left:3px solid #6366f1}
+    .prop-item:nth-child(2){border-left-color:#38bdf8}.prop-item:nth-child(3){border-left-color:#34d399}.prop-item:nth-child(4){border-left-color:#f59e0b}.prop-item:nth-child(5){border-left-color:#f87171}
+    .prop-num{min-width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;font-family:"Microsoft YaHei",sans-serif}
+    .prop-item:nth-child(2) .prop-num{background:linear-gradient(135deg,#0ea5e9,#38bdf8)}.prop-item:nth-child(3) .prop-num{background:linear-gradient(135deg,#10b981,#34d399)}.prop-item:nth-child(4) .prop-num{background:linear-gradient(135deg,#f59e0b,#fbbf24)}.prop-item:nth-child(5) .prop-num{background:linear-gradient(135deg,#ef4444,#f87171)}
+    .prop-body{font-size:14.5px;color:rgba(255,255,255,0.78);line-height:1.9}.prop-body strong{color:#fff;font-family:"Microsoft YaHei",sans-serif}
+    .note-box{background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);border-radius:12px;padding:16px 20px;margin-top:14px;font-size:14px;color:rgba(255,255,255,0.7);line-height:1.9;font-family:"Microsoft YaHei",sans-serif}
+    .note-box .note-label{font-weight:700;color:#fbbf24;margin-bottom:4px;display:block}
+    .green-box{background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.2);border-radius:12px;padding:16px 20px;margin-top:14px;font-size:14px;color:rgba(255,255,255,0.75);line-height:1.9;font-family:"Microsoft YaHei",sans-serif}
+    .green-box .note-label{font-weight:700;color:#34d399;margin-bottom:4px;display:block}
+    .blue-box{background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.2);border-radius:12px;padding:16px 20px;margin-top:14px;font-size:14px;color:rgba(255,255,255,0.75);line-height:1.9;font-family:"Microsoft YaHei",sans-serif}
+    .blue-box .note-label{font-weight:700;color:#38bdf8;margin-bottom:4px;display:block}
+    .eg-block{background:rgba(192,132,252,0.05);border:1px solid rgba(192,132,252,0.18);border-radius:14px;padding:24px 28px;margin-bottom:20px}
+    .eg-title{font-size:15px;font-weight:700;color:#c084fc;margin-bottom:14px;font-family:"Microsoft YaHei",sans-serif;display:flex;align-items:center;gap:8px}
+    .eg-title::before{content:"";display:inline-block;width:4px;height:16px;background:linear-gradient(#c084fc,#818cf8);border-radius:2px;flex-shrink:0}
+    .eg-block p{font-size:14.5px;color:rgba(255,255,255,0.8);line-height:2}.eg-block p+p{margin-top:8px}
+    .sol-steps{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+    .sol-step{background:rgba(255,255,255,0.025);border-left:3px solid #6366f1;border-radius:0 8px 8px 0;padding:12px 16px;font-size:14.5px;color:rgba(255,255,255,0.78);line-height:2}
+    .sol-step:nth-child(2){border-left-color:#38bdf8}.sol-step:nth-child(3){border-left-color:#34d399}.sol-step:nth-child(4){border-left-color:#f59e0b}.sol-step:nth-child(5){border-left-color:#f87171}.sol-step:nth-child(6){border-left-color:#c084fc}
+    .sol-step strong{color:#fff;font-family:"Microsoft YaHei",sans-serif}
+    .ans-box{background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:10px;padding:12px 18px;margin-top:12px;font-size:14.5px;color:rgba(255,255,255,0.85);line-height:2}
+    .ans-box .ans-label{color:#fbbf24;font-weight:700;font-family:"Microsoft YaHei",sans-serif}
+    canvas.demo-canvas{display:block;margin:18px auto 0;background:rgba(0,0,0,0.25);border-radius:12px;border:1px solid rgba(255,255,255,0.07)}
+    .demo-label{text-align:center;font-size:12.5px;color:rgba(255,255,255,0.35);font-family:"Microsoft YaHei",sans-serif;margin-top:8px}
+    .sim-ctrl{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+    .sim-btn{padding:7px 20px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:13px;font-family:"Microsoft YaHei",sans-serif;cursor:pointer;transition:all .2s}
+    .sim-btn:hover{background:rgba(99,102,241,0.25);border-color:rgba(99,102,241,0.5);color:#fff}
+    .sim-btn.active{background:linear-gradient(135deg,#6366f1,#818cf8);border-color:transparent;color:#fff;box-shadow:0 2px 10px rgba(99,102,241,0.4)}
+    .slider-row{display:flex;align-items:center;gap:14px;margin-top:14px;font-family:"Microsoft YaHei",sans-serif;font-size:13px;color:rgba(255,255,255,0.65)}
+    .slider-row input[type=range]{flex:1;accent-color:#818cf8}
+    .slider-val{min-width:60px;text-align:right;color:#fbbf24;font-weight:600}
+    .mag-table{width:100%;border-collapse:collapse;margin-top:14px;font-family:"Microsoft YaHei",sans-serif;font-size:13.5px}
+    .mag-table th{background:rgba(99,102,241,0.2);color:#818cf8;padding:10px 14px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.1)}
+    .mag-table td{padding:9px 14px;border-bottom:1px solid rgba(255,255,255,0.05);color:rgba(255,255,255,0.78)}
+    .mag-table tr:hover td{background:rgba(255,255,255,0.03)}
+  </style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">§3-7 &nbsp;磁介质 &amp; 位移电流</div>
+    <span class="topbar-course">普通物理（卓越班）下册 · 电磁学</span>
+  </div>
+  <div class="topbar-sub">NUSEP26 · 普通物理（卓）下</div>
+</div>
+
+<div class="page">
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(0)">3-7-1 物质的磁性</div>
+    <div class="tab" onclick="switchTab(1)">3-7-2 磁化强度</div>
+    <div class="tab" onclick="switchTab(2)">3-7-3 磁场强度 H</div>
+    <div class="tab" onclick="switchTab(3)">3-7-4 铁磁质</div>
+    <div class="tab" onclick="switchTab(4)">位移电流</div>
+  </div>
+
+  <!-- ══ Tab 0：物质的磁性 ══ -->
+  <div class="tab-panel active" id="panel-0">
+    <div class="card">
+      <div class="card-title">磁介质的分类</div>
+      <p>当磁场中存在介质时，介质被<span class="hl">磁化</span>，产生附加磁场，影响原磁场：$\vec{B} = \vec{B}_0 + \vec{B}'$</p>
+      <p>相对磁导率 $\mu_r = B/B_0$，磁导率 $\mu = \mu_0\mu_r$</p>
+      <table class="mag-table">
+        <thead><tr><th>类型</th><th>μᵣ 范围</th><th>特征</th><th>典型材料</th></tr></thead>
+        <tbody>
+          <tr><td><span class="hl-blue">抗磁质</span></td><td>$\mu_r < 1$</td><td>附加磁场与外场反向，微弱排斥</td><td>Cu、Bi、水、超导体（μᵣ=0）</td></tr>
+          <tr><td><span class="hl-green">顺磁质</span></td><td>$\mu_r > 1$（略大于1）</td><td>附加磁场与外场同向，微弱吸引</td><td>Al、O₂、铂</td></tr>
+          <tr><td><span class="hl-red">铁磁质</span></td><td>$\mu_r \gg 1$（可达$10^3\sim10^5$）</td><td>强烈磁化，磁滞，有居里点</td><td>Fe、Ni、Co、铁氧体</td></tr>
+          <tr><td><span class="hl-purple">完全抗磁体</span></td><td>$\mu_r = 0$</td><td>完全排斥磁场（Meissner效应）</td><td>超导材料</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 仿真：磁介质示意 -->
+    <div class="card">
+      <div class="card-title">交互仿真：三类磁介质在外场中的响应</div>
+      <p>选择介质类型，观察介质内部磁场与外场的对比，以及磁力线的变化。</p>
+      <div class="sim-ctrl">
+        <button class="sim-btn active" id="btnDia" onclick="setMedium('dia')">抗磁质 (μᵣ&lt;1)</button>
+        <button class="sim-btn" id="btnPara" onclick="setMedium('para')">顺磁质 (μᵣ&gt;1)</button>
+        <button class="sim-btn" id="btnFerro" onclick="setMedium('ferro')">铁磁质 (μᵣ≫1)</button>
+        <button class="sim-btn" id="btnSuper" onclick="setMedium('super')">超导体 (μᵣ=0)</button>
+        <button class="sim-btn" onclick="toggleFieldLines()">🌀 磁力线</button>
+      </div>
+      <canvas id="mediumCanvas" class="demo-canvas" width="620" height="280"></canvas>
+      <div class="demo-label" id="mediumLabel">抗磁质：介质内磁场略小于外场，磁力线稀疏</div>
+    </div>
+  </div>
+
+  <!-- ══ Tab 1：磁化强度 ══ -->
+  <div class="tab-panel" id="panel-1">
+    <div class="card">
+      <div class="card-title">分子磁矩与磁化强度</div>
+      <p><span class="hl">分子磁矩</span>：分子/原子中电子轨道运动与自旋等效为分子电流，其磁矩称为分子磁矩 $\vec{P}_m$。</p>
+      <p><span class="hl-blue">磁化强度</span>（单位 A/m）：单位体积内分子磁矩的矢量和：</p>
+      $$\vec{M} = \frac{\sum_i \vec{m}_i}{\Delta V} = \frac{\sum\vec{P}_m + \sum\Delta\vec{P}_m}{\Delta V}$$
+      <ul class="prop-list">
+        <li class="prop-item"><span class="prop-num">顺</span><div class="prop-body"><strong>顺磁质</strong>：$\sum\vec{P}_m \gg \sum\Delta\vec{P}_m$，原有磁矩转向外场，$\vec{M}$ 与 $\vec{B}_0$ 同向</div></li>
+        <li class="prop-item"><span class="prop-num">抗</span><div class="prop-body"><strong>抗磁质</strong>：$\sum\vec{P}_m = 0$，附加磁矩 $\Delta\vec{P}_m$ 反向于外场，$\vec{M}$ 与 $\vec{B}_0$ 反向</div></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">磁化电流</div>
+      <p>介质磁化的宏观效果：在介质表面（边缘）出现环形<span class="hl">磁化电流</span> $I_s$，其面密度 $j_s = I_s/L$（A/m）。</p>
+      <p>可以证明：$|\vec{M}| = j_s$，即磁化强度等于磁化面电流密度。进一步有：</p>
+      $$\oint_L \vec{M}\cdot d\vec{l} = \sum I_s$$
+      <div class="note-box">
+        <span class="note-label">顺磁 vs 抗磁</span>
+        顺磁质：磁化电流与螺线管传导电流同向 → 增强磁场；
+        抗磁质：磁化电流反向 → 削弱磁场。
+      </div>
+    </div>
+
+    <!-- 仿真：磁化过程 -->
+    <div class="card">
+      <div class="card-title">交互仿真：磁化过程——分子磁矩的取向</div>
+      <p>调节外磁场强度，观察材料内部分子磁矩从随机取向到有序排列的过程（顺磁质），以及磁化电流的出现。</p>
+      <div class="slider-row">
+        <span>外场 B₀ =</span>
+        <input type="range" id="magnetB0" min="0" max="10" step="0.2" value="0" oninput="updateMagnet()">
+        <span class="slider-val" id="magnetB0Val">0</span>
+        <span style="margin-left:8px">磁化强度 M/M_max =</span>
+        <span class="slider-val" id="magnetMVal">0.000</span>
+      </div>
+      <div class="sim-ctrl">
+        <button class="sim-btn" onclick="toggleMagnetArrows()">➜ 分子磁矩</button>
+        <button class="sim-btn" onclick="toggleMagnetCurve()">📊 M(B)曲线</button>
+      </div>
+      <canvas id="magnetizeCanvas" class="demo-canvas" width="620" height="280"></canvas>
+      <div class="demo-label">小箭头：分子磁矩；右侧：M(B₀) 朗之万函数曲线</div>
+    </div>
+  </div>
+
+  <!-- ══ Tab 2：磁场强度 H ══ -->
+  <div class="tab-panel" id="panel-2">
+    <div class="card">
+      <div class="card-title">有介质时的安培环路定理</div>
+      <p>有磁介质时，安培环路定理需同时考虑传导电流 $I_0$ 和磁化电流 $I_s$：</p>
+      $$\oint_L \vec{B}\cdot d\vec{l} = \mu_0\!\left(\sum I_0 + \oint_L \vec{M}\cdot d\vec{l}\right)$$
+      <p>整理得：$\displaystyle\oint_L\!\left(\frac{\vec{B}}{\mu_0} - \vec{M}\right)\cdot d\vec{l} = \sum I_0$</p>
+      <p>定义<span class="hl">磁场强度</span> $\vec{H} = \dfrac{\vec{B}}{\mu_0} - \vec{M}$（单位 A/m），则：</p>
+      $$\oint_L \vec{H}\cdot d\vec{l} = \sum I_0$$
+      <div class="blue-box">
+        <span class="note-label">重要性质</span>
+        该式对真空和介质均成立，且只涉及传导电流，不涉及磁化电流，使计算大为简化。对各向同性均匀磁介质：$\vec{M} = \chi_m \vec{H}$，$\mu_r = 1+\chi_m$，$\vec{B} = \mu\vec{H} = \mu_0\mu_r\vec{H}$
+      </div>
+    </div>
+
+    <!-- 仿真：H 与 B 的对比 -->
+    <div class="card">
+      <div class="card-title">交互仿真：有介质螺线管中 H 与 B 的分布</div>
+      <p>调节相对磁导率 $\mu_r$，对比螺线管内外的 $\vec{H}$（仅由传导电流决定，不随介质变化）和 $\vec{B} = \mu_r\mu_0\vec{H}$（随介质变化）。</p>
+      <div class="slider-row">
+        <span>μᵣ =</span>
+        <input type="range" id="muR" min="0.5" max="1000" step="0.5" value="1" oninput="updateMuR()">
+        <span class="slider-val" id="muRVal">1.0</span>
+        <span style="margin-left:12px">B/B₀ =</span>
+        <span class="slider-val" id="muRBVal">1.0</span>
+      </div>
+      <div class="sim-ctrl">
+        <button class="sim-btn" onclick="toggleHField()">🔵 H场</button>
+        <button class="sim-btn" onclick="toggleBField()">🟠 B场</button>
+      </div>
+      <canvas id="hbCanvas" class="demo-canvas" width="620" height="280"></canvas>
+      <div class="demo-label">蓝：H（不变）；橙：B（= μᵣ × B₀，随介质变化）</div>
+    </div>
+
+    <div class="eg-block">
+      <div class="eg-title">例题：有介质螺绕环的磁参数</div>
+      <p>螺绕环：200匝，周长 0.1 m，截面积 $S = 5\times10^{-5}\ \text{m}^2$，通电 0.1 A，测得磁通量 $\Phi = 6\times10^{-5}\ \text{Wb}$，求相对磁导率。</p>
+      <div class="sol-steps">
+        <div class="sol-step"><strong>磁场强度</strong>：$HL = NI \Rightarrow H = NI/L = 200\times0.1/0.1 = 200\ \text{A/m}$</div>
+        <div class="sol-step"><strong>磁感应强度</strong>：$B = \Phi/S = 6\times10^{-5}/(5\times10^{-5}) = 1.2\ \text{T}$</div>
+        <div class="sol-step"><strong>相对磁导率</strong>：$\mu_r = B/(\mu_0 H) = 1.2/(4\pi\times10^{-7}\times200) \approx 4775$</div>
+      </div>
+      <div class="ans-box"><span class="ans-label">结果：</span>$\mu_r \approx 4775$（典型铁磁质数值）</div>
+    </div>
+  </div>
+
+  <!-- ══ Tab 3：铁磁质 ══ -->
+  <div class="tab-panel" id="panel-3">
+    <div class="card">
+      <div class="card-title">铁磁质的特点</div>
+      <ul class="prop-list">
+        <li class="prop-item"><span class="prop-num">①</span><div class="prop-body"><strong>高导磁性</strong>：$\mu_r \gg 1$（$10^2\sim10^5$），集中磁通量，常用于变压器、电机铁芯</div></li>
+        <li class="prop-item"><span class="prop-num">②</span><div class="prop-body"><strong>非线性</strong>：$B$-$H$ 关系非线性，$\mu_r$ 随 $H$ 变化，不是常数</div></li>
+        <li class="prop-item"><span class="prop-num">③</span><div class="prop-body"><strong>磁滞</strong>：$B$ 的变化落后于 $H$ 的变化，形成磁滞回线；剩余磁化强度（剩磁）和矫顽力</div></li>
+        <li class="prop-item"><span class="prop-num">④</span><div class="prop-body"><strong>居里点</strong>：超过临界温度（居里温度）后铁磁性消失，变为顺磁质（Fe: 770°C，Ni: 358°C）</div></li>
+      </ul>
+    </div>
+
+    <!-- 仿真：磁滞回线 -->
+    <div class="card">
+      <div class="card-title">交互仿真：磁滞回线</div>
+      <p>动画演示铁磁质磁化和去磁过程，展示 $B$-$H$ 磁滞回线、剩磁和矫顽力。</p>
+      <div class="sim-ctrl">
+        <button class="sim-btn active" id="hystPlay" onclick="toggleHyst()">▶ 播放</button>
+        <button class="sim-btn" onclick="resetHyst()">↺ 重置</button>
+        <button class="sim-btn" id="btnHard" onclick="setHystType('hard')">硬磁材料</button>
+        <button class="sim-btn active" id="btnSoft" onclick="setHystType('soft')">软磁材料</button>
+      </div>
+      <canvas id="hystCanvas" class="demo-canvas" width="620" height="320"></canvas>
+      <div class="demo-label">磁滞回线：B落后于H变化；面积代表磁化损耗（磁滞损耗）</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">磁畴理论</div>
+      <p>铁磁质内部自发形成<span class="hl">磁畴</span>（spontaneous magnetization domain）：每个磁畴内部磁矩整齐排列，但不同磁畴方向随机，宏观上合磁矩为零（未磁化状态）。</p>
+      <p>施加外场后，有利方向的磁畴扩大，不利方向的磁畴缩小或翻转，宏观磁化出现。</p>
+      <canvas id="domainCanvas" class="demo-canvas" width="620" height="200"></canvas>
+      <div class="demo-label">磁畴示意（左：未磁化；右：磁化后）</div>
+    </div>
+  </div>
+
+  <!-- ══ Tab 4：位移电流 ══ -->
+  <div class="tab-panel" id="panel-4">
+    <div class="card">
+      <div class="card-title">位移电流的概念</div>
+      <p>通过某截面的<span class="hl">位移电流</span>等于该截面上电位移通量的时间变化率：</p>
+      $$I_d = \frac{d\Phi_D}{dt} = \iint_S \frac{\partial\vec{D}}{\partial t}\cdot d\vec{S}$$
+      <p>位移电流密度：$\vec{j}_d = \dfrac{\partial\vec{D}}{\partial t}$</p>
+      <div class="note-box">
+        <span class="note-label">理解方式</span>
+        以平行板电容器为例：导线中流入传导电流 $I_0$，极板间虽无自由电荷流动，但 $\vec{D}$ 随时间变化，等效为"电流"连续通过。全电流（传导 + 位移）始终连续，满足电流连续性方程。
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">全电流定律与推广的安培环路定理</div>
+      <p><span class="hl-green">全电流</span> = 传导电流 $I_0$ + 位移电流 $I_d$，全电流连续：</p>
+      $$\oiint_S\!\left(\vec{j} + \frac{\partial\vec{D}}{\partial t}\right)\cdot d\vec{S} = 0$$
+      <p>推广的安培环路定理（麦克斯韦修正）：</p>
+      $$\oint_L \vec{H}\cdot d\vec{l} = I_0 + I_d = \iint_S\vec{j}\cdot d\vec{S} + \iint_S\frac{\partial\vec{D}}{\partial t}\cdot d\vec{S}$$
+      <div class="green-box">
+        <span class="note-label">深刻意义</span>
+        麦克斯韦引入位移电流后，使安培定律适用于非稳恒情况。变化电场激发磁场，变化磁场激发电场，导致电磁波的存在！传播速度 $c = 1/\sqrt{\varepsilon_0\mu_0} \approx 3\times10^8\ \text{m/s}$。
+      </div>
+    </div>
+
+    <!-- 仿真：电容器充电中的位移电流 -->
+    <div class="card">
+      <div class="card-title">交互仿真：电容器充电中的位移电流与磁场</div>
+      <p>动画演示平行板电容器充电过程：传导电流 $\to$ 极板间位移电流 $\to$ 极板间磁场（安培环路）。</p>
+      <div class="slider-row">
+        <span>充电进度 t =</span>
+        <input type="range" id="capT" min="0" max="100" value="0" oninput="updateCap()">
+        <span class="slider-val" id="capTVal">0%</span>
+        <span style="margin-left:10px">I_d/I_0 =</span>
+        <span class="slider-val" id="capIdVal">1.00</span>
+      </div>
+      <div class="sim-ctrl">
+        <button class="sim-btn" onclick="toggleCapAnim()">⏸ 暂停</button>
+        <button class="sim-btn" onclick="toggleCapFields()">⚡ 电磁场</button>
+      </div>
+      <canvas id="capCanvas" class="demo-canvas" width="620" height="300"></canvas>
+      <div class="demo-label">左：电容器截面（E场和B场）| 右：I_d(t) 和 B(r,t) 分布</div>
+    </div>
+
+    <div class="eg-block">
+      <div class="eg-title">例题：给电容器充电，求位移电流和极板间磁场</div>
+      <p>平行板电容器，电容 $C$，充电电流 $i = 0.2e^{-t}$（SI），$q(t=0)=0$。求（1）极板电压 $U(t)$；（2）位移电流 $I_d$。</p>
+      <div class="sol-steps">
+        <div class="sol-step"><strong>（1）电压</strong>：$q = \displaystyle\int_0^t i\,dt = 0.2(1-e^{-t})$；$U = q/C = \dfrac{0.2}{C}(1-e^{-t})$</div>
+        <div class="sol-step"><strong>（2）位移电流</strong>：$I_d = \dfrac{d\Phi_D}{dt} = \dfrac{d(DS)}{dt} = S\varepsilon_0\dfrac{dE}{dt} = \dfrac{dq}{dt} = i = 0.2e^{-t}$</div>
+        <div class="sol-step"><strong>物理意义</strong>：$I_d = I_0 = i$（传导电流在极板处等于位移电流，全电流连续）</div>
+      </div>
+      <div class="ans-box"><span class="ans-label">结果：</span>$U(t) = \dfrac{0.2}{C}(1-e^{-t})$；$I_d = 0.2e^{-t}$（与传导电流相等！）</div>
+    </div>
+  </div>
+</div>
+
+<!-- Particle BG -->
+<script>
+(function(){
+  const cv=document.getElementById('particles'),cx=cv.getContext('2d');
+  let W,H,pts=[];
+  function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  for(let i=0;i<90;i++)pts.push({x:Math.random()*2000,y:Math.random()*1200,vx:(Math.random()-.5)*0.3,vy:(Math.random()-.5)*0.3,r:Math.random()*1.6+0.4,a:Math.random()*0.5+0.1});
+  (function frame(){cx.clearRect(0,0,W,H);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle=`rgba(129,140,248,${p.a})`;cx.fill();});requestAnimationFrame(frame);})();
+})();
+</script>
+
+<script>
+function switchTab(i){
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',j===i));
+  document.querySelectorAll('.tab-panel').forEach((p,j)=>p.classList.toggle('active',j===i));
+  const fns=[drawMedium,drawMagnetize,drawHB,()=>{drawHyst();drawDomain();},drawCap];
+  if(fns[i]) fns[i]();
+}
+function drawArrow(ctx,x1,y1,x2,y2,col,w=2.5){
+  const dx=x2-x1,dy=y2-y1,l=Math.sqrt(dx*dx+dy*dy);if(l<1)return;
+  ctx.save();ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=w;
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  const a=Math.atan2(dy,dx);ctx.translate(x2,y2);ctx.rotate(a);
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-10,-5);ctx.lineTo(-10,5);ctx.closePath();ctx.fill();
+  ctx.restore();
+}
+</script>
+
+<!-- Tab 0: Medium sim -->
+<script>
+let mediumType='dia';
+let showFieldLines=true;
+function toggleFieldLines(){
+  showFieldLines = !showFieldLines;
+  drawMedium();
+}
+const mediumMuR={dia:0.7,para:1.5,ferro:500,super:0};
+const mediumColors={dia:'rgba(56,189,248,0.5)',para:'rgba(52,211,153,0.5)',ferro:'rgba(248,113,113,0.5)',super:'rgba(192,132,252,0.5)'};
+const mediumLabels={
+  dia:'抗磁质（μᵣ<1）：介质内磁场略弱，磁力线稀疏',
+  para:'顺磁质（μᵣ>1）：介质内磁场略强，磁力线略密',
+  ferro:'铁磁质（μᵣ≫1）：磁力线高度集中于介质内',
+  super:'超导体（μᵣ=0）：完全排斥磁场，磁力线绕行（Meissner效应）'
+};
+function setMedium(t){
+  mediumType=t;
+  ['dia','para','ferro','super'].forEach(n=>document.getElementById('btn'+n.charAt(0).toUpperCase()+n.slice(1)).classList.toggle('active',n===t));
+  document.getElementById('mediumLabel').textContent=mediumLabels[t];
+  drawMedium();
+}
+function drawMedium(){
+  const cv=document.getElementById('mediumCanvas');if(!cv)return;
+  const ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  const muR=mediumMuR[mediumType];
+  const col=mediumColors[mediumType];
+  const bx=W*0.3,bw=W*0.4,by=H*0.15,bh=H*0.7;
+
+  // uniform background B field lines (pointing right)
+  if(showFieldLines){
+    const nLines=9;
+    for(let i=0;i<nLines;i++){
+      const y=H*0.1+i*(H*0.8/(nLines-1));
+      // outside left
+      ctx.strokeStyle='rgba(56,189,248,0.4)';ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.moveTo(10,y);ctx.lineTo(bx,y);ctx.stroke();
+      // outside right
+      ctx.beginPath();ctx.moveTo(bx+bw,y);ctx.lineTo(W-10,y);ctx.stroke();
+      // arrows outside
+      [40,W-50].forEach(ax=>{
+        ctx.fillStyle='rgba(56,189,248,0.5)';
+        ctx.beginPath();ctx.moveTo(ax,y);ctx.lineTo(ax-8,y-4);ctx.lineTo(ax-8,y+4);ctx.closePath();ctx.fill();
+      });
+    }
+  }
+
+  // medium block
+  ctx.fillStyle=col;ctx.fillRect(bx,by,bw,bh);
+  ctx.strokeStyle=col.replace('0.5','0.8');ctx.lineWidth=2;ctx.strokeRect(bx,by,bw,bh);
+
+  // field lines inside medium
+  if(showFieldLines){
+    if(mediumType==='super'){
+      // Meissner: lines curve around
+      const nLines=9;
+      for(let i=0;i<nLines;i++){
+        const y0=H*0.1+i*(H*0.8/(nLines-1));
+        const dy_center=y0-H/2;
+        // lines deflect around the block
+        ctx.strokeStyle='rgba(192,132,252,0.5)';ctx.lineWidth=1.5;
+        ctx.beginPath();ctx.moveTo(bx-30,y0);
+        // curve around top/bottom of block
+        const deflect=dy_center>0?H*0.45:-H*0.45;
+        const sign=dy_center>0?1:-1;
+        ctx.bezierCurveTo(bx,y0,bx+bw/2,H/2+sign*(bh/2+25),bx+bw,y0);
+        ctx.stroke();
+      }
+      ctx.fillStyle='rgba(192,132,252,0.7)';ctx.font='bold 12px "Microsoft YaHei"';ctx.textAlign='center';
+      ctx.fillText('B = 0',bx+bw/2,H/2+5);
+    } else {
+      // field lines inside (density proportional to muR)
+      const nLines=9;
+      const innerN=Math.max(1,Math.round(nLines*Math.min(muR,5)/1));
+      const spacing=bh/(innerN+1);
+      for(let i=0;i<Math.min(innerN,25);i++){
+        const y=by+spacing*(i+1)+(innerN>nLines?0:0);
+        const alpha=mediumType==='ferro'?0.9:0.55;
+        const thick=mediumType==='ferro'?3:1.5;
+        ctx.strokeStyle=`rgba(56,189,248,${alpha})`;ctx.lineWidth=thick;
+        ctx.beginPath();ctx.moveTo(bx,y);ctx.lineTo(bx+bw,y);ctx.stroke();
+        // arrow inside
+        const ax=bx+bw/2;
+        ctx.fillStyle=`rgba(56,189,248,${alpha})`;
+        ctx.beginPath();ctx.moveTo(ax,y);ctx.lineTo(ax-8,y-4);ctx.lineTo(ax-8,y+4);ctx.closePath();ctx.fill();
+      }
+      // μᵣ label
+      ctx.fillStyle='rgba(255,255,255,0.65)';ctx.font='bold 13px "Microsoft YaHei"';ctx.textAlign='center';
+      ctx.fillText('B = '+muR.toFixed(1)+' B₀',bx+bw/2,H/2+5);
+      ctx.fillStyle='rgba(255,255,255,0.35)';ctx.font='11px "Microsoft YaHei"';
+      ctx.fillText('μᵣ = '+muR,bx+bw/2,H/2+22);
+    }
+  }
+  // label
+  ctx.fillStyle='rgba(255,255,255,0.35)';ctx.font='11px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText('磁介质',bx+bw/2,by-8);
+  ctx.fillStyle='rgba(56,189,248,0.4)';ctx.font='12px Times New Roman';ctx.textAlign='right';
+  ctx.fillText('B₀ →',bx-8,H*0.1-4);
+}
+window.addEventListener('DOMContentLoaded',drawMedium);
+</script>
+
+<!-- Tab 1: Magnetize sim -->
+<script>
+let magnetB0val=0;
+let showMagnetArrows=true;
+let showMagnetCurve=true;
+function toggleMagnetArrows(){
+  showMagnetArrows = !showMagnetArrows;
+  drawMagnetize();
+}
+function toggleMagnetCurve(){
+  showMagnetCurve = !showMagnetCurve;
+  drawMagnetize();
+}
+function updateMagnet(){
+  magnetB0val=parseFloat(document.getElementById('magnetB0').value);
+  document.getElementById('magnetB0Val').textContent=magnetB0val.toFixed(1);
+  // Langevin function approximation: M/M_max ≈ tanh(B0/3)
+  const M=Math.tanh(magnetB0val/3);
+  document.getElementById('magnetMVal').textContent=M.toFixed(3);
+  drawMagnetize();
+}
+function drawMagnetize(){
+  const cv=document.getElementById('magnetizeCanvas');if(!cv)return;
+  const ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  const M=Math.tanh(magnetB0val/3);
+  const LP=W*0.55;
+
+  // Grid of molecular magnets
+  if(showMagnetArrows){
+    const cols=8,rows=5;
+    const dx=(LP-40)/(cols-1), dy=(H-40)/(rows-1);
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        const px=25+c*dx, py=20+r*dy;
+        // random base angle for each magnet (seeded by position)
+        const seed=(r*cols+c)*2.7183;
+        const randomAngle=(Math.sin(seed)*2-1)*Math.PI;
+        // align towards 0 (rightward) with strength M
+        const angle=randomAngle*(1-M);
+        ctx.strokeStyle=`rgba(${M>0?'248,113,113':'56,189,248'},0.8)`;ctx.lineWidth=2;
+        ctx.beginPath();
+        ctx.moveTo(px-12*Math.cos(angle),py-12*Math.sin(angle));
+        ctx.lineTo(px+12*Math.cos(angle),py+12*Math.sin(angle));
+        ctx.stroke();
+        // arrowhead
+        ctx.fillStyle=`rgba(${M>0?'248,113,113':'56,189,248'},0.8)`;
+        ctx.beginPath();
+        ctx.moveTo(px+12*Math.cos(angle),py+12*Math.sin(angle));
+        ctx.lineTo(px+12*Math.cos(angle)-6*Math.cos(angle-0.5),py+12*Math.sin(angle)-6*Math.sin(angle-0.5));
+        ctx.lineTo(px+12*Math.cos(angle)-6*Math.cos(angle+0.5),py+12*Math.sin(angle)-6*Math.sin(angle+0.5));
+        ctx.closePath();ctx.fill();
+      }
+    }
+  }
+
+  // B0 field line
+  if(magnetB0val>0){
+    ctx.strokeStyle='rgba(56,189,248,0.4)';ctx.lineWidth=2;
+    for(let r2=0;r2<3;r2++){
+      const y=H*0.25+r2*H*0.25;
+      ctx.beginPath();ctx.moveTo(10,y);ctx.lineTo(LP-10,y);ctx.stroke();
+      ctx.fillStyle='rgba(56,189,248,0.5)';
+      ctx.beginPath();ctx.moveTo(LP-20,y);ctx.lineTo(LP-30,y-4);ctx.lineTo(LP-30,y+4);ctx.closePath();ctx.fill();
+    }
+    ctx.fillStyle='rgba(56,189,248,0.5)';ctx.font='11px Times New Roman';ctx.textAlign='left';
+    ctx.fillText('B₀='+magnetB0val.toFixed(1),10,14);
+  }
+
+  // Divider
+  ctx.strokeStyle='rgba(255,255,255,0.07)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(LP,0);ctx.lineTo(LP,H);ctx.stroke();
+
+  // Right: Langevin M(B) curve
+  if(showMagnetCurve){
+    const RP=LP+12,RW=W-RP-18,padT=25,padB=25,GH=H-padT-padB;
+    ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(RP,padT);ctx.lineTo(RP,padT+GH);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(RP,padT+GH);ctx.lineTo(RP+RW,padT+GH);ctx.stroke();
+
+    // curve: tanh(x/3)
+    ctx.strokeStyle='rgba(52,211,153,0.8)';ctx.lineWidth=2;ctx.beginPath();
+    for(let i=0;i<=200;i++){
+      const b=10*i/200;
+      const m=Math.tanh(b/3);
+      const sx=RP+b/10*RW,sy=padT+GH-m*GH*0.88;
+      i===0?ctx.moveTo(sx,sy):ctx.lineTo(sx,sy);
+    }
+    ctx.stroke();
+
+    // current point
+    const sxC=RP+magnetB0val/10*RW,syC=padT+GH-M*GH*0.88;
+    ctx.beginPath();ctx.arc(sxC,syC,5,0,Math.PI*2);ctx.fillStyle='#fbbf24';ctx.fill();
+    ctx.setLineDash([3,3]);ctx.strokeStyle='rgba(251,191,36,0.4)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(sxC,padT);ctx.lineTo(sxC,padT+GH);ctx.stroke();
+    ctx.setLineDash([]);
+
+    // labels
+    ctx.fillStyle='rgba(255,255,255,0.3)';ctx.font='10px "Microsoft YaHei"';ctx.textAlign='center';
+    ctx.fillText('B₀',RP+RW/2,padT+GH+16);
+    ctx.save();ctx.translate(RP-25,padT+GH/2);ctx.rotate(-Math.PI/2);ctx.fillText('M/M_max',0,0);ctx.restore();
+    ctx.fillStyle='rgba(52,211,153,0.6)';ctx.font='10px "Microsoft YaHei"';ctx.textAlign='left';
+    ctx.fillText('M≈tanh(B₀/3)',RP+4,padT+14);
+  }
+}
+window.addEventListener('DOMContentLoaded',drawMagnetize);
+</script>
+
+<!-- Tab 2: H and B -->
+<script>
+let muRParam=1;
+let showHField=true;
+let showBField=true;
+function toggleHField(){
+  showHField = !showHField;
+  drawHB();
+}
+function toggleBField(){
+  showBField = !showBField;
+  drawHB();
+}
+function updateMuR(){
+  muRParam=parseFloat(document.getElementById('muR').value);
+  document.getElementById('muRVal').textContent=muRParam.toFixed(1);
+  document.getElementById('muRBVal').textContent=muRParam.toFixed(1);
+  drawHB();
+}
+function drawHB(){
+  const cv=document.getElementById('hbCanvas');if(!cv)return;
+  const ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  const muR=muRParam;
+
+  // Solenoid
+  const sx=60,ex=W-60,sy=H/2-50,ey=H/2+50;
+  ctx.fillStyle='rgba(99,102,241,0.15)';ctx.fillRect(sx,sy,ex-sx,ey-sy);
+  ctx.strokeStyle='rgba(129,140,248,0.5)';ctx.lineWidth=2;ctx.strokeRect(sx,sy,ex-sx,ey-sy);
+  for(let x=sx+15;x<ex-10;x+=22){
+    ctx.strokeStyle='rgba(129,140,248,0.4)';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(x,sy);ctx.lineTo(x+11,ey);ctx.stroke();
+  }
+  ctx.fillStyle='rgba(255,255,255,0.3)';ctx.font='11px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText('n匝/m  μᵣ='+muR.toFixed(1),W/2,ey+18);
+
+  // H lines (blue, same inside and outside, but only exist inside solenoid for infinite)
+  if(showHField){
+    const nH=5;
+    for(let i=0;i<nH;i++){
+      const y=sy+10+(ey-sy-20)*i/(nH-1);
+      ctx.strokeStyle='rgba(56,189,248,0.5)';ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(sx+5,y);ctx.lineTo(ex-5,y);ctx.stroke();
+      // arrow
+      ctx.fillStyle='rgba(56,189,248,0.6)';
+      ctx.beginPath();ctx.moveTo(sx+W*0.25,y);ctx.lineTo(sx+W*0.25-8,y-4);ctx.lineTo(sx+W*0.25-8,y+4);ctx.closePath();ctx.fill();
+    }
+    ctx.fillStyle='rgba(56,189,248,0.7)';ctx.font='bold 11px "Microsoft YaHei"';ctx.textAlign='left';
+    ctx.fillText('H = nI（不变）',sx+8,sy-8);
+  }
+
+  // B lines (orange, proportional to muR)
+  if(showBField){
+    const nH=5;
+    const Bscale=Math.min(muR,8);
+    const nB=Math.max(1,Math.round(nH*Bscale));
+    const bSpacing=(ey-sy-10)/(nB+1);
+    for(let i=0;i<Math.min(nB,30);i++){
+      const y=sy+5+bSpacing*(i+1);
+      if(y>=sy&&y<=ey){
+        const alpha=Math.min(0.9,0.3+Bscale*0.06);
+        ctx.strokeStyle=`rgba(251,191,36,${alpha})`;ctx.lineWidth=Math.min(3,1+Bscale*0.2);
+        ctx.beginPath();ctx.moveTo(sx+5,y);ctx.lineTo(ex-5,y);ctx.stroke();
+        // arrow
+        ctx.fillStyle=`rgba(251,191,36,${alpha})`;
+        ctx.beginPath();ctx.moveTo(W*0.65,y);ctx.lineTo(W*0.65-8,y-4);ctx.lineTo(W*0.65-8,y+4);ctx.closePath();ctx.fill();
+      }
+    }
+    ctx.fillStyle='rgba(251,191,36,0.7)';ctx.font='bold 11px "Microsoft YaHei"';ctx.textAlign='right';
+    ctx.fillText('B = μᵣμ₀nI = '+muR.toFixed(1)+' B₀',ex-8,sy-8);
+  }
+
+  // legend
+  ctx.fillStyle='rgba(255,255,255,0.3)';ctx.font='11px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText('蓝色: H（仅由传导电流决定） | 橙色: B（随μᵣ变化）',W/2,H-10);
+}
+window.addEventListener('DOMContentLoaded',drawHB);
+</script>
+
+<!-- Tab 3: Hysteresis loop -->
+<script>
+let hystT=0, hystPlaying=false, hystType='soft';
+function setHystType(t){
+  hystType=t;
+  document.getElementById('btnHard').classList.toggle('active',t==='hard');
+  document.getElementById('btnSoft').classList.toggle('active',t==='soft');
+  resetHyst();
+}
+function toggleHyst(){
+  hystPlaying=!hystPlaying;
+  document.getElementById('hystPlay').textContent=hystPlaying?'⏸ 暂停':'▶ 播放';
+  if(hystPlaying) animateHyst();
+}
+function resetHyst(){
+  hystT=0;hystPlaying=false;
+  document.getElementById('hystPlay').textContent='▶ 播放';
+  document.getElementById('hystPlay').classList.add('active');
+  drawHyst();
+  hystPlaying=true; animateHyst();
+}
+function animateHyst(){
+  if(!hystPlaying)return;
+  hystT+=0.015;
+  drawHyst();
+  requestAnimationFrame(animateHyst);
+}
+function hystB(H,type){
+  // simplified hysteresis model
+  const Hc=type==='hard'?0.6:0.2; // coercive field
+  const Bs=1.0; // saturation
+  const k=type==='hard'?1.5:4;
+  // approximate B-H loop with sigmoid
+  const offset=type==='hard'?0.5:0.15;
+  // Use two branches
+  return Bs*Math.tanh(k*(H));
+}
+function drawHyst(){
+  const cv=document.getElementById('hystCanvas');if(!cv)return;
+  const ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  const padL=55,padR=20,padT=30,padB=35;
+  const GW=W-padL-padR,GH=H-padT-padB;
+  const gx=padL,gy=padT;
+
+  // axes
+  ctx.strokeStyle='rgba(255,255,255,0.2)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(gx,gy);ctx.lineTo(gx,gy+GH);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(gx,gy+GH/2);ctx.lineTo(gx+GW,gy+GH/2);ctx.stroke();
+
+  const Hc=hystType==='hard'?0.6:0.18;
+  const Br=hystType==='hard'?0.85:0.5;
+  const k=hystType==='hard'?2.5:5;
+
+  // draw full hysteresis loop
+  // Upper branch: B = tanh(k*(H+offset)) - offset_b
+  // Lower branch: opposite
+  const nPts=300;
+  const Hmax=1.2;
+  // upper branch (H going from +Hmax to -Hmax)
+  ctx.strokeStyle='rgba(56,189,248,0.6)';ctx.lineWidth=2;ctx.beginPath();
+  for(let i=0;i<=nPts;i++){
+    const Hv=Hmax-2*Hmax*i/nPts;
+    const Bv=Math.tanh(k*(Hv+Hc))*0.9+0.05;
+    const sx=gx+(Hv/Hmax+1)/2*GW;
+    const sy=gy+GH/2-Bv*GH*0.45;
+    i===0?ctx.moveTo(sx,sy):ctx.lineTo(sx,sy);
+  }
+  ctx.stroke();
+  // lower branch
+  ctx.strokeStyle='rgba(248,113,113,0.6)';ctx.lineWidth=2;ctx.beginPath();
+  for(let i=0;i<=nPts;i++){
+    const Hv=-Hmax+2*Hmax*i/nPts;
+    const Bv=Math.tanh(k*(Hv-Hc))*0.9-0.05;
+    const sx=gx+(Hv/Hmax+1)/2*GW;
+    const sy=gy+GH/2-Bv*GH*0.45;
+    i===0?ctx.moveTo(sx,sy):ctx.lineTo(sx,sy);
+  }
+  ctx.stroke();
+
+  // animated point
+  const angle=hystT%(Math.PI*2);
+  const Hcur=Math.cos(angle)*Hmax;
+  const branch=Math.sin(angle)>0;
+  const Bcur=branch?Math.tanh(k*(Hcur+Hc))*0.9+0.05:Math.tanh(k*(Hcur-Hc))*0.9-0.05;
+  const ptx=gx+(Hcur/Hmax+1)/2*GW;
+  const pty=gy+GH/2-Bcur*GH*0.45;
+  const grd=ctx.createRadialGradient(ptx,pty,0,ptx,pty,10);
+  grd.addColorStop(0,'rgba(251,191,36,1)');grd.addColorStop(1,'rgba(251,191,36,0)');
+  ctx.beginPath();ctx.arc(ptx,pty,10,0,Math.PI*2);ctx.fillStyle=grd;ctx.fill();
+  ctx.beginPath();ctx.arc(ptx,pty,5,0,Math.PI*2);ctx.fillStyle='#fbbf24';ctx.fill();
+
+  // mark Hc and Br
+  const HcPx=gx+(Hc/Hmax+1)/2*GW;
+  const HcNPx=gx+(-Hc/Hmax+1)/2*GW;
+  const BrPy=gy+GH/2-Br*GH*0.45;
+  const BrNPy=gy+GH/2+Br*GH*0.45;
+  // Hc lines
+  ctx.strokeStyle='rgba(251,191,36,0.35)';ctx.lineWidth=1;ctx.setLineDash([4,3]);
+  ctx.beginPath();ctx.moveTo(HcPx,gy);ctx.lineTo(HcPx,gy+GH);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(HcNPx,gy);ctx.lineTo(HcNPx,gy+GH);ctx.stroke();
+  // Br lines
+  ctx.beginPath();ctx.moveTo(gx,BrPy);ctx.lineTo(gx+GW,BrPy);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(gx,BrNPy);ctx.lineTo(gx+GW,BrNPy);ctx.stroke();
+  ctx.setLineDash([]);
+
+  // labels
+  ctx.fillStyle='rgba(251,191,36,0.6)';ctx.font='11px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText('Hc',HcPx,gy+GH+14);ctx.fillText('-Hc',HcNPx,gy+GH+14);
+  ctx.textAlign='right';
+  ctx.fillText('Br',gx-4,BrPy+4);ctx.fillText('-Br',gx-4,BrNPy+4);
+  ctx.textAlign='center';
+  ctx.fillStyle='rgba(255,255,255,0.3)';ctx.font='11px "Microsoft YaHei"';
+  ctx.fillText('H',gx+GW/2,gy+GH+26);
+  ctx.save();ctx.translate(gx-40,gy+GH/2);ctx.rotate(-Math.PI/2);ctx.fillText('B',0,0);ctx.restore();
+
+  const typeLabel=hystType==='hard'?'硬磁材料（宽回线）：大剩磁、大矫顽力，适合永磁体':'软磁材料（窄回线）：小矫顽力，易磁化退磁，适合变压器铁芯';
+  ctx.fillStyle='rgba(255,255,255,0.35)';ctx.font='11px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText(typeLabel,W/2,H-8);
+}
+function drawDomain(){
+  const cv=document.getElementById('domainCanvas');if(!cv)return;
+  const ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  const W2=W/2;
+
+  // Left: unmagnetized domains
+  ctx.fillStyle='rgba(99,102,241,0.1)';ctx.fillRect(20,20,W2-40,H-40);
+  ctx.strokeStyle='rgba(129,140,248,0.4)';ctx.lineWidth=1.5;ctx.strokeRect(20,20,W2-40,H-40);
+  const domainDirs=[[0],[Math.PI/2],[Math.PI],[Math.PI*3/2],[Math.PI*0.25],[Math.PI*0.75]];
+  const blocks=[[0,0],[1,0],[0,1],[1,1],[0.5,0.5],[1.5,0.5]];
+  const dw=(W2-40)/3, dh=(H-40)/2;
+  [[0,0,0],[1,0,Math.PI/2],[0,1,Math.PI],[1,1,Math.PI*3/2],[2,0,Math.PI/4],[2,1,Math.PI*5/4]].forEach(([col,row,ang])=>{
+    const bx2=20+col*dw,by2=20+row*dh;
+    const cols2=['rgba(248,113,113,0.15)','rgba(56,189,248,0.15)','rgba(52,211,153,0.15)','rgba(192,132,252,0.15)','rgba(251,191,36,0.15)','rgba(248,113,113,0.15)'];
+    ctx.fillStyle=cols2[col+row*3]||'rgba(99,102,241,0.12)';
+    ctx.fillRect(bx2,by2,dw,dh);
+    ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.lineWidth=1;ctx.strokeRect(bx2,by2,dw,dh);
+    // domain arrow
+    const cx2=bx2+dw/2,cy2=by2+dh/2;
+    const alen=18;
+    drawArrow(ctx,cx2-alen*Math.cos(ang),cy2-alen*Math.sin(ang),cx2+alen*Math.cos(ang),cy2+alen*Math.sin(ang),'rgba(255,255,255,0.5)',2);
+  });
+  ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='11px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText('未磁化（磁畴随机）',W2/2,H-6);
+
+  // Right: magnetized
+  ctx.fillStyle='rgba(99,102,241,0.1)';ctx.fillRect(W2+20,20,W2-40,H-40);
+  ctx.strokeStyle='rgba(129,140,248,0.4)';ctx.lineWidth=1.5;ctx.strokeRect(W2+20,20,W2-40,H-40);
+  // All domains aligned
+  for(let col=0;col<3;col++){for(let row=0;row<2;row++){
+    const bx3=W2+20+col*dw,by3=20+row*dh;
+    ctx.fillStyle='rgba(56,189,248,0.12)';ctx.fillRect(bx3,by3,dw,dh);
+    ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.lineWidth=1;ctx.strokeRect(bx3,by3,dw,dh);
+    const cx3=bx3+dw/2,cy3=by3+dh/2;
+    drawArrow(ctx,cx3-18,cy3,cx3+18,cy3,'rgba(56,189,248,0.7)',2);
+  }}
+  // B field arrows outside
+  drawArrow(ctx,W2+10,H/2,W2+20,H/2,'rgba(251,191,36,0.5)',2);
+  drawArrow(ctx,W-20,H/2,W-10,H/2,'rgba(251,191,36,0.5)',2);
+  ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='11px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText('磁化后（磁畴有序对齐）',W2+(W2-40)/2+20,H-6);
+}
+window.addEventListener('DOMContentLoaded',()=>{drawHyst();drawDomain();});
+</script>
+
+<!-- Tab 4: Displacement current sim -->
+<script>
+let capTParam=0;
+function updateCap(){
+  capTParam=parseInt(document.getElementById('capT').value)/100;
+  document.getElementById('capTVal').textContent=Math.round(capTParam*100)+'%';
+  const Id=Math.exp(-capTParam*3);
+  document.getElementById('capIdVal').textContent=Id.toFixed(3);
+  drawCap();
+}
+function drawCap(){
+  const cv=document.getElementById('capCanvas');if(!cv)return;
+  const ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  const t=capTParam;
+  const Id=Math.exp(-t*3); // normalized displacement current
+  const q=1-Math.exp(-t*3); // charge (normalized)
+
+  const LP=W*0.5;
+  const cx=LP/2, cy=H/2;
+  const plateW=LP-40, plateH=12, gap=80;
+  const py1=cy-gap/2, py2=cy+gap/2;
+
+  // E field lines between plates
+  const nE=Math.round(5*q)+1;
+  for(let i=0;i<nE;i++){
+    const x=30+(LP-60)*i/(Math.max(nE-1,1));
+    ctx.strokeStyle=`rgba(251,191,36,${0.3+q*0.4})`;ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(x,py1+plateH/2);ctx.lineTo(x,py2-plateH/2);ctx.stroke();
+    // E arrow
+    ctx.fillStyle=`rgba(251,191,36,${0.4+q*0.4})`;
+    ctx.beginPath();ctx.moveTo(x,py2-plateH/2);ctx.lineTo(x-4,py2-plateH/2-8);ctx.lineTo(x+4,py2-plateH/2-8);ctx.closePath();ctx.fill();
+  }
+  ctx.fillStyle='rgba(251,191,36,0.5)';ctx.font='11px Times New Roman';ctx.textAlign='left';
+  ctx.fillText('E⃗ ↓ (∝ q)',10,py1+gap/2+5);
+
+  // Plates
+  ctx.fillStyle='rgba(99,102,241,0.4)';ctx.fillRect(10,py1,plateW,plateH);
+  ctx.fillRect(10,py2-plateH,plateW,plateH);
+  ctx.fillStyle='rgba(248,113,113,0.7)';ctx.font='11px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText('+ + + + +',cx,py1+10);
+  ctx.fillStyle='rgba(56,189,248,0.7)';ctx.fillText('− − − − −',cx,py2-2);
+
+  // Conducting wires
+  ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(cx,10);ctx.lineTo(cx,py1);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(cx,py2);ctx.lineTo(cx,H-10);ctx.stroke();
+
+  // Conduction current arrow (in wire)
+  const Ic=Id;
+  if(Ic>0.05){
+    drawArrow(ctx,cx,py1-40,cx,py1-10,'rgba(52,211,153,'+(0.3+Ic*0.6)+')',2.5);
+    ctx.fillStyle=`rgba(52,211,153,0.7)`;ctx.font='11px "Microsoft YaHei"';ctx.textAlign='left';
+    ctx.fillText('I₀='+Ic.toFixed(2),cx+8,py1-28);
+  }
+
+  // Displacement current (dashed, in gap)
+  ctx.strokeStyle=`rgba(192,132,252,${0.3+Ic*0.5})`;ctx.lineWidth=2;ctx.setLineDash([6,4]);
+  ctx.beginPath();ctx.moveTo(cx,py1+plateH);ctx.lineTo(cx,py2-plateH);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='rgba(192,132,252,0.7)';ctx.font='11px "Microsoft YaHei"';ctx.textAlign='left';
+  ctx.fillText('I_d='+Ic.toFixed(2),cx+8,cy+5);
+
+  // B field circles in gap
+  const Bv=Ic;
+  [20,38].forEach((r,i)=>{
+    const alpha=0.5-i*0.12;
+    ctx.strokeStyle=`rgba(56,189,248,${alpha*Bv})`;ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();
+    // arrow (CCW for downward displacement current)
+    const ang=-Math.PI*0.3;
+    const ax=cx+r*Math.cos(ang),ay=cy+r*Math.sin(ang);
+    const tang=ang-Math.PI/2;
+    ctx.fillStyle=`rgba(56,189,248,${alpha*Bv})`;
+    ctx.beginPath();
+    ctx.moveTo(ax+8*Math.cos(tang),ay+8*Math.sin(tang));
+    ctx.lineTo(ax+8*Math.cos(tang)-6*Math.cos(tang-0.5),ay+8*Math.sin(tang)-6*Math.sin(tang-0.5));
+    ctx.lineTo(ax+8*Math.cos(tang)-6*Math.cos(tang+0.5),ay+8*Math.sin(tang)-6*Math.sin(tang+0.5));
+    ctx.closePath();ctx.fill();
+  });
+  ctx.fillStyle=`rgba(56,189,248,${0.3+Bv*0.5})`;ctx.font='10px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText('B场',cx,cy-45);
+
+  // Divider
+  ctx.strokeStyle='rgba(255,255,255,0.07)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(LP,0);ctx.lineTo(LP,H);ctx.stroke();
+
+  // Right: I_d(t) curve
+  const RP=LP+12,RW=W-RP-18,padT=25,padB=30,GH=H-padT-padB;
+  ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(RP,padT);ctx.lineTo(RP,padT+GH);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(RP,padT+GH);ctx.lineTo(RP+RW,padT+GH);ctx.stroke();
+
+  // I_d curve
+  ctx.strokeStyle='rgba(192,132,252,0.7)';ctx.lineWidth=2;ctx.beginPath();
+  for(let i=0;i<=200;i++){
+    const tv=i/200;
+    const Idv=Math.exp(-tv*3);
+    const sx=RP+tv*RW,sy=padT+GH-Idv*GH*0.85;
+    i===0?ctx.moveTo(sx,sy):ctx.lineTo(sx,sy);
+  }
+  ctx.stroke();
+
+  // q(t) curve
+  ctx.strokeStyle='rgba(251,191,36,0.5)';ctx.lineWidth=2;ctx.setLineDash([5,3]);ctx.beginPath();
+  for(let i=0;i<=200;i++){
+    const tv=i/200;
+    const qv=1-Math.exp(-tv*3);
+    const sx=RP+tv*RW,sy=padT+GH-qv*GH*0.85;
+    i===0?ctx.moveTo(sx,sy):ctx.lineTo(sx,sy);
+  }
+  ctx.stroke();ctx.setLineDash([]);
+
+  // current point
+  const sxC=RP+t*RW;
+  ctx.beginPath();ctx.arc(sxC,padT+GH-Id*GH*0.85,5,0,Math.PI*2);ctx.fillStyle='#c084fc';ctx.fill();
+  ctx.setLineDash([3,3]);ctx.strokeStyle='rgba(251,191,36,0.4)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(sxC,padT);ctx.lineTo(sxC,padT+GH);ctx.stroke();ctx.setLineDash([]);
+
+  // labels
+  ctx.fillStyle='rgba(192,132,252,0.6)';ctx.font='10px "Microsoft YaHei"';ctx.textAlign='left';
+  ctx.fillText('I_d(t)',RP+4,padT+12);
+  ctx.fillStyle='rgba(251,191,36,0.5)';
+  ctx.fillText('q(t)',RP+4,padT+24);
+  ctx.fillStyle='rgba(255,255,255,0.25)';ctx.font='10px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText('t',RP+RW/2,padT+GH+18);
+}
+window.addEventListener('DOMContentLoaded',drawCap);
+</script>
+
+<!-- ── 笔记工具栏 ── -->
+<style>
+.note-fab {
+  position: fixed; bottom: 28px; right: 28px; z-index: 1000;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+}
+.fab-main {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 22px; box-shadow: 0 4px 20px rgba(99,102,241,0.5);
+  transition: transform 0.2s, box-shadow 0.2s;
+  color: #fff;
+}
+.fab-main:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(99,102,241,0.65); }
+.fab-main.active { background: linear-gradient(135deg, #7c3aed, #a78bfa); transform: rotate(45deg); }
+.fab-menu {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+  opacity: 0; pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.fab-menu.open { opacity: 1; pointer-events: all; transform: translateY(0); }
+.fab-item {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(15,12,41,0.92); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px; padding: 9px 16px 9px 12px;
+  cursor: pointer; white-space: nowrap;
+  backdrop-filter: blur(12px);
+  transition: border-color 0.2s, background 0.2s;
+  font-family: "Microsoft YaHei", sans-serif;
+}
+.fab-item:hover { border-color: rgba(129,140,248,0.4); background: rgba(99,102,241,0.15); }
+.fab-item .fi-icon { font-size: 17px; }
+.fab-item .fi-label { font-size: 13px; color: rgba(255,255,255,0.8); }
+.fab-item.starred .fi-label { color: #fbbf24; }
+.fab-item.starred { border-color: rgba(251,191,36,0.35); }
+.fab-item.read-done .fi-label { color: #34d399; }
+.fab-item.read-done { border-color: rgba(52,211,153,0.35); }
+.note-drawer {
+  position: fixed; bottom: 0; right: 0; left: 0; z-index: 999;
+  background: rgba(10,8,30,0.96);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(20px);
+  padding: 20px 28px 28px;
+  transform: translateY(100%);
+  transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
+}
+.note-drawer.open { transform: translateY(0); }
+.drawer-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.drawer-title { font-size: 14px; font-weight: 700; color: #a5b4fc; font-family: "Microsoft YaHei",sans-serif; letter-spacing: 1px; }
+.drawer-close { font-size: 20px; color: rgba(255,255,255,0.4); cursor: pointer; transition: color 0.2s; line-height: 1; }
+.drawer-close:hover { color: #fff; }
+.drawer-textarea {
+  width: 100%; height: 120px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; padding: 12px 16px;
+  color: #fff; font-size: 14px; font-family: "Microsoft YaHei",sans-serif;
+  resize: vertical; outline: none; line-height: 1.8;
+  transition: border-color 0.2s;
+}
+.drawer-textarea:focus { border-color: rgba(129,140,248,0.5); }
+.drawer-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+.drawer-hint { font-size: 11px; color: rgba(255,255,255,0.25); font-family: "Microsoft YaHei",sans-serif; }
+.drawer-save {
+  background: linear-gradient(135deg, #6366f1, #818cf8); border: none;
+  color: #fff; font-size: 13px; font-weight: 600; padding: 8px 22px; border-radius: 10px;
+  cursor: pointer; font-family: "Microsoft YaHei",sans-serif; transition: opacity 0.2s;
+}
+.drawer-save:hover { opacity: 0.85; }
+.phy-toast {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: rgba(15,12,41,0.95); border: 1px solid rgba(129,140,248,0.3);
+  border-radius: 24px; padding: 10px 22px;
+  font-size: 13px; color: rgba(255,255,255,0.85); font-family: "Microsoft YaHei",sans-serif;
+  z-index: 1100; opacity: 0;
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none; white-space: nowrap;
+}
+.phy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+
+<div class="note-fab">
+  <div class="fab-menu" id="fabMenu">
+    <div class="fab-item" id="fabStar" onclick="toggleStar()">
+      <span class="fi-icon">☆</span>
+      <span class="fi-label">收藏此节</span>
+    </div>
+    <div class="fab-item" id="fabRead" onclick="toggleRead()">
+      <span class="fi-icon">○</span>
+      <span class="fi-label">标记已读</span>
+    </div>
+    <div class="fab-item" onclick="openDrawer()">
+      <span class="fi-icon">📝</span>
+      <span class="fi-label">我的笔记</span>
+    </div>
+  </div>
+  <button class="fab-main" id="fabBtn" onclick="toggleFab()" title="工具">✦</button>
+</div>
+
+<div class="note-drawer" id="noteDrawer">
+  <div class="drawer-header">
+    <div class="drawer-title">📝 我的笔记 · §3-7</div>
+    <div class="drawer-close" onclick="closeDrawer()">×</div>
+  </div>
+  <textarea class="drawer-textarea" id="drawerTA" placeholder="在此记录你的理解、疑问或总结……"></textarea>
+  <div class="drawer-footer">
+    <span class="drawer-hint">自动保存到本地，刷新不丢失</span>
+    <button class="drawer-save" onclick="saveNote()">保存</button>
+  </div>
+</div>
+
+<div class="phy-toast" id="phyToast"></div>
+
+<script>
+(function(){
+  const PID = '3-7';
+  const SK  = 'phy26_note_' + PID;
+  const STK = 'phy26_star_' + PID;
+  const RDK = 'phy26_read_' + PID;
+  let fabOpen = false;
+
+  function showToast(msg) {
+    const t = document.getElementById('phyToast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  window.toggleFab = function() {
+    fabOpen = !fabOpen;
+    document.getElementById('fabMenu').classList.toggle('open', fabOpen);
+    document.getElementById('fabBtn').classList.toggle('active', fabOpen);
+  };
+
+  window.toggleStar = function() {
+    const starred = localStorage.getItem(STK) === '1';
+    if (starred) { localStorage.removeItem(STK); showToast('已取消收藏'); }
+    else { localStorage.setItem(STK, '1'); showToast('⭐ 已收藏此节'); }
+    refreshStarUI();
+  };
+
+  window.toggleRead = function() {
+    const read = localStorage.getItem(RDK) === '1';
+    if (read) { localStorage.removeItem(RDK); showToast('已取消已读标记'); }
+    else { localStorage.setItem(RDK, '1'); showToast('✓ 已标记为已读'); }
+    refreshReadUI();
+  };
+
+  function refreshStarUI() {
+    const starred = localStorage.getItem(STK) === '1';
+    const el = document.getElementById('fabStar');
+    el.querySelector('.fi-icon').textContent = starred ? '★' : '☆';
+    el.querySelector('.fi-label').textContent = starred ? '已收藏' : '收藏此节';
+    el.classList.toggle('starred', starred);
+  }
+
+  function refreshReadUI() {
+    const read = localStorage.getItem(RDK) === '1';
+    const el = document.getElementById('fabRead');
+    el.querySelector('.fi-icon').textContent = read ? '✓' : '○';
+    el.querySelector('.fi-label').textContent = read ? '已读' : '标记已读';
+    el.classList.toggle('read-done', read);
+  }
+
+  window.openDrawer = function() {
+    document.getElementById('drawerTA').value = localStorage.getItem(SK) || '';
+    document.getElementById('noteDrawer').classList.add('open');
+    document.getElementById('fabMenu').classList.remove('open');
+    document.getElementById('fabBtn').classList.remove('active');
+    fabOpen = false;
+    setTimeout(() => document.getElementById('drawerTA').focus(), 350);
+  };
+
+  window.closeDrawer = function() {
+    document.getElementById('noteDrawer').classList.remove('open');
+  };
+
+  window.saveNote = function() {
+    const val = document.getElementById('drawerTA').value.trim();
+    if (val) { localStorage.setItem(SK, val); showToast('✓ 笔记已保存'); }
+    else { localStorage.removeItem(SK); showToast('笔记已清空'); }
+    closeDrawer();
+  };
+
+  let saveTimer;
+  document.getElementById('drawerTA').addEventListener('input', function() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      const val = this.value.trim();
+      if (val) localStorage.setItem(SK, val);
+    }, 1500);
+  });
+
+  refreshStarUI(); refreshReadUI();
+
+  if (localStorage.getItem(SK)) {
+    const noteItem = document.querySelector('.fab-item:last-of-type .fi-icon');
+    if (noteItem) noteItem.textContent = '📋';
+  }
+})();
+</script>
+</body>
+</html>

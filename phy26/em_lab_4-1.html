@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>§4-1 电磁感应定律 — 仿真实验</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI','Microsoft YaHei',sans-serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;color:#e2e8f0;display:flex;flex-direction:column;overflow:hidden}
+  #topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;background:rgba(255,255,255,0.05);border-bottom:1px solid rgba(255,255,255,0.1);backdrop-filter:blur(8px);flex-shrink:0;z-index:10}
+  #topbar a.back-btn{text-decoration:none;color:#fbbf24;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:8px;padding:5px 13px;font-size:13px;transition:background .2s}
+  #topbar a.back-btn:hover{background:rgba(251,191,36,0.22)}
+  .topbar-title-wrap{display:flex;flex-direction:column;gap:2px}
+  .topbar-title{font-size:16px;font-weight:700;color:#fff}
+  .topbar-course{font-size:11px;color:rgba(255,255,255,0.38);letter-spacing:1px}
+  .topbar-sub{margin-left:auto;font-size:12px;color:rgba(255,255,255,0.3)}
+  #main{display:flex;flex:1;overflow:hidden}
+  #sidebar{width:260px;flex-shrink:0;background:rgba(255,255,255,0.04);border-right:1px solid rgba(255,255,255,0.08);overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:14px}
+  #sidebar::-webkit-scrollbar{width:4px}
+  #sidebar::-webkit-scrollbar-thumb{background:rgba(251,191,36,0.3);border-radius:2px}
+  .section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#fbbf24;margin-bottom:6px;border-bottom:1px solid rgba(251,191,36,0.2);padding-bottom:4px}
+  .exp-btn{width:100%;text-align:left;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;cursor:pointer;color:rgba(255,255,255,0.7);font-size:13px;font-family:'Microsoft YaHei',sans-serif;transition:all .2s;display:flex;align-items:center;gap:10px}
+  .exp-btn:hover{background:rgba(251,191,36,0.1);border-color:rgba(251,191,36,0.3);color:#fff}
+  .exp-btn.active{background:rgba(251,191,36,0.15);border-color:rgba(251,191,36,0.5);color:#fbbf24;font-weight:600}
+  .exp-icon{font-size:18px;flex-shrink:0}
+  .exp-info{display:flex;flex-direction:column;gap:2px}
+  .exp-name{font-size:13px;font-weight:600}
+  .exp-desc{font-size:11px;color:rgba(255,255,255,0.4)}
+  .ctrl-group{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px}
+  .ctrl-label{font-size:11px;color:rgba(255,255,255,0.45);letter-spacing:0.8px;margin-bottom:8px;font-family:'Microsoft YaHei',sans-serif}
+  .slider-wrap{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .slider-wrap label{font-size:12px;color:rgba(255,255,255,0.6);min-width:60px;font-family:'Microsoft YaHei',sans-serif}
+  .slider-wrap input[type=range]{flex:1;accent-color:#fbbf24;height:4px}
+  .slider-wrap span{font-size:12px;color:#fbbf24;font-weight:600;min-width:52px;text-align:right}
+  .action-btn{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(251,191,36,0.3);background:rgba(251,191,36,0.1);color:#fbbf24;font-size:13px;font-family:'Microsoft YaHei',sans-serif;cursor:pointer;transition:all .2s;margin-top:4px}
+  .action-btn:hover{background:rgba(251,191,36,0.25);border-color:rgba(251,191,36,0.6);color:#fff}
+  .action-btn.primary{background:linear-gradient(135deg,#f59e0b,#fbbf24);border-color:transparent;color:#1a1200;font-weight:700}
+  .readout-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+  .readout{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:8px 10px;text-align:center}
+  .readout-val{font-size:16px;font-weight:800;color:#fbbf24;font-family:'Times New Roman',serif}
+  .readout-label{font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px;letter-spacing:0.5px}
+  #canvas-area{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+  #exp-title-bar{padding:10px 20px;background:rgba(0,0,0,0.2);border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:12px;flex-shrink:0}
+  #exp-title{font-size:15px;font-weight:700;color:#fbbf24;font-family:'Microsoft YaHei',sans-serif}
+  #exp-subtitle{font-size:12px;color:rgba(255,255,255,0.4)}
+  #canvas-wrap{flex:1;overflow:hidden}
+  canvas#simCanvas{display:block;width:100%;height:100%;background:rgba(0,0,0,0.3)}
+  #info-bar{padding:8px 20px;background:rgba(0,0,0,0.2);border-top:1px solid rgba(255,255,255,0.06);font-size:12px;color:rgba(255,255,255,0.4);font-family:'Microsoft YaHei',sans-serif;flex-shrink:0}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">§4-1 电磁感应定律</div>
+    <div class="topbar-course">普通物理（卓越班）下册 · 电磁学 · 仿真实验</div>
+  </div>
+  <div class="topbar-sub">NUSEP26</div>
+</div>
+
+<div id="main">
+  <div id="sidebar">
+    <div>
+      <div class="section-title">实验选择</div>
+      <button class="exp-btn active" onclick="loadExp(0)">
+        <span class="exp-icon">🔄</span>
+        <div class="exp-info"><div class="exp-name">法拉第感应定律</div><div class="exp-desc">磁通量变化 → 感应电动势</div></div>
+      </button>
+      <button class="exp-btn" onclick="loadExp(1)">
+        <span class="exp-icon">🌀</span>
+        <div class="exp-info"><div class="exp-name">感生电场分布</div><div class="exp-desc">螺线管截面涡旋电场</div></div>
+      </button>
+      <button class="exp-btn" onclick="loadExp(2)">
+        <span class="exp-icon">📐</span>
+        <div class="exp-info"><div class="exp-name">楞次定律演示</div><div class="exp-desc">感应电流阻碍磁通变化</div></div>
+      </button>
+      <button class="exp-btn" onclick="loadExp(3)">
+        <span class="exp-icon">⚡</span>
+        <div class="exp-info"><div class="exp-name">感应电荷测量</div><div class="exp-desc">q = ΔΨ/R 与速率无关</div></div>
+      </button>
+    </div>
+
+    <div id="ctrl-panel">
+      <!-- 动态控制面板 -->
+    </div>
+
+    <div class="readout-grid" id="readout-panel">
+      <div class="readout"><div class="readout-val" id="ro1">—</div><div class="readout-label" id="ro1l">Φ (Wb)</div></div>
+      <div class="readout"><div class="readout-val" id="ro2">—</div><div class="readout-label" id="ro2l">ε (V)</div></div>
+      <div class="readout"><div class="readout-val" id="ro3">—</div><div class="readout-label" id="ro3l">I (A)</div></div>
+      <div class="readout"><div class="readout-val" id="ro4">—</div><div class="readout-label" id="ro4l">t (s)</div></div>
+    </div>
+    <div style="margin-top:auto;padding-top:12px"><button onclick="openReport()" style="width:100%;padding:10px;border-radius:10px;border:1px solid rgba(52,211,153,0.4);background:rgba(52,211,153,0.1);color:#34d399;font-size:13px;font-family:'Microsoft YaHei',sans-serif;cursor:pointer;font-weight:700;">📄 生成实验报告</button></div>
+  </div>
+
+  <div id="canvas-area">
+    <div id="exp-title-bar">
+      <div id="exp-title">法拉第电磁感应定律</div>
+      <div id="exp-subtitle">调节磁场变化率，观察感应电动势的产生</div>
+    </div>
+    <div id="canvas-wrap">
+      <canvas id="simCanvas"></canvas>
+    </div>
+    <div id="info-bar" id="info-bar">提示：拖动滑块改变参数，点击"开始动画"观察动态过程</div>
+  </div>
+</div>
+
+<script>
+const canvas=document.getElementById('simCanvas');
+const ctx=canvas.getContext('2d');
+let animId=null, simT=0, curExp=0;
+
+// ── Experiment definitions ──
+const EXPS=[
+  {title:'法拉第电磁感应定律',subtitle:'调节 dB/dt，观察感应电动势随磁通量变化率的关系',
+   ctrls:`<div class="ctrl-group"><div class="ctrl-label">参数控制</div>
+    <div class="slider-wrap"><label>dB/dt</label><input type="range" id="p0_dbdt" min="-5" max="5" step="0.1" value="2" oninput="redraw()"><span id="p0_dbdt_v">2.0 T/s</span></div>
+    <div class="slider-wrap"><label>线圈半径 R</label><input type="range" id="p0_R" min="0.05" max="0.3" step="0.01" value="0.1" oninput="redraw()"><span id="p0_R_v">0.10 m</span></div>
+    <div class="slider-wrap"><label>匝数 N</label><input type="range" id="p0_N" min="1" max="20" step="1" value="5" oninput="redraw()"><span id="p0_N_v">5</span></div>
+    <div class="slider-wrap"><label>电阻 R_c</label><input type="range" id="p0_Rc" min="1" max="50" step="1" value="10" oninput="redraw()"><span id="p0_Rc_v">10 Ω</span></div>
+    <button class="action-btn primary" onclick="toggleAnim()">▶ 开始动画</button></div>`,
+   ro:['Φ (Wb)','ε (V)','I (mA)','t (s)']},
+  {title:'感生电场分布',subtitle:'螺线管截面内磁场均匀变化，观察涡旋电场的分布规律',
+   ctrls:`<div class="ctrl-group"><div class="ctrl-label">参数控制</div>
+    <div class="slider-wrap"><label>dB/dt</label><input type="range" id="p1_dbdt" min="-4" max="4" step="0.1" value="2" oninput="redraw()"><span id="p1_dbdt_v">2.0 T/s</span></div>
+    <div class="slider-wrap"><label>螺线管半径</label><input type="range" id="p1_R" min="0.5" max="1" step="0.05" value="0.7" oninput="redraw()"><span id="p1_R_v">0.70</span></div>
+    <button class="action-btn" onclick="toggleShowVec()">切换：场线 / 矢量</button>
+    <button class="action-btn primary" onclick="toggleAnim()">▶ 动画</button></div>`,
+   ro:['r (m)','E_感 (V/m)','方向','—']},
+  {title:'楞次定律演示',subtitle:'磁铁靠近/远离线圈，感应电流方向由楞次定律决定',
+   ctrls:`<div class="ctrl-group"><div class="ctrl-label">参数控制</div>
+    <div class="slider-wrap"><label>磁铁速度</label><input type="range" id="p2_v" min="-5" max="5" step="0.5" value="2" oninput="redraw()"><span id="p2_v_v">+2.0 m/s</span></div>
+    <div class="slider-wrap"><label>磁铁强度</label><input type="range" id="p2_B" min="0.1" max="2" step="0.1" value="1" oninput="redraw()"><span id="p2_B_v">1.0 T</span></div>
+    <button class="action-btn primary" onclick="toggleAnim()">▶ 开始动画</button>
+    <button class="action-btn" onclick="resetSim()">重置</button></div>`,
+   ro:['磁铁位置','Φ变化','感应电流','阻力']},
+  {title:'感应电荷与速率无关',subtitle:'改变磁通量变化速率，验证 q = ΔΨ/R 与时间无关',
+   ctrls:`<div class="ctrl-group"><div class="ctrl-label">参数控制</div>
+    <div class="slider-wrap"><label>ΔΦ</label><input type="range" id="p3_dphi" min="0.01" max="1" step="0.01" value="0.2" oninput="redraw()"><span id="p3_dphi_v">0.20 Wb</span></div>
+    <div class="slider-wrap"><label>变化时间 Δt</label><input type="range" id="p3_dt" min="0.1" max="5" step="0.1" value="1" oninput="redraw()"><span id="p3_dt_v">1.0 s</span></div>
+    <div class="slider-wrap"><label>电阻 R</label><input type="range" id="p3_R" min="1" max="100" step="1" value="20" oninput="redraw()"><span id="p3_R_v">20 Ω</span></div>
+    <button class="action-btn primary" onclick="toggleAnim()">▶ 演示</button></div>`,
+   ro:['ΔΦ (Wb)','Δt (s)','ε (V)','q (mC)']}
+];
+
+let showVec=false;
+function toggleShowVec(){showVec=!showVec;redraw();}
+
+function loadExp(i){
+  curExp=i;simT=0;
+  if(animId){cancelAnimationFrame(animId);animId=null;}
+  document.querySelectorAll('.exp-btn').forEach((b,j)=>b.classList.toggle('active',j===i));
+  document.getElementById('exp-title').textContent=EXPS[i].title;
+  document.getElementById('exp-subtitle').textContent=EXPS[i].subtitle;
+  document.getElementById('ctrl-panel').innerHTML=EXPS[i].ctrls;
+  const ro=EXPS[i].ro;
+  ['ro1l','ro2l','ro3l','ro4l'].forEach((id,j)=>document.getElementById(id).textContent=ro[j]);
+  redraw();
+}
+
+function toggleAnim(){
+  if(animId){cancelAnimationFrame(animId);animId=null;return;}
+  function frame(){simT+=0.025;redraw();animId=requestAnimationFrame(frame);}
+  frame();
+}
+function resetSim(){simT=0;if(animId){cancelAnimationFrame(animId);animId=null;}redraw();}
+
+function gv(id){const el=document.getElementById(id);return el?parseFloat(el.value):0;}
+function sv(id,txt){const el=document.getElementById(id);if(el)el.textContent=txt;}
+function ro(i,v){const el=document.getElementById('ro'+(i+1));if(el)el.textContent=v;}
+
+function redraw(){
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  if(curExp===0) drawFaraday(W,H);
+  else if(curExp===1) drawEField(W,H);
+  else if(curExp===2) drawLenz(W,H);
+  else if(curExp===3) drawCharge(W,H);
+}
+
+// ── Exp 0: Faraday ──
+function drawFaraday(W,H){
+  const dbdt=gv('p0_dbdt'),R=gv('p0_R'),N=gv('p0_N'),Rc=gv('p0_Rc');
+  sv('p0_dbdt_v',(dbdt>=0?'+':'')+dbdt.toFixed(1)+' T/s');
+  sv('p0_R_v',R.toFixed(2)+' m');
+  sv('p0_N_v',N.toFixed(0));
+  sv('p0_Rc_v',Rc.toFixed(0)+' Ω');
+  const B0=1+0.8*Math.sin(simT*1.5);
+  const B=dbdt!==0?1+dbdt*simT*0.1:B0;
+  const Phi=B*Math.PI*R*R;
+  const eps=-N*dbdt*Math.PI*R*R;
+  const I=eps/Rc*1000;
+
+  // Background glow
+  const cx=W/2,cy=H*0.42;
+  const grad=ctx.createRadialGradient(cx,cy,0,cx,cy,200);
+  grad.addColorStop(0,`rgba(251,191,36,${Math.abs(dbdt)*0.04})`);
+  grad.addColorStop(1,'transparent');
+  ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+
+  // Solenoid (rectangle)
+  const sw=180,sh=100,sx=cx-sw/2,sy=cy-sh/2-30;
+  ctx.fillStyle='rgba(56,189,248,0.08)';ctx.fillRect(sx,sy,sw,sh);
+  ctx.strokeStyle='rgba(56,189,248,0.5)';ctx.lineWidth=2;ctx.strokeRect(sx,sy,sw,sh);
+  // B symbols
+  const rows=3,cols=5;
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    const px=sx+sw*(c+0.5)/cols,py=sy+sh*(r+0.5)/rows;
+    ctx.fillStyle='rgba(56,189,248,0.7)';ctx.font='13px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(dbdt>0?'×':'·',px,py);
+  }
+  ctx.fillStyle='rgba(56,189,248,0.6)';ctx.font='11px "Microsoft YaHei"';ctx.textAlign='center';ctx.textBaseline='alphabetic';
+  ctx.fillText('B = '+(Math.abs(dbdt)*simT*0.1+1).toFixed(2)+' T',cx,sy-8);
+
+  // Coil circle
+  const coilR=Math.min(R*400,90);
+  ctx.beginPath();ctx.arc(cx,cy+60,coilR,0,Math.PI*2);
+  ctx.strokeStyle='rgba(251,191,36,0.8)';ctx.lineWidth=3;ctx.stroke();
+  ctx.fillStyle='rgba(251,191,36,0.06)';ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='12px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText('N='+N.toFixed(0)+' 匝，R='+R.toFixed(2)+'m',cx,cy+60+coilR+16);
+
+  // EMF arrow
+  if(Math.abs(eps)>0.001){
+    const arrowLen=Math.min(Math.abs(eps)*15,60);
+    const dir=eps>0?1:-1;
+    ctx.strokeStyle='rgba(248,113,113,0.9)';ctx.lineWidth=2.5;
+    ctx.beginPath();ctx.arc(cx,cy+60,coilR+18,0,Math.PI*2*0.7*dir);ctx.stroke();
+    ctx.fillStyle='rgba(248,113,113,0.9)';ctx.font='bold 13px "Microsoft YaHei"';ctx.textAlign='center';
+    ctx.fillText('ε = '+eps.toFixed(3)+' V',cx,cy+60-coilR-12);
+  }
+
+  // Graph: ε vs t
+  const gx=W*0.62,gy=H*0.08,gW=W*0.34,gH=H*0.38;
+  drawAxes(ctx,gx,gy,gW,gH,'t (s)','ε (V)');
+  ctx.strokeStyle='rgba(248,113,113,0.85)';ctx.lineWidth=2;
+  ctx.beginPath();
+  for(let px=0;px<=gW;px++){
+    const t=simT*px/gW;
+    const e=-N*dbdt*Math.PI*R*R;
+    const y=gy+gH/2-e/Math.max(Math.abs(eps)*1.5,0.01)*gH*0.45;
+    px===0?ctx.moveTo(gx+px,y):ctx.lineTo(gx+px,y);
+  }
+  ctx.stroke();
+
+  ro(0,Phi.toFixed(4));ro(1,eps.toFixed(4));ro(2,I.toFixed(2));ro(3,simT.toFixed(2));
+}
+
+function drawAxes(ctx,x,y,w,h,xl,yl){
+  ctx.strokeStyle='rgba(255,255,255,0.2)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x,y+h);ctx.lineTo(x+w,y+h);ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,0.35)';ctx.font='11px "Microsoft YaHei"';
+  ctx.textAlign='center';ctx.fillText(xl,x+w/2,y+h+14);
+  ctx.save();ctx.translate(x-14,y+h/2);ctx.rotate(-Math.PI/2);ctx.fillText(yl,0,0);ctx.restore();
+}
+
+// ── Exp 1: E-field ──
+function drawEField(W,H){
+  const dbdt=gv('p1_dbdt'),Rn=gv('p1_R');
+  sv('p1_dbdt_v',(dbdt>=0?'+':'')+dbdt.toFixed(1)+' T/s');
+  sv('p1_R_v',Rn.toFixed(2));
+  const cx=W/2,cy=H/2,R=Rn*200;
+  // Solenoid circle
+  ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);
+  ctx.fillStyle='rgba(56,189,248,0.07)';ctx.fill();
+  ctx.strokeStyle='rgba(56,189,248,0.5)';ctx.lineWidth=2;ctx.stroke();
+  // B symbols
+  const n=5;
+  for(let r=0;r<n;r++)for(let c=0;c<n;c++){
+    const px=cx-R+R*2*(c+0.5)/n,py=cy-R+R*2*(r+0.5)/n;
+    if((px-cx)**2+(py-cy)**2>R*R*0.85)continue;
+    ctx.fillStyle='rgba(56,189,248,0.6)';ctx.font='13px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(dbdt>0?'×':'·',px,py);
+  }
+  // E field rings
+  if(Math.abs(dbdt)>0.01){
+    const ccw=dbdt>0;
+    [R*0.4,R*0.7,R*1.15,R*1.6].forEach((r,i)=>{
+      const alpha=0.9-i*0.15;
+      ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(251,191,36,${alpha})`;ctx.lineWidth=2-i*0.3;ctx.stroke();
+      const ang=ccw?-0.4:0.4;
+      const ax=cx+r*Math.cos(ang),ay=cy+r*Math.sin(ang);
+      const td=ccw?ang-Math.PI/2:ang+Math.PI/2;
+      ctx.fillStyle=`rgba(251,191,36,${alpha})`;
+      ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(ax-9*Math.cos(td-0.4),ay-9*Math.sin(td-0.4));ctx.lineTo(ax-9*Math.cos(td+0.4),ay-9*Math.sin(td+0.4));ctx.closePath();ctx.fill();
+    });
+    ctx.fillStyle='rgba(251,191,36,0.7)';ctx.font='bold 12px "Microsoft YaHei"';ctx.textAlign='center';
+    ctx.fillText(ccw?'E 感 逆时针':'E 感 顺时针',cx,cy-R-18);
+  }
+  // Readouts
+  const r_sample=Rn*0.5;
+  const E_in=Math.abs(dbdt)*r_sample/2;
+  ro(0,r_sample.toFixed(2));ro(1,E_in.toFixed(4));ro(2,dbdt>0?'逆时针':'顺时针');ro(3,'—');
+}
+
+// ── Exp 2: Lenz ──
+function drawLenz(W,H){
+  const v=gv('p2_v'),Bm=gv('p2_B');
+  sv('p2_v_v',(v>=0?'+':'')+v.toFixed(1)+' m/s');
+  sv('p2_B_v',Bm.toFixed(1)+' T');
+  const magX=W*0.25+v*simT*18;
+  const coilX=W*0.6,coilY=H/2,coilW=80,coilH=120;
+  // Magnet
+  const mx=Math.min(Math.max(magX,60),W*0.55);
+  ctx.fillStyle='rgba(248,113,113,0.8)';ctx.fillRect(mx-20,H/2-40,40,40);
+  ctx.fillStyle='rgba(56,189,248,0.8)';ctx.fillRect(mx-20,H/2,40,40);
+  ctx.fillStyle='#fff';ctx.font='bold 14px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('N',mx,H/2-20);ctx.fillText('S',mx,H/2+20);
+  // Coil
+  ctx.strokeStyle='rgba(251,191,36,0.8)';ctx.lineWidth=3;
+  ctx.strokeRect(coilX-coilW/2,coilY-coilH/2,coilW,coilH);
+  // Flux arrows
+  const dist=coilX-mx;
+  const flux=Bm*1000/(dist*dist+100)*Math.sign(v);
+  const eps=-flux*0.01;
+  const arrowDir=eps>0?1:-1;
+  if(Math.abs(eps)>0.0001){
+    ctx.strokeStyle='rgba(52,211,153,0.8)';ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(coilX,coilY,50,0,Math.PI*2*0.75*arrowDir);ctx.stroke();
+    ctx.fillStyle='rgba(52,211,153,0.8)';ctx.font='12px "Microsoft YaHei"';ctx.textAlign='center';
+    ctx.fillText(arrowDir>0?'感应电流 ↺':'感应电流 ↻',coilX,coilY+70);
+    ctx.fillStyle='rgba(248,113,113,0.7)';
+    ctx.fillText('阻力 ← 楞次定律',coilX,coilY+88);
+  }
+  ro(0,(mx/100).toFixed(2));ro(1,flux>0?'增大':'减小');ro(2,arrowDir>0?'逆时针':'顺时针');ro(3,Math.abs(eps).toFixed(4));
+}
+
+// ── Exp 3: Charge ──
+function drawCharge(W,H){
+  const dphi=gv('p3_dphi'),dt=gv('p3_dt'),Rc=gv('p3_R');
+  sv('p3_dphi_v',dphi.toFixed(2)+' Wb');
+  sv('p3_dt_v',dt.toFixed(1)+' s');
+  sv('p3_R_v',Rc.toFixed(0)+' Ω');
+  const eps=dphi/dt, q=dphi/Rc*1000;
+  // Bar chart
+  const bars=[{label:'Δt='+dt.toFixed(1)+'s',eps,q},{label:'Δt='+(dt*2).toFixed(1)+'s',eps:eps/2,q},{label:'Δt='+(dt*0.5).toFixed(1)+'s',eps:eps*2,q}];
+  const bx=W*0.1,by=H*0.15,bW=W*0.8,bH=H*0.55;
+  ctx.fillStyle='rgba(255,255,255,0.05)';ctx.fillRect(bx,by,bW,bH);
+  const barW=bW/bars.length*0.5;
+  bars.forEach((b,i)=>{
+    const x=bx+bW*(i+0.5)/bars.length;
+    // ε bar
+    const eh=Math.min(b.eps/eps*bH*0.4,bH*0.45);
+    ctx.fillStyle='rgba(248,113,113,0.7)';ctx.fillRect(x-barW/2-4,by+bH-eh,barW/2,eh);
+    // q bar (constant)
+    const qh=bH*0.4;
+    ctx.fillStyle='rgba(52,211,153,0.7)';ctx.fillRect(x+4,by+bH-qh,barW/2,qh);
+    ctx.fillStyle='rgba(255,255,255,0.6)';ctx.font='11px "Microsoft YaHei"';ctx.textAlign='center';
+    ctx.fillText(b.label,x,by+bH+16);
+    ctx.fillStyle='rgba(248,113,113,0.8)';ctx.fillText('ε='+b.eps.toFixed(2)+'V',x-barW/4,by+bH-eh-6);
+    ctx.fillStyle='rgba(52,211,153,0.8)';ctx.fillText('q='+q.toFixed(1)+'mC',x+barW/4,by+bH-qh-6);
+  });
+  ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='13px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText('红：感应电动势 ε（随 Δt 变化）　绿：感应电荷 q（与 Δt 无关）',W/2,by+bH+36);
+  ctx.fillStyle='rgba(251,191,36,0.8)';ctx.font='bold 14px "Microsoft YaHei"';
+  ctx.fillText('q = ΔΨ/R = '+q.toFixed(2)+' mC（恒定）',W/2,by-14);
+  ro(0,dphi.toFixed(3));ro(1,dt.toFixed(1));ro(2,eps.toFixed(3));ro(3,q.toFixed(2));
+}
+
+function resizeCanvas(){const w=canvas.parentElement;canvas.width=w.clientWidth;canvas.height=w.clientHeight;redraw();}
+window.addEventListener('resize',resizeCanvas);
+window.addEventListener('DOMContentLoaded',()=>{loadExp(0);setTimeout(resizeCanvas,80);});
+</script>
+
+<!-- ── 实验报告生成器 ── -->
+<style>
+.report-overlay{position:fixed;inset:0;z-index:1200;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:20px}
+.report-overlay.open{display:flex}
+.report-modal{background:#0e0c24;border:1px solid rgba(255,255,255,0.1);border-radius:20px;width:min(760px,100%);max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,0.7);animation:slideUp 0.3s cubic-bezier(0.4,0,0.2,1) both}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.rm-header{padding:24px 28px 20px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:space-between}
+.rm-title{font-size:17px;font-weight:700;color:#fff;font-family:"Microsoft YaHei",sans-serif}
+.rm-title span{color:#34d399}
+.rm-close{font-size:22px;color:rgba(255,255,255,0.4);cursor:pointer;line-height:1;transition:color 0.2s}
+.rm-close:hover{color:#fff}
+.rm-body{padding:24px 28px;display:flex;flex-direction:column;gap:16px}
+.rm-field{display:flex;flex-direction:column;gap:6px}
+.rm-label{font-size:12px;color:rgba(255,255,255,0.45);font-family:"Microsoft YaHei",sans-serif;letter-spacing:0.5px}
+.rm-label span{color:#f87171}
+.rm-input,.rm-textarea{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 14px;color:#fff;font-size:14px;font-family:"Microsoft YaHei",sans-serif;outline:none;transition:border-color 0.2s;width:100%}
+.rm-input:focus,.rm-textarea:focus{border-color:rgba(52,211,153,0.5)}
+.rm-textarea{resize:vertical;min-height:80px;line-height:1.8}
+.rm-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.rm-section-title{font-size:12px;font-weight:700;color:rgba(52,211,153,0.8);letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid rgba(52,211,153,0.15);padding-bottom:8px;margin-top:4px;font-family:"Microsoft YaHei",sans-serif}
+.rm-footer{padding:16px 28px 24px;display:flex;gap:12px;justify-content:flex-end}
+.rm-btn{padding:10px 28px;border-radius:12px;border:none;cursor:pointer;font-size:14px;font-weight:700;font-family:"Microsoft YaHei",sans-serif;transition:opacity 0.2s,transform 0.15s}
+.rm-btn:hover{opacity:0.88;transform:translateY(-1px)}
+.rm-btn-cancel{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.6)}
+.rm-btn-gen{background:linear-gradient(135deg,#10b981,#34d399);color:#fff}
+.rm-btn-copy{background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;display:none}
+.report-output{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:20px 24px;margin:0 28px 24px;font-family:"Microsoft YaHei","Times New Roman",serif;font-size:13.5px;color:rgba(255,255,255,0.85);line-height:2;white-space:pre-wrap;display:none;max-height:340px;overflow-y:auto}
+.report-output.show{display:block}
+</style>
+<div class="report-overlay" id="reportOverlay" onclick="overlayClick(event)">
+  <div class="report-modal">
+    <div class="rm-header">
+      <div class="rm-title">实验报告 · <span>电磁感应定律</span></div>
+      <div class="rm-close" onclick="closeReport()">×</div>
+    </div>
+    <div class="rm-body">
+      <div class="rm-section-title">基本信息</div>
+      <div class="rm-row">
+        <div class="rm-field"><div class="rm-label">姓名 <span>*</span></div><input class="rm-input" id="rName" placeholder="请输入姓名"></div>
+        <div class="rm-field"><div class="rm-label">学号 <span>*</span></div><input class="rm-input" id="rStuId" placeholder="请输入学号"></div>
+      </div>
+      <div class="rm-row">
+        <div class="rm-field"><div class="rm-label">实验日期</div><input class="rm-input" id="rDate" type="date"></div>
+        <div class="rm-field"><div class="rm-label">实验伙伴</div><input class="rm-input" id="rPartner" placeholder="可选"></div>
+      </div>
+      <div class="rm-section-title">实验内容</div>
+      <div class="rm-field"><div class="rm-label">实验目的</div><textarea class="rm-textarea" id="rPurpose" placeholder="描述本次实验的目的和预期目标……"></textarea></div>
+      <div class="rm-field"><div class="rm-label">实验步骤与观察</div><textarea class="rm-textarea" id="rProcess" placeholder="描述你进行的操作步骤和实验过程中的观察……" style="min-height:100px"></textarea></div>
+      <div class="rm-field"><div class="rm-label">实验数据记录</div><textarea class="rm-textarea" id="rData" placeholder="记录关键数据、参数和仿真结果……"></textarea></div>
+      <div class="rm-section-title">分析与总结</div>
+      <div class="rm-field"><div class="rm-label">结果分析</div><textarea class="rm-textarea" id="rAnalysis" placeholder="对实验现象和数据进行分析……"></textarea></div>
+      <div class="rm-field"><div class="rm-label">误差分析与思考</div><textarea class="rm-textarea" id="rError" placeholder="分析可能的误差来源，以及对物理规律的思考……"></textarea></div>
+      <div class="rm-field"><div class="rm-label">实验结论</div><textarea class="rm-textarea" id="rConclusion" placeholder="总结本次实验的结论……"></textarea></div>
+    </div>
+    <div class="report-output" id="reportOutput"></div>
+    <div class="rm-footer">
+      <button class="rm-btn rm-btn-cancel" onclick="closeReport()">取消</button>
+      <button class="rm-btn rm-btn-copy" id="rmCopyBtn" onclick="copyReport()">复制报告</button>
+      <button class="rm-btn rm-btn-gen" onclick="generateReport()">生成报告</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  const EXP_NAME = '电磁感应定律';
+  const EXP_SEC  = '§4-1';
+  const STORE_KEY = 'phy26_report_' + EXP_SEC.replace(/[§\/]/g,'');
+  function loadSaved(){const d=JSON.parse(localStorage.getItem(STORE_KEY)||'{}');if(d.name)document.getElementById('rName').value=d.name;if(d.stuId)document.getElementById('rStuId').value=d.stuId;if(d.date)document.getElementById('rDate').value=d.date;if(d.partner)document.getElementById('rPartner').value=d.partner;if(d.purpose)document.getElementById('rPurpose').value=d.purpose;if(d.process)document.getElementById('rProcess').value=d.process;if(d.data)document.getElementById('rData').value=d.data;if(d.analysis)document.getElementById('rAnalysis').value=d.analysis;if(d.error)document.getElementById('rError').value=d.error;if(d.conclusion)document.getElementById('rConclusion').value=d.conclusion;}
+  function saveDraft(){const d={name:document.getElementById('rName').value,stuId:document.getElementById('rStuId').value,date:document.getElementById('rDate').value,partner:document.getElementById('rPartner').value,purpose:document.getElementById('rPurpose').value,process:document.getElementById('rProcess').value,data:document.getElementById('rData').value,analysis:document.getElementById('rAnalysis').value,error:document.getElementById('rError').value,conclusion:document.getElementById('rConclusion').value};localStorage.setItem(STORE_KEY,JSON.stringify(d));}
+  window.openReport=function(){document.getElementById('reportOverlay').classList.add('open');document.getElementById('reportOutput').classList.remove('show');document.getElementById('rmCopyBtn').style.display='none';const dateEl=document.getElementById('rDate');if(!dateEl.value)dateEl.value=new Date().toISOString().slice(0,10);loadSaved();const _d={rPurpose:'验证法拉第电磁感应定律，研究感应电动势与磁通量变化率的关系，理解楞次定律，分析感生电场的分布规律，掌握感应电荷与磁通量变化量的关系。',rProcess:'调节dB/dt、线圈半径R和匝数N，观察感应电动势ε=−NdΦ/dt的变化；演示楞次定律：磁铁靠近线圈时感应电流方向阻碍磁通量增加；改变磁通量变化速率Δt，验证感应电荷q=ΔΨ/R与Δt无关；观察感生电场的涡旋分布。',rData:'线圈（N=5，R=0.1m），dB/dt=2T/s：Φ=πR²B，ε=−NdΦ/dt=−5×π×0.01×2=−0.314V；dB/dt增大2倍：ε=−0.628V（ε∝dB/dt）；ΔΦ=0.2Wb，R=20Ω，Δt=1s：q=ΔΦ/R=10mC；Δt=2s：ε减半但q=10mC不变（q与Δt无关）。',rAnalysis:'法拉第定律ε=−NdΦ/dt表明感应电动势与磁通量变化率成正比，负号体现楞次定律（感应电流方向阻碍磁通量变化）。感生电场是涡旋场，沿闭合路径的线积分等于−dΦ/dt。感应电荷q=ΔΨ/R只与磁通量总变化量有关，与变化速率无关。',rError:'仿真中使用理想线圈和均匀磁场，忽略了线圈电阻、漏磁和互感效应；实际实验中线圈的有限尺寸和磁场的不均匀性会引入误差；高频变化时需考虑集肤效应和分布电容。',rConclusion:'验证了法拉第电磁感应定律：ε=−NdΦ/dt；楞次定律确定感应电流方向；感生电场是涡旋场；感应电荷q=ΔΨ/R与磁通量变化速率无关，只与总变化量有关。'};Object.entries(_d).forEach(([id,val])=>{const el=document.getElementById(id);if(el&&!el.value)el.value=val;});};
+  window.closeReport=function(){saveDraft();document.getElementById('reportOverlay').classList.remove('open');};
+  window.overlayClick=function(e){if(e.target===document.getElementById('reportOverlay'))closeReport();};
+  window.generateReport=function(){const name=document.getElementById('rName').value.trim();const stuId=document.getElementById('rStuId').value.trim();const date=document.getElementById('rDate').value||'—';const partner=document.getElementById('rPartner').value.trim()||'—';const purpose=document.getElementById('rPurpose').value.trim()||'（未填写）';const process=document.getElementById('rProcess').value.trim()||'（未填写）';const data=document.getElementById('rData').value.trim()||'（未填写）';const analysis=document.getElementById('rAnalysis').value.trim()||'（未填写）';const error=document.getElementById('rError').value.trim()||'（未填写）';const conclusion=document.getElementById('rConclusion').value.trim()||'（未填写）';if(!name||!stuId){alert('请填写姓名和学号');return;}saveDraft();const divider='─'.repeat(40);const report=['普通物理（卓越班）下册 · 电磁学',`实验报告：${EXP_NAME}（${EXP_SEC}）`,divider,`姓　　名：${name}　　　学　　号：${stuId}`,`实验日期：${date}　　　实验伙伴：${partner}`,divider,'','一、实验目的',purpose,'','二、实验步骤与观察',process,'','三、实验数据记录',data,'','四、结果分析',analysis,'','五、误差分析与思考',error,'','六、实验结论',conclusion,'',divider,`生成时间：${new Date().toLocaleString('zh-CN')}`,'本报告由 NUSEP26 普通物理（卓越班）实验仿真平台生成'].join('\n');const out=document.getElementById('reportOutput');out.textContent=report;out.classList.add('show');document.getElementById('rmCopyBtn').style.display='inline-flex';out.scrollIntoView({behavior:'smooth',block:'nearest'});};
+  window.copyReport=function(){const text=document.getElementById('reportOutput').textContent;navigator.clipboard.writeText(text).then(()=>{const btn=document.getElementById('rmCopyBtn');const orig=btn.textContent;btn.textContent='✓ 已复制';setTimeout(()=>btn.textContent=orig,2000);}).catch(()=>{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);const btn=document.getElementById('rmCopyBtn');btn.textContent='✓ 已复制';setTimeout(()=>btn.textContent='复制报告',2000);});};
+  ['rName','rStuId','rDate','rPartner','rPurpose','rProcess','rData','rAnalysis','rError','rConclusion'].forEach(id=>document.getElementById(id).addEventListener('input',saveDraft));
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2-2 电介质 — 电磁学</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Times New Roman", "Microsoft YaHei", "PingFang SC", serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh; color: #fff;
+    }
+    :lang(zh), .zh { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; }
+    canvas#particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+
+    .topbar {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; gap: 14px;
+      padding: 18px 36px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      background: rgba(15,12,41,0.7); backdrop-filter: blur(12px);
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .back-btn { color: rgba(255,255,255,0.5); font-size: 14px; cursor: pointer; text-decoration: none; transition: color .2s; }
+    .back-btn:hover { color: #818cf8; }
+    .topbar-title-wrap { display: flex; flex-direction: column; gap: 2px; }
+    .topbar-title { font-size: 16px; font-weight: 700; letter-spacing: 1px; }
+    .topbar-course { font-size: 11px; color: rgba(255,255,255,0.38); letter-spacing: 1px; }
+    .topbar-sub { margin-left: auto; font-size: 12px; color: rgba(255,255,255,0.3); }
+
+    .tabs { display: flex; gap: 10px; margin-bottom: 32px; font-family: "Microsoft YaHei", sans-serif; flex-wrap: wrap; }
+    .tab {
+      padding: 9px 22px; border-radius: 10px; font-size: 14px; font-weight: 600;
+      cursor: pointer; border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.5);
+      transition: all .2s;
+    }
+    .tab.active {
+      background: linear-gradient(135deg,#6366f1,#818cf8);
+      border-color: transparent; color: #fff;
+      box-shadow: 0 4px 16px rgba(99,102,241,0.4);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .page { position: relative; z-index: 10; max-width: 860px; margin: 0 auto; padding: 36px 24px 80px; }
+
+    .card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 16px; padding: 28px 32px; margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 16px; font-weight: 700; color: #818cf8;
+      margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .card-title::before {
+      content: ""; display: inline-block;
+      width: 4px; height: 18px; border-radius: 2px;
+      background: linear-gradient(#6366f1,#818cf8); flex-shrink: 0;
+    }
+    .card p { font-size: 15px; color: rgba(255,255,255,0.8); line-height: 2; }
+    .card p + p { margin-top: 10px; }
+    .hl       { color: #fbbf24; font-weight: 600; }
+    .hl-blue  { color: #38bdf8; font-weight: 600; }
+    .hl-green { color: #34d399; font-weight: 600; }
+    .hl-red   { color: #f87171; font-weight: 600; }
+    .hl-purple { color: #c084fc; font-weight: 600; }
+
+    .katex { color: #e2e8f0; font-size: 1.05em; }
+    .katex-display { margin: 14px 0; }
+    .katex-display > .katex { color: #93c5fd; }
+
+    .prop-list { list-style: none; margin-top: 10px; display: flex; flex-direction: column; gap: 12px; }
+    .prop-item {
+      display: flex; gap: 14px; align-items: flex-start;
+      background: rgba(255,255,255,0.03); border-radius: 10px; padding: 14px 18px;
+      border-left: 3px solid #6366f1;
+    }
+    .prop-item:nth-child(2) { border-left-color: #38bdf8; }
+    .prop-item:nth-child(3) { border-left-color: #34d399; }
+    .prop-item:nth-child(4) { border-left-color: #f59e0b; }
+    .prop-num {
+      min-width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700;
+      background: linear-gradient(135deg,#6366f1,#818cf8); color: #fff;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .prop-item:nth-child(2) .prop-num { background: linear-gradient(135deg,#0ea5e9,#38bdf8); }
+    .prop-item:nth-child(3) .prop-num { background: linear-gradient(135deg,#10b981,#34d399); }
+    .prop-item:nth-child(4) .prop-num { background: linear-gradient(135deg,#f59e0b,#fbbf24); }
+    .prop-body { font-size: 14.5px; color: rgba(255,255,255,0.78); line-height: 1.9; }
+    .prop-body strong { color: #fff; font-family: "Microsoft YaHei", sans-serif; }
+
+    .note-box {
+      background: rgba(251,191,36,0.06); border: 1px solid rgba(251,191,36,0.2);
+      border-radius: 12px; padding: 16px 20px; margin-top: 14px;
+      font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.9;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .note-box .note-label { font-weight: 700; color: #fbbf24; margin-bottom: 4px; display: block; font-family: "Microsoft YaHei", sans-serif; }
+
+    .green-box {
+      background: rgba(52,211,153,0.06); border: 1px solid rgba(52,211,153,0.2);
+      border-radius: 12px; padding: 16px 20px; margin-top: 14px;
+      font-size: 14px; color: rgba(255,255,255,0.75); line-height: 1.9;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .green-box .note-label { font-weight: 700; color: #34d399; margin-bottom: 4px; display: block; }
+
+    .blue-box {
+      background: rgba(56,189,248,0.06); border: 1px solid rgba(56,189,248,0.2);
+      border-radius: 12px; padding: 16px 20px; margin-top: 14px;
+      font-size: 14px; color: rgba(255,255,255,0.75); line-height: 1.9;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .blue-box .note-label { font-weight: 700; color: #38bdf8; margin-bottom: 4px; display: block; }
+
+    .compare-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;
+    }
+    .compare-card {
+      border-radius: 12px; padding: 20px 22px;
+      font-size: 14px; line-height: 1.9;
+    }
+    .compare-card.polar {
+      background: rgba(248,113,113,0.07); border: 1px solid rgba(248,113,113,0.22);
+    }
+    .compare-card.nonpolar {
+      background: rgba(56,189,248,0.07); border: 1px solid rgba(56,189,248,0.22);
+    }
+    .compare-card .cc-title {
+      font-size: 15px; font-weight: 700; margin-bottom: 10px;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .compare-card.polar .cc-title { color: #f87171; }
+    .compare-card.nonpolar .cc-title { color: #38bdf8; }
+    .compare-card p { color: rgba(255,255,255,0.78); }
+
+    /* 例题块 */
+    .eg-block {
+      background: rgba(192,132,252,0.05); border: 1px solid rgba(192,132,252,0.18);
+      border-radius: 14px; padding: 24px 28px; margin-bottom: 20px;
+    }
+    .eg-title {
+      font-size: 15px; font-weight: 700; color: #c084fc; margin-bottom: 14px;
+      font-family: "Microsoft YaHei", sans-serif; display: flex; align-items: center; gap: 8px;
+    }
+    .eg-title::before {
+      content: ""; display: inline-block; width: 4px; height: 16px;
+      background: linear-gradient(#c084fc,#818cf8); border-radius: 2px; flex-shrink: 0;
+    }
+    .eg-block p { font-size: 14.5px; color: rgba(255,255,255,0.8); line-height: 2; }
+    .eg-block p + p { margin-top: 8px; }
+
+    .sol-steps { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .sol-step {
+      background: rgba(255,255,255,0.025); border-left: 3px solid #6366f1;
+      border-radius: 0 8px 8px 0; padding: 12px 16px;
+      font-size: 14.5px; color: rgba(255,255,255,0.78); line-height: 2;
+    }
+    .sol-step:nth-child(2) { border-left-color: #38bdf8; }
+    .sol-step:nth-child(3) { border-left-color: #34d399; }
+    .sol-step:nth-child(4) { border-left-color: #f59e0b; }
+    .sol-step:nth-child(5) { border-left-color: #f87171; }
+    .sol-step:nth-child(6) { border-left-color: #c084fc; }
+    .sol-step strong { color: #fff; font-family: "Microsoft YaHei", sans-serif; }
+
+    .ans-box {
+      background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.25);
+      border-radius: 10px; padding: 12px 18px; margin-top: 12px;
+      font-size: 14.5px; color: rgba(255,255,255,0.85); line-height: 2;
+    }
+    .ans-box .ans-label { color: #fbbf24; font-weight: 700; font-family: "Microsoft YaHei",sans-serif; }
+
+    canvas.demo-canvas {
+      display: block; margin: 18px auto 0;
+      background: rgba(0,0,0,0.25); border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+    .demo-label {
+      text-align: center; font-size: 12.5px; color: rgba(255,255,255,0.35);
+      font-family: "Microsoft YaHei",sans-serif; margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+
+<div class="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title">§2-2 &nbsp;电介质</div>
+  <div class="topbar-sub">NUSEP26 · 电磁学</div>
+</div>
+
+<div class="page">
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(0)">2-2-1 &nbsp;电介质的电结构</div>
+    <div class="tab" onclick="switchTab(1)">2-2-2 &nbsp;极化现象</div>
+    <div class="tab" onclick="switchTab(2)">2-2-3 &nbsp;电极化强度矢量</div>
+    <div class="tab" onclick="switchTab(3)">2-2-4 &nbsp;介质中的高斯定理</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- Tab 0: 2-2-1 电介质的电结构               -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="tab-panel active" id="panel-0">
+
+    <!-- 1. 什么是电介质 -->
+    <div class="card">
+      <div class="card-title">什么是电介质（绝缘体）</div>
+      <p><span class="hl">电介质</span>（dielectric）是<span class="hl">电阻率很大、导电能力极差</span>的物质，即通常所说的<span class="hl-blue">绝缘体</span>。常见的电介质包括：玻璃、陶瓷、橡胶、塑料、云母、纸张、油、空气等。</p>
+      <p>与导体形成鲜明对比：导体中自由电子可在全体范围内自由运动；电介质中正负电荷受到分子键的强烈束缚，<span class="hl">几乎无自由电荷</span>，宏观上不能导电。</p>
+      <div class="note-box">
+        <span class="note-label">核心区别：自由电荷的有无</span>
+        导体：大量自由电荷（金属中为自由电子）可在整个导体范围内运动，响应外电场产生传导电流。<br>
+        电介质：正负电荷被束缚在分子内部，仅能在分子尺度内发生微小位移（极化），无宏观传导电流。
+      </div>
+    </div>
+
+    <!-- 2. 两类分子结构 -->
+    <div class="card">
+      <div class="card-title">两类电介质的分子结构</div>
+      <p>根据分子内正负电荷中心是否重合，将电介质分子分为两类：</p>
+      <div class="compare-grid">
+        <div class="compare-card polar">
+          <div class="cc-title">有极分子（极性分子）</div>
+          <p>正负电荷中心<span class="hl-red">不重合</span>，分子固有电偶极矩 $\vec{p} \neq \vec{0}$。<br><br>
+          无外电场时，各分子电矩方向随机分布，热运动使宏观合电矩为零，介质对外不显电性。<br><br>
+          外电场施加后，电矩趋向沿场方向排列（<span class="hl-red">取向极化</span>），产生宏观电极化。<br><br>
+          <strong>典型例子：</strong>$\mathrm{H_2O}$（水）、$\mathrm{HCl}$、$\mathrm{NH_3}$、$\mathrm{CO}$</p>
+        </div>
+        <div class="compare-card nonpolar">
+          <div class="cc-title">无极分子（非极性分子）</div>
+          <p>正负电荷中心<span class="hl-blue">重合</span>，分子固有电偶极矩 $\vec{p} = \vec{0}$。<br><br>
+          无外电场时，分子对外不显电性，介质整体呈电中性。<br><br>
+          外电场施加后，正负电荷中心被拉开，感应出电偶极矩（<span class="hl-blue">位移极化</span>），产生宏观电极化。<br><br>
+          <strong>典型例子：</strong>$\mathrm{H_2}$、$\mathrm{O_2}$、$\mathrm{N_2}$、$\mathrm{CO_2}$、$\mathrm{CH_4}$</p>
+        </div>
+      </div>
+      <canvas id="moleculeCanvas" class="demo-canvas" width="700" height="200"></canvas>
+      <div class="demo-label">左：有极分子无场时电矩随机；右：无极分子无场时正负中心重合，$\vec{p}=0$</div>
+    </div>
+
+    <!-- 3. 电偶极矩 -->
+    <div class="card">
+      <div class="card-title">电偶极矩 $\vec{p}$</div>
+      <p>描述分子（或任意电荷系统）电极性的物理量，定义为：</p>
+      $$\vec{p} = q\,\vec{l}$$
+      <p>其中 $q$ 为正电荷量，$\vec{l}$ 为从<span class="hl-red">负电荷中心指向正电荷中心</span>的位移矢量。电偶极矩是<span class="hl">矢量</span>，SI 单位为 $\mathrm{C\cdot m}$。</p>
+      <ul class="prop-list" style="margin-top:14px;">
+        <li class="prop-item">
+          <div class="prop-num">①</div>
+          <div class="prop-body">
+            <strong>大小：</strong>$p = ql$，$l$ 为正负电荷中心之间的距离。分子尺度下 $l \sim 10^{-10}\ \mathrm{m}$，$q \sim e = 1.6\times10^{-19}\ \mathrm{C}$，故 $p \sim 10^{-29}\ \mathrm{C\cdot m}$（通常以 Debye 为单位，$1\ \mathrm{D} = 3.336\times10^{-30}\ \mathrm{C\cdot m}$）。
+          </div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">②</div>
+          <div class="prop-body">
+            <strong>方向：</strong>由负电荷中心指向正电荷中心（物理学约定；化学中有时反向，注意区分）。
+          </div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">③</div>
+          <div class="prop-body">
+            <strong>有极分子</strong>：固有电偶极矩 $\vec{p}_0 \neq \vec{0}$，大小由分子结构决定，不随外场变化（但方向随外场转动）。<br>
+            <strong>无极分子</strong>：固有 $\vec{p}_0 = \vec{0}$；外场作用下感应出 $\vec{p} = \varepsilon_0 \alpha \vec{E}$，其中 $\alpha$ 为分子极化率（标量，$\mathrm{m^3}$）。
+          </div>
+        </li>
+      </ul>
+      <canvas id="dipoleCanvas" class="demo-canvas" width="500" height="140"></canvas>
+      <div class="demo-label">电偶极子：$-q$ 和 $+q$，$\vec{p} = q\vec{l}$ 由负指向正</div>
+    </div>
+
+    <!-- 4. 极化机制对比 -->
+    <div class="card">
+      <div class="card-title">两类极化机制</div>
+      <ul class="prop-list">
+        <li class="prop-item">
+          <div class="prop-num">位移</div>
+          <div class="prop-body">
+            <strong>位移极化（无极分子）</strong><br>
+            外电场使分子内正负电荷中心发生相对位移（正电荷沿场方向、负电荷逆场方向），产生感应电偶极矩 $\vec{p}_{\text{ind}} \propto \vec{E}$。<br>
+            位移极化响应速度极快（随电场几乎瞬时建立），在光频范围仍有效，对应折射率 $n = \sqrt{\varepsilon_r}$（高频极限）。
+          </div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">取向</div>
+          <div class="prop-body">
+            <strong>取向极化（有极分子）</strong><br>
+            外电场对固有电矩施加力矩 $\vec{M} = \vec{p}\times\vec{E}$，使各分子电矩趋向沿场方向排列。但热运动与取向作用相互竞争，排列程度取决于 $E$ 和温度 $T$：温度越高，热运动越强，排列越乱，极化越弱。<br>
+            取向极化比位移极化慢，在微波频率以上便跟不上交变场，产生<span class="hl">介电弛豫</span>和<span class="hl-blue">介电损耗</span>（微波炉加热原理）。
+          </div>
+        </li>
+      </ul>
+      <div class="green-box">
+        <span class="note-label">实际情况</span>
+        有极分子在外场中同时发生<strong>取向极化</strong>和<strong>位移极化</strong>，通常取向极化贡献更大（因为固有电矩 $\gg$ 感应电矩）。无极分子只有位移极化。两种机制都使电介质内部出现宏观极化，产生极化电荷，改变内部电场分布。
+      </div>
+      <canvas id="polarizationCanvas" class="demo-canvas" width="700" height="200"></canvas>
+      <div class="demo-label">外电场作用下：左（无极分子）位移极化；右（有极分子）取向极化</div>
+    </div>
+
+    <!-- 5. 宏观电极化强度 -->
+    <div class="card">
+      <div class="card-title">宏观描述：电极化强度 $\vec{P}$</div>
+      <p>在宏观尺度上，用<span class="hl">电极化强度</span>（polarization）$\vec{P}$ 描述电介质的极化程度，定义为单位体积内电偶极矩的矢量和：</p>
+      $$\vec{P} = \frac{\sum_i \vec{p}_i}{\Delta V}$$
+      <p>$\vec{P}$ 的 SI 单位为 $\mathrm{C/m^2}$（与面电荷密度相同）。对各向同性线性介质，$\vec{P}$ 与介质内合场强 $\vec{E}$ 成正比：</p>
+      $$\vec{P} = \varepsilon_0 \chi_e \vec{E}$$
+      <p>其中 $\chi_e \geq 0$ 为<span class="hl">电极化率</span>（无量纲）。相对介电常数 $\varepsilon_r = 1 + \chi_e \geq 1$。</p>
+      <div class="blue-box">
+        <span class="note-label">微观 → 宏观</span>
+        若单位体积内有 $n$ 个分子，每个分子平均电矩为 $\bar{\vec{p}}$，则 $\vec{P} = n\bar{\vec{p}}$。<br>
+        对无极分子：$\bar{\vec{p}} = \varepsilon_0\alpha\vec{E}$，故 $\chi_e = n\alpha/\varepsilon_0 \cdot \varepsilon_0 = n\alpha$（忽略局域场修正时）。<br>
+        对有极分子（低场/高温近似，Langevin 理论）：$\bar{p} \approx \dfrac{p_0^2 E}{3k_B T}$，故 $\chi_e \propto 1/T$（Curie 定律）。
+      </div>
+    </div>
+
+    <!-- 6. 与导体的对比总结 -->
+    <div class="card">
+      <div class="card-title">电介质与导体的电结构对比</div>
+      <ul class="prop-list">
+        <li class="prop-item">
+          <div class="prop-num">导</div>
+          <div class="prop-body">
+            <strong>导体</strong>：大量<span class="hl">自由电荷</span>（金属为自由电子），可在整个导体中运动。外电场 → 自由电荷定向运动 → 静电感应 → 导体内部 $\vec{E}=\vec{0}$（静电平衡）。电荷分布在表面。
+          </div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">介</div>
+          <div class="prop-body">
+            <strong>电介质</strong>：几乎<span class="hl-blue">无自由电荷</span>，正负电荷束缚在分子内。外电场 → 分子极化（位移/取向）→ 出现<span class="hl-green">极化电荷</span>（束缚电荷）→ 介质内部 $\vec{E}$ 减弱但不为零（$\vec{E} = \vec{E}_0/\varepsilon_r$）。
+          </div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">异</div>
+          <div class="prop-body">
+            导体中自由电荷能完全屏蔽外场（内部 $E=0$）；电介质中束缚电荷只能部分抵消外场（内部 $E$ 减小但不为零）。这是两者最本质的区别，也决定了电容器中填入电介质后电容增大为 $C = \varepsilon_r C_0$。
+          </div>
+        </li>
+      </ul>
+    </div>
+
+  </div><!-- /panel-0 -->
+
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- Tab 1: 2-2-2 极化现象                     -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="panel-1">
+
+    <!-- 1. 什么是极化现象 -->
+    <div class="card">
+      <div class="card-title">极化现象的本质</div>
+      <p>将电介质置于外电场 $\vec{E}_0$ 中，介质内每个分子的正负电荷在电场力作用下发生<span class="hl">微小相对位移</span>（无极分子）或<span class="hl">定向排列</span>（有极分子），这种在外电场作用下介质内部发生的<span class="hl-blue">电荷重排现象</span>称为<span class="hl">电极化</span>（polarization）。</p>
+      <p>极化的结果：介质内部正负束缚电荷仍相互抵消，<span class="hl-green">内部宏观上不出现净电荷</span>；但在介质的<span class="hl">表面</span>（以及不均匀介质的内部界面处），正负电荷不再完全抵消，出现宏观净电荷，称为<span class="hl">极化电荷</span>（又称束缚电荷）。</p>
+      <canvas id="polarSurfaceCanvas" class="demo-canvas" width="640" height="210"></canvas>
+      <div class="demo-label">外场 $\vec{E}_0$ 向右：介质内部正负极化电荷相消，左表面出现负极化电荷，右表面出现正极化电荷</div>
+    </div>
+
+    <!-- 2. 极化电荷只在表面 -->
+    <div class="card">
+      <div class="card-title">极化电荷分布：表面有，内部无</div>
+      <p>对<span class="hl">均匀电介质</span>，可以用一个简单图像理解极化电荷只在表面的原因：</p>
+      <ul class="prop-list" style="margin-top:14px;">
+        <li class="prop-item">
+          <div class="prop-num">内部</div>
+          <div class="prop-body">
+            <strong>内部相消：</strong>均匀极化时，相邻分子的正负端紧密相靠，正负极化电荷精确抵消，内部任意体积元净电荷为零（体积极化电荷密度 $\rho_P = 0$）。<br>
+            严格表述：$\rho_P = -\nabla\cdot\vec{P}$；均匀极化时 $\nabla\cdot\vec{P}=0$，故 $\rho_P=0$。
+          </div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">表面</div>
+          <div class="prop-body">
+            <strong>表面不消：</strong>在介质表面，一侧是介质（有极化），另一侧是真空（无极化），分子链在表面处"断开"，正或负端没有对应的相消电荷，因此出现净极化面电荷，面密度为：
+            $$\sigma_P = \vec{P}\cdot\hat{n}$$
+            其中 $\hat{n}$ 为介质表面的<span class="hl">外法线</span>方向。$\vec{P}$ 与 $\hat{n}$ 同向（正面）则出现正极化电荷，反向（负面）则出现负极化电荷。
+          </div>
+        </li>
+      </ul>
+      <div class="note-box">
+        <span class="note-label">对非均匀介质</span>
+        若极化强度 $\vec{P}$ 在介质内部不均匀（如不均匀介质，或不均匀外场），则内部也可出现体积极化电荷：$\rho_P = -\nabla\cdot\vec{P}$。但均匀介质在均匀外场中，内部极化电荷为零。
+      </div>
+    </div>
+
+    <!-- 3. 极化电荷产生的电场不能完全抵消外场 -->
+    <div class="card">
+      <div class="card-title">极化电场：不能完全抵消外场</div>
+      <p>极化电荷在介质内部产生<span class="hl">退极化场</span> $\vec{E}'$（方向与 $\vec{E}_0$ 相反），使介质内的合场强 $\vec{E}$ 减小。但与导体不同，<span class="hl">极化电场不能完全抵消外场</span>，原因如下：</p>
+      <ul class="prop-list" style="margin-top:14px;">
+        <li class="prop-item">
+          <div class="prop-num">①</div>
+          <div class="prop-body">
+            <strong>自洽平衡：</strong>导体中自由电荷可以无限积累直到内部场为零；电介质中束缚电荷的位移量受分子结合力限制，极化程度与合场强 $\vec{E}$ 成正比，系统达到自洽平衡时内部场仍不为零。
+          </div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">②</div>
+          <div class="prop-body">
+            <strong>定量描述：</strong>均匀线性介质中，内部合场强为
+            $$\vec{E} = \frac{\vec{E}_0}{\varepsilon_r}$$
+            其中 $\varepsilon_r = 1 + \chi_e \geq 1$ 为相对介电常数。由于 $\varepsilon_r > 1$，内部场 $|\vec{E}| < |\vec{E}_0|$，但不为零。只有当 $\varepsilon_r \to \infty$（理想导体极限）时内部场才趋于零。
+          </div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">③</div>
+          <div class="prop-body">
+            <strong>极化电荷与自由电荷的根本区别：</strong>极化电荷是束缚的，大小受外场制约，无法独立移动以"填满"所有外场；自由电荷可以持续定向运动直到内部场完全为零。
+          </div>
+        </li>
+      </ul>
+      <canvas id="fieldWeakenCanvas" class="demo-canvas" width="640" height="200"></canvas>
+      <div class="demo-label">介质内合场 $\vec{E} = \vec{E}_0 + \vec{E}' = \vec{E}_0/\varepsilon_r$，$\vec{E}'$ 为极化电荷产生的退极化场</div>
+    </div>
+
+    <!-- 4. 击穿 -->
+    <div class="card">
+      <div class="card-title">电介质击穿（Dielectric Breakdown）</div>
+      <p>正常极化下，束缚电荷的位移极小，介质保持绝缘性。但当外加电场增大到超过某一<span class="hl">击穿场强</span> $E_b$（breakdown field strength）时，分子中的正负电荷所受库仑力超过分子结合力，被强行分离成<span class="hl">自由电荷</span>，介质从绝缘体转变为导体，发生<span class="hl-red">击穿</span>。</p>
+      <ul class="prop-list" style="margin-top:14px;">
+        <li class="prop-item">
+          <div class="prop-num">机制</div>
+          <div class="prop-body">
+            <strong>雪崩击穿：</strong>强场使少量束缚电荷游离成自由电子，自由电子被场加速后再碰撞中性分子使其电离，产生更多自由电子，形成雪崩式倍增，最终电流急剧增大，形成放电通道。
+          </div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">参数</div>
+          <div class="prop-body">
+            <strong>击穿场强 $E_b$（介电强度）：</strong>不同材料的 $E_b$ 相差悬殊。<br>
+            空气：$E_b \approx 3\times10^6\ \mathrm{V/m}$；云母：$\sim 10^8\ \mathrm{V/m}$；变压器油：$\sim 1.5\times10^7\ \mathrm{V/m}$。<br>
+            工程上用电容器的<span class="hl">额定电压</span>来保证不超过 $E_b$。
+          </div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">现象</div>
+          <div class="prop-body">
+            <strong>宏观表现：</strong>击穿时伴随强烈发光（放电弧）、发热和声响（如闪电）。固体介质击穿后留下永久导电通道（烧蚀痕迹），不可自愈；气体击穿后撤去电场可自愈（如空气放电）。
+          </div>
+        </li>
+      </ul>
+      <canvas id="breakdownCanvas" class="demo-canvas" width="560" height="200"></canvas>
+      <div class="demo-label">击穿示意：强电场使束缚电荷游离，形成雪崩，介质变为导体</div>
+      <div class="green-box" style="margin-top:16px;">
+        <span class="note-label">极化 vs 击穿的对比</span>
+        <strong>极化：</strong>弱场，束缚电荷微小位移，介质仍为绝缘体，$\vec{E}_{\text{内}} = \vec{E}_0/\varepsilon_r \neq \vec{0}$。<br>
+        <strong>击穿：</strong>强场（$E > E_b$），束缚电荷完全脱离束缚变为自由电荷，介质导电，不再是绝缘体。<br>
+        击穿是极化的极端情形，两者之间没有突变——随外场增大，极化程度增大，直到结合力失效而击穿。
+      </div>
+    </div>
+
+    <!-- 5. 小结 -->
+    <div class="card">
+      <div class="card-title">极化现象小结</div>
+      <ul class="prop-list">
+        <li class="prop-item">
+          <div class="prop-num">①</div>
+          <div class="prop-body">外电场 → 束缚电荷重排（位移/取向极化） → <span class="hl">表面出现极化电荷</span>，内部（均匀介质）无净极化电荷。</div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">②</div>
+          <div class="prop-body">极化电荷产生退极化场 $\vec{E}'$，使介质内合场 $\vec{E} = \vec{E}_0/\varepsilon_r$ 减弱，但<span class="hl">不能完全抵消</span>外场（$\varepsilon_r$ 有限）。</div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">③</div>
+          <div class="prop-body">外场超过击穿场强 $E_b$ → 束缚电荷变自由电荷 → <span class="hl-red">击穿</span>，介质变导体，绝缘性破坏。</div>
+        </li>
+      </ul>
+      <div class="note-box" style="margin-top:16px;">
+        <span class="note-label">与导体静电平衡的对比</span>
+        导体中自由电荷无限积累 → 内部 $\vec{E}=0$（完全屏蔽）；电介质中束缚电荷有限位移 → 内部 $\vec{E}$ 减小但 $\neq 0$（部分屏蔽）。击穿则是介质"退化"为导体的过程。
+      </div>
+    </div>
+
+  </div><!-- /panel-1 -->
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- Tab 2: 2-2-3 电极化强度矢量               -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="panel-2">
+
+    <!-- 1. 定义 -->
+    <div class="card">
+      <div class="card-title">电极化强度矢量的定义</div>
+      <p>为定量描述介质极化的程度，引入<span class="hl">电极化强度矢量</span> $\vec{P}$，定义为单位体积内分子电偶极矩的矢量和：</p>
+      $$\vec{P} = \frac{\displaystyle\sum_i \vec{p}_{ei}}{\mathrm{d}V}$$
+      <p>$\vec{P}$ 的 SI 单位为 $\mathrm{C/m^2}$，与面电荷密度量纲相同。$\vec{P}=\vec{0}$ 表示介质未极化或各分子电矩宏观抵消；$|\vec{P}|$ 越大，极化程度越强。</p>
+      <div class="note-box">
+        <span class="note-label">宏观平均的含义</span>
+        $\mathrm{d}V$ 是宏观小、微观大的体积元（含足够多分子以做统计平均，又小到可视为场点处的"微元"）。对<span class="hl">均匀极化</span>介质，$\vec{P}$ 处处相同；对<span class="hl">非均匀极化</span>，$\vec{P}$ 是位置的函数。
+      </div>
+    </div>
+
+    <!-- 2. 实验规律 P = χ_e ε_0 E -->
+    <div class="card">
+      <div class="card-title">实验规律：$\vec{P} = \chi_e \varepsilon_0 \vec{E}$</div>
+      <p>对各向同性线性电介质，实验表明电极化强度与该点处的<span class="hl">合场强</span> $\vec{E}$ 成正比：</p>
+      $$\vec{P} = \chi_e \varepsilon_0 \vec{E}$$
+      <ul class="prop-list" style="margin-top:14px;">
+        <li class="prop-item">
+          <div class="prop-num">$\chi_e$</div>
+          <div class="prop-body">
+            <strong>电极化率</strong>（electric susceptibility）：无量纲正数，$\chi_e \geq 0$。<br>
+            仅取决于<span class="hl">电介质的种类</span>，与外场强弱无关（线性介质假设）。<br>
+            典型值：真空 $\chi_e=0$；空气 $\approx 5.4\times10^{-4}$；水 $\approx 79$；云母 $\approx 5$。
+          </div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">$\vec{E}$</div>
+          <div class="prop-body">
+            <strong>该点处的合场强</strong>，包含所有电荷（自由电荷与极化电荷）的贡献：
+            $$\vec{E} = \vec{E}_0 + \vec{E}'$$
+            其中 $\vec{E}_0$ 为自由电荷产生的外场，$\vec{E}'$ 为极化电荷产生的退极化场。$\vec{P}$ 由 $\vec{E}$ 决定，而 $\vec{E}'$ 又由 $\vec{P}$ 决定，两者自洽联立求解。
+          </div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">$\varepsilon_r$</div>
+          <div class="prop-body">
+            <strong>相对介电常数</strong>（relative permittivity）：
+            $$\varepsilon_r = 1 + \chi_e$$
+            $\varepsilon_r \geq 1$（真空 $\varepsilon_r = 1$）。介质中 $\vec{D} = \varepsilon_0\varepsilon_r \vec{E}$，电容增大为真空时的 $\varepsilon_r$ 倍。
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 3. 极化电荷面密度 -->
+    <div class="card">
+      <div class="card-title">极化电荷面密度 $\sigma' = P\cos\theta$</div>
+      <p>均匀电介质的表面产生极化（束缚）面电荷，其面密度等于该处电极化强度沿表面<span class="hl">外法线</span>方向的投影：</p>
+      $$\sigma' = \vec{P}\cdot\hat{n} = P\cos\theta$$
+      <p>其中 $\hat{n}$ 为介质表面的外法线单位矢量，$\theta$ 为 $\vec{P}$ 与 $\hat{n}$ 的夹角。</p>
+      <ul class="prop-list" style="margin-top:14px;">
+        <li class="prop-item">
+          <div class="prop-num">推导</div>
+          <div class="prop-body">
+            在面积元 $\mathrm{d}S$ 处取斜截面（$\hat{n}$ 为外法线）：极化使每个分子产生偶极矩 $\vec{p}_e$，对于面积元两侧的分子柱，只有靠近表面的半个"分子层"的正（或负）端未被内部对应端抵消，从而贡献净电荷。几何计算给出：$\mathrm{d}q' = P\cos\theta\,\mathrm{d}S$，即 $\sigma' = P\cos\theta$。
+          </div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">符号</div>
+          <div class="prop-body">
+            $\sigma' > 0$：$\vec{P}$ 分量指出介质表面，该面出现<span class="hl-green">正极化电荷</span>（$\vec{E}_0$ 指向该面时）。<br>
+            $\sigma' < 0$：$\vec{P}$ 分量指入介质，该面出现<span class="hl-red">负极化电荷</span>（$\vec{E}_0$ 背离该面时）。
+          </div>
+        </li>
+      </ul>
+      <canvas id="sigmaCanvas" class="demo-canvas" width="560" height="180"></canvas>
+      <div class="demo-label">介质块两侧：左面 $\hat{n}$ 与 $\vec{P}$ 反向，$\sigma'<0$（负极化电荷）；右面 $\hat{n}$ 与 $\vec{P}$ 同向，$\sigma'>0$（正极化电荷）</div>
+    </div>
+
+    <!-- 4. 例题：平行板电容器插入介质 -->
+    <div class="eg-block">
+      <div class="eg-title">例 &nbsp;平行板电容器内插入均匀电介质</div>
+      <p>平行板电容器两板间距为 $D$，板上自由电荷面密度为 $\sigma_0$（正板在左，负板在右）。两板间充满电极化率为 $\chi_e$ 的均匀电介质。求：</p>
+      <p>（1）介质表面极化电荷面密度 $\sigma'$；&nbsp;&nbsp;（2）介质中的合场强 $\vec{E}$。</p>
+      <canvas id="capCanvas" class="demo-canvas" width="560" height="220"></canvas>
+      <div class="demo-label">平行板电容器充入介质：自由电荷产生 $\vec{E}_1$，极化电荷产生退极化场 $\vec{E}_2$</div>
+      <div class="sol-steps">
+        <div class="sol-step">
+          <strong>建立各场强分量：</strong>取 $\vec{i}$ 方向从正板指向负板（即 $\vec{E}_0$ 方向）。<br>
+          自由电荷（面密度 $\sigma_0$）产生的场：
+          $$\vec{E}_1 = \frac{\sigma_0}{\varepsilon_0}\vec{i}$$
+          极化电荷（面密度 $\sigma'$，正极化电荷在右面，负在左面）产生的退极化场：
+          $$\vec{E}_2 = -\frac{\sigma'}{\varepsilon_0}\vec{i}$$
+          （极化电荷产生的场与 $\vec{E}_0$ 反向。）<br>
+          合场强：
+          $$\vec{E} = \vec{E}_1 + \vec{E}_2 = \frac{\sigma_0 - \sigma'}{\varepsilon_0}\vec{i}$$
+        </div>
+        <div class="sol-step">
+          <strong>利用极化关系：</strong>
+          $$\vec{P} = \chi_e \varepsilon_0 \vec{E} = \chi_e(\sigma_0 - \sigma')\vec{i}$$
+        </div>
+        <div class="sol-step">
+          <strong>利用面密度关系：</strong>
+          介质右表面（外法线 $\hat{n} = \vec{i}$），故：
+          $$\sigma' = \vec{P}\cdot\hat{n} = |\vec{P}| = \chi_e(\sigma_0 - \sigma')$$
+        </div>
+        <div class="sol-step">
+          <strong>联立求解 $\sigma'$：</strong>
+          $$\sigma' = \chi_e\sigma_0 - \chi_e\sigma'$$
+          $$\sigma'(1 + \chi_e) = \chi_e\sigma_0$$
+          $$\boxed{\sigma' = \frac{\chi_e\,\sigma_0}{1 + \chi_e}}$$
+        </div>
+        <div class="sol-step">
+          <strong>代回求合场强 $\vec{E}$：</strong>
+          $$\vec{E} = \frac{\sigma_0 - \sigma'}{\varepsilon_0}\vec{i} = \frac{\sigma_0 - \dfrac{\chi_e\sigma_0}{1+\chi_e}}{\varepsilon_0}\vec{i} = \frac{\sigma_0}{\varepsilon_0}\cdot\frac{1}{1+\chi_e}\vec{i}$$
+          $$\boxed{\vec{E} = \frac{1}{1+\chi_e}\cdot\frac{\sigma_0}{\varepsilon_0}\vec{i} = \frac{1}{\varepsilon_r}\cdot\frac{\sigma_0}{\varepsilon_0}\vec{i}}$$
+        </div>
+        <div class="ans-box">
+          <span class="ans-label">答：</span>
+          极化电荷面密度 $\sigma' = \dfrac{\chi_e\,\sigma_0}{1+\chi_e}$；<br>
+          介质中合场强 $\vec{E} = \dfrac{\sigma_0}{\varepsilon_0(1+\chi_e)}\vec{i} = \dfrac{\sigma_0}{\varepsilon_0\varepsilon_r}\vec{i}$，为真空时的 $\dfrac{1}{\varepsilon_r}$。
+        </div>
+      </div>
+      <div class="blue-box" style="margin-top:14px;">
+        <span class="note-label">物理图像</span>
+        极化电荷 $\sigma' = \dfrac{\chi_e}{1+\chi_e}\sigma_0 < \sigma_0$，始终小于自由电荷，验证了<strong>极化电荷不能完全抵消外场</strong>。当 $\chi_e \to \infty$（$\varepsilon_r\to\infty$，理想导体极限）时，$\sigma'\to\sigma_0$，$\vec{E}\to 0$，退化为导体内部场为零的结论。
+      </div>
+    </div>
+
+  </div><!-- /panel-2 -->
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- Tab 3: 2-2-4 有电介质时静电场的高斯定理   -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="panel-3">
+
+    <!-- 1. 真空中的高斯定理 -->
+    <div class="card">
+      <div class="card-title">出发点：真空中的高斯定理</div>
+      <p>真空中，对任意闭合曲面 $S$，场强 $\vec{E}$ 的通量等于面内总电荷量除以 $\varepsilon_0$：</p>
+      $$\oint_S \vec{E}\cdot\mathrm{d}\vec{S} = \frac{1}{\varepsilon_0}\sum_i q_i$$
+      <p>有介质时，$S$ 面内的电荷包括<span class="hl">自由电荷</span> $\sum q_{fi}$ 和<span class="hl">极化（束缚）电荷</span> $\sum q'_i$，直接使用上式需要知道极化电荷的分布，十分麻烦。为此引入辅助量 $\vec{D}$，将极化电荷"吸收"进去。</p>
+    </div>
+
+    <!-- 2. 电位移矢量 D -->
+    <div class="card">
+      <div class="card-title">电位移矢量 $\vec{D}$</div>
+      <p>定义<span class="hl">电位移矢量</span>（electric displacement）：</p>
+      $$\vec{D} = \varepsilon_0\vec{E} + \vec{P}$$
+      <p>对各向同性线性介质，$\vec{P} = \chi_e\varepsilon_0\vec{E}$，代入得：</p>
+      $$\vec{D} = \varepsilon_0(1+\chi_e)\vec{E} = \varepsilon_0\varepsilon_r\vec{E}$$
+      <ul class="prop-list" style="margin-top:14px;">
+        <li class="prop-item">
+          <div class="prop-num">单位</div>
+          <div class="prop-body">$\vec{D}$ 的 SI 单位为 $\mathrm{C/m^2}$，与面电荷密度量纲相同（有时也写作 $\mathrm{N/V \cdot m}$ 等价形式）。</div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">关系</div>
+          <div class="prop-body">
+            三个矢量的关系：$\vec{D} = \varepsilon_r\vec{E} \cdot \varepsilon_0 = \varepsilon_0\vec{E} + \vec{P}$，即
+            $$\vec{D} = \varepsilon_r \vec{E}\,\varepsilon_0, \quad \vec{P} = \vec{D} - \varepsilon_0\vec{E} = (\varepsilon_r - 1)\varepsilon_0\vec{E} = \chi_e\varepsilon_0\vec{E}$$
+          </div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">注意</div>
+          <div class="prop-body">$\vec{D}$ 是辅助量，无独立物理意义；$\vec{E}$ 才是真实场强，决定受力 $\vec{F}=q\vec{E}$。$\vec{D}$ 的引入仅为方便处理介质问题。</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 3. 介质中的高斯定理 -->
+    <div class="card">
+      <div class="card-title">介质中的高斯定理（$\vec{D}$ 的高斯定理）</div>
+      <p>对任意闭合曲面 $S$，$\vec{D}$ 的通量仅与面内<span class="hl">自由电荷</span>有关：</p>
+      $$\oint_S \vec{D}\cdot\mathrm{d}\vec{S} = \sum_i q_{fi}$$
+      <p>极化电荷对右端没有贡献，已被 $\vec{D}$ 的定义所"吸收"。</p>
+      <div class="note-box">
+        <span class="note-label">推导概要</span>
+        有介质时真空高斯定理：$\oint\varepsilon_0\vec{E}\cdot\mathrm{d}\vec{S} = \sum q_f + \sum q'$。
+        可以证明：$\sum q'=-\oint\vec{P}\cdot\mathrm{d}\vec{S}$（极化电荷散度定理）。代入得：
+        $\oint(\varepsilon_0\vec{E}+\vec{P})\cdot\mathrm{d}\vec{S} = \sum q_f$，即 $\oint\vec{D}\cdot\mathrm{d}\vec{S}=\sum q_f$。
+      </div>
+      <div class="green-box" style="margin-top:14px;">
+        <span class="note-label">使用步骤（对称问题）</span>
+        ① 根据自由电荷分布，利用 $\oint\vec{D}\cdot\mathrm{d}\vec{S}=\sum q_f$ 求 $\vec{D}$；<br>
+        ② 由 $\vec{E}=\vec{D}/(\varepsilon_0\varepsilon_r)$ 得各区域场强；<br>
+        ③ 由 $\vec{P}=\chi_e\varepsilon_0\vec{E}=(\varepsilon_r-1)\varepsilon_0\vec{E}$ 得极化强度；<br>
+        ④ 由 $\sigma'=\vec{P}\cdot\hat{n}$ 得极化面电荷。
+      </div>
+    </div>
+
+    <!-- 例1 -->
+    <div class="eg-block">
+      <div class="eg-title">例 1 &nbsp;平行板电容器内插入 $\varepsilon_r$ 的电介质——用 $\vec{D}$ 法再求极化电荷</div>
+      <p>自由电荷面密度为 $\sigma_0$（正板在左）的平行板电容器，两板间充满相对介电常数为 $\varepsilon_r$ 的均匀电介质。用 $\vec{D}$ 的高斯定理求极化电荷面密度 $\sigma'$。</p>
+      <div class="sol-steps">
+        <div class="sol-step">
+          <strong>① 求 $\vec{D}$：</strong>
+          对平行板结构，取包住正极板（含表面）的高斯面（扁盒，下底在介质内）。
+          $$D = \sigma_0 \implies \vec{D} = \sigma_0\,\vec{i}$$
+          （$\vec{D}$ 与自由电荷一一对应，与介质无关。）
+        </div>
+        <div class="sol-step">
+          <strong>② 求 $\vec{E}$：</strong>
+          $$\vec{E} = \frac{\vec{D}}{\varepsilon_0\varepsilon_r} = \frac{\sigma_0}{\varepsilon_0\varepsilon_r}\vec{i}$$
+        </div>
+        <div class="sol-step">
+          <strong>③ 求 $\vec{P}$：</strong>
+          $$\vec{P} = (\varepsilon_r-1)\varepsilon_0\vec{E} = \frac{(\varepsilon_r-1)\sigma_0}{\varepsilon_r}\vec{i}$$
+        </div>
+        <div class="sol-step">
+          <strong>④ 求 $\sigma'$：</strong>介质右表面外法线 $\hat{n}=\vec{i}$：
+          $$\sigma' = \vec{P}\cdot\hat{n} = \frac{(\varepsilon_r-1)\sigma_0}{\varepsilon_r} = \left(1-\frac{1}{\varepsilon_r}\right)\sigma_0$$
+          与 2-2-3 节结果一致（$\chi_e/(1+\chi_e) = (\varepsilon_r-1)/\varepsilon_r$）。
+        </div>
+        <div class="ans-box">
+          <span class="ans-label">答：</span>
+          $\sigma' = \dfrac{(\varepsilon_r-1)\sigma_0}{\varepsilon_r}$；$\vec{E} = \dfrac{\sigma_0}{\varepsilon_0\varepsilon_r}\vec{i}$。
+        </div>
+      </div>
+    </div>
+
+    <!-- 例2 -->
+    <div class="eg-block">
+      <div class="eg-title">例 2 &nbsp;两极板并联，左半充介质——求各区 $D$、$E$、$\sigma'$ 及电势差</div>
+      <p>两无限大金属平行板，自由电荷面密度为 $\pm\sigma_0$，并联（两板电势差固定为 $V_0 = 300\ \mathrm{V}$），板间距为 $d$。左半空间（区域1）充满 $\varepsilon_r = 5$ 的电介质，右半空间（区域2）为真空。求各区的 $D_1,D_2,E_1,E_2$，极化电荷面密度 $\sigma_1',\sigma_2'$，以及两极板的真实自由电荷面密度（重新分布后）$\sigma_{01},\sigma_{02}$。</p>
+      <canvas id="parallelCanvas" class="demo-canvas" width="600" height="200"></canvas>
+      <div class="demo-label">左半区域1（介质 $\varepsilon_r=5$）与右半区域2（真空），两极板并联（电势差固定）</div>
+      <div class="sol-steps">
+        <div class="sol-step">
+          <strong>关键约束——两极板并联：</strong>两极板通过导线相连，电势差固定为 $V_0$，但两区域的面电荷密度 $\sigma_{01}\neq\sigma_{02}$（因为极板是导体，各区域独立平衡）。<br>
+          对每个区域分别应用高斯定理，且两区域电场强度分别由各自的 $D$ 决定：
+          $$E_1 = \frac{V_0}{d}, \quad E_2 = \frac{V_0}{d}$$
+          <strong>关键：两区 $E$ 相同！</strong>因为两极板是良导体（等势面），板间距相同，所以不论介质如何，两区场强 $E$ 均由电势差决定，$E_1 = E_2 = V_0/d$。
+        </div>
+        <div class="sol-step">
+          <strong>求各区 $D$：</strong>
+          $$D_1 = \varepsilon_0\varepsilon_r E_1 = 5\varepsilon_0\cdot\frac{V_0}{d}$$
+          $$D_2 = \varepsilon_0 E_2 = \varepsilon_0\cdot\frac{V_0}{d}$$
+          代入 $V_0=300\ \mathrm{V}$，$d$ 保留符号（题目未给 $d$，以比值表达；若取 $d=1\ \mathrm{mm}$ 可得数值）。
+        </div>
+        <div class="sol-step">
+          <strong>求各区自由电荷面密度（由 $D=\sigma_0$ 关系）：</strong>
+          $$\sigma_{01} = D_1 = 5\varepsilon_0\frac{V_0}{d}$$
+          $$\sigma_{02} = D_2 = \varepsilon_0\frac{V_0}{d}$$
+          两区自由电荷密度之比 $\sigma_{01}:\sigma_{02} = 5:1$，介质侧积累更多自由电荷。
+        </div>
+        <div class="sol-step">
+          <strong>求极化电荷面密度：</strong>
+          区域1（介质侧），$\vec{P}_1 = (\varepsilon_r-1)\varepsilon_0\vec{E}_1 = 4\varepsilon_0\dfrac{V_0}{d}\vec{i}$，
+          介质右表面（靠近负板）：$\sigma_1' = P_1 = 4\varepsilon_0 V_0/d$（正极化电荷）；
+          介质左表面（靠近正板）：$\sigma_1' = -4\varepsilon_0 V_0/d$（负极化电荷）。<br>
+          区域2为真空，$\sigma_2' = 0$。
+        </div>
+        <div class="sol-step">
+          <strong>数值结果（以 $V_0=300\ \mathrm{V}$ 表达）：</strong>
+          $$E_1 = E_2 = \frac{300}{d}\ \mathrm{V/m}$$
+          $$D_1 = \frac{5\times 8.85\times10^{-12}\times300}{d}\ \mathrm{C/m^2}, \quad D_2 = \frac{D_1}{5}$$
+          $$\sigma_{01}:\sigma_{02} = 5:1; \quad \sigma_1' = 4\varepsilon_0\frac{V_0}{d}, \quad \sigma_2' = 0$$
+        </div>
+        <div class="ans-box">
+          <span class="ans-label">答：</span>
+          $E_1 = E_2 = V_0/d$（并联→两区场强相等）；<br>
+          $D_1 = 5\varepsilon_0 V_0/d$，$D_2 = \varepsilon_0 V_0/d$；<br>
+          $\sigma_{01} = 5\varepsilon_0 V_0/d$，$\sigma_{02} = \varepsilon_0 V_0/d$；<br>
+          $\sigma_1' = 4\varepsilon_0 V_0/d$（介质表面），$\sigma_2' = 0$（真空无极化电荷）。
+        </div>
+      </div>
+      <div class="blue-box" style="margin-top:12px;">
+        <span class="note-label">并联 vs 串联</span>
+        <strong>并联（同一对极板，各区域电势差相同）：</strong>$E_1=E_2$，$D_1/D_2=\varepsilon_{r1}/\varepsilon_{r2}$，$\sigma_0$ 各区不同。<br>
+        <strong>串联（不同介质层叠，面积相同）：</strong>$D_1=D_2$（见例3），$E$ 各区不同。
+      </div>
+    </div>
+
+    <!-- 例3 -->
+    <div class="eg-block">
+      <div class="eg-title">例 3 &nbsp;两层介质的平行板电容器——串联情形</div>
+      <p>平行板电容器，极板面积 $S = 200\ \mathrm{cm}^2 = 2\times10^{-2}\ \mathrm{m}^2$，极板间充两层均匀电介质：</p>
+      <p>层1：$\varepsilon_{r1}=5$，厚度 $d_1=2\ \mathrm{mm}$；&nbsp;&nbsp;层2：$\varepsilon_{r2}=2$，厚度 $d_2=3\ \mathrm{mm}$。</p>
+      <p>两极板间电势差 $V_A - V_B = 3800\ \mathrm{V}$（$A$ 板为正极）。</p>
+      <p>求：极板上的自由电荷面密度 $\sigma_0$；各介质层内的 $\vec{E}$、$\vec{D}$、$\vec{P}$；各介质层表面的极化电荷面密度。</p>
+      <canvas id="twoLayerCanvas" class="demo-canvas" width="580" height="220"></canvas>
+      <div class="demo-label">两层介质串联：$D$ 连续，$E$ 各区不同，$V_A - V_B = E_1 d_1 + E_2 d_2$</div>
+      <div class="sol-steps">
+        <div class="sol-step">
+          <strong>串联约束——$D$ 连续：</strong>
+          两板面积相同，法向分量连续（无界面自由电荷），故：
+          $$D_1 = D_2 \equiv D$$
+          由高斯定理，$D = \sigma_0$（与介质无关）。
+        </div>
+        <div class="sol-step">
+          <strong>各层场强：</strong>
+          $$E_1 = \frac{D}{\varepsilon_0\varepsilon_{r1}} = \frac{\sigma_0}{5\varepsilon_0}, \quad E_2 = \frac{D}{\varepsilon_0\varepsilon_{r2}} = \frac{\sigma_0}{2\varepsilon_0}$$
+        </div>
+        <div class="sol-step">
+          <strong>利用电势差求 $\sigma_0$：</strong>
+          $$V_A - V_B = E_1 d_1 + E_2 d_2 = \frac{\sigma_0}{5\varepsilon_0}\times2\times10^{-3} + \frac{\sigma_0}{2\varepsilon_0}\times3\times10^{-3}$$
+          $$= \frac{\sigma_0}{\varepsilon_0}\left(\frac{2\times10^{-3}}{5} + \frac{3\times10^{-3}}{2}\right) = \frac{\sigma_0}{\varepsilon_0}\left(4\times10^{-4} + 1.5\times10^{-3}\right) = \frac{\sigma_0}{\varepsilon_0}\times1.9\times10^{-3}$$
+          $$\sigma_0 = \frac{3800\times8.85\times10^{-12}}{1.9\times10^{-3}} = \frac{3.363\times10^{-8}}{1.9\times10^{-3}} \approx 1.77\times10^{-5}\ \mathrm{C/m^2}$$
+        </div>
+        <div class="sol-step">
+          <strong>各层 $E$、$D$、$P$：</strong>
+          $$D = \sigma_0 \approx 1.77\times10^{-5}\ \mathrm{C/m^2}$$
+          $$E_1 = \frac{D}{5\varepsilon_0} = \frac{1.77\times10^{-5}}{5\times8.85\times10^{-12}} \approx 4.0\times10^5\ \mathrm{V/m}$$
+          $$E_2 = \frac{D}{2\varepsilon_0} = \frac{1.77\times10^{-5}}{2\times8.85\times10^{-12}} \approx 1.0\times10^6\ \mathrm{V/m}$$
+          $$P_1 = (\varepsilon_{r1}-1)\varepsilon_0 E_1 = 4\times8.85\times10^{-12}\times4.0\times10^5 \approx 1.42\times10^{-5}\ \mathrm{C/m^2}$$
+          $$P_2 = (\varepsilon_{r2}-1)\varepsilon_0 E_2 = 1\times8.85\times10^{-12}\times1.0\times10^6 \approx 8.85\times10^{-6}\ \mathrm{C/m^2}$$
+        </div>
+        <div class="sol-step">
+          <strong>各表面极化电荷面密度（取 $\vec{i}$ 从 $A$ 指向 $B$）：</strong><br>
+          $A$ 板处（介质1左表面，外法线 $\hat{n}=-\vec{i}$）：$\sigma_{A}' = -P_1 \approx -1.42\times10^{-5}\ \mathrm{C/m^2}$<br>
+          介质1/2 界面（介质1右表面外法线 $+\vec{i}$）：$\sigma_{12,\text{右}}' = P_1 \approx +1.42\times10^{-5}\ \mathrm{C/m^2}$<br>
+          介质2左表面（外法线 $-\vec{i}$）：$\sigma_{12,\text{左}}' = -P_2 \approx -8.85\times10^{-6}\ \mathrm{C/m^2}$<br>
+          $B$ 板处（介质2右表面，外法线 $+\vec{i}$）：$\sigma_{B}' = P_2 \approx +8.85\times10^{-6}\ \mathrm{C/m^2}$<br>
+          界面处净极化电荷：$\sigma_{\text{界}}' = P_1 - P_2 \approx 5.35\times10^{-6}\ \mathrm{C/m^2}$（正）。
+        </div>
+        <div class="ans-box">
+          <span class="ans-label">答：</span>
+          $\sigma_0 \approx 1.77\times10^{-5}\ \mathrm{C/m^2}$；$D \approx 1.77\times10^{-5}\ \mathrm{C/m^2}$；<br>
+          $E_1 \approx 4.0\times10^5\ \mathrm{V/m}$，$E_2 \approx 1.0\times10^6\ \mathrm{V/m}$；<br>
+          $P_1 \approx 1.42\times10^{-5}\ \mathrm{C/m^2}$，$P_2 \approx 8.85\times10^{-6}\ \mathrm{C/m^2}$。
+        </div>
+      </div>
+    </div>
+
+    <!-- 例3变体：嵌入金属板 -->
+    <div class="eg-block">
+      <div class="eg-title">例 3 变体 &nbsp;界面处嵌入金属板</div>
+      <p>在例 3 的两层介质界面处嵌入一块<span class="hl">薄金属板</span>（厚度不计）。其余条件不变（$V_A - V_B = 3800\ \mathrm{V}$，$d_1=2\ \mathrm{mm}$，$d_2=3\ \mathrm{mm}$，$\varepsilon_{r1}=5$，$\varepsilon_{r2}=2$）。求金属板内部的场强、电位移、极化强度。</p>
+      <div class="sol-steps">
+        <div class="sol-step">
+          <strong>金属板内部的场强：</strong>
+          金属板是导体，静电平衡时内部场强为零：
+          $$\boxed{\vec{E}_{\text{金属}} = \vec{0}}$$
+        </div>
+        <div class="sol-step">
+          <strong>金属板内部的电位移：</strong>
+          $$\vec{D}_{\text{金属}} = \varepsilon_0\vec{E}_{\text{金属}} + \vec{P}_{\text{金属}} = \varepsilon_0\cdot\vec{0} + \vec{0} = \vec{0}$$
+          （金属无极化，$\vec{P}=\vec{0}$；场强也为零，故 $\vec{D}=\vec{0}$。）
+        </div>
+        <div class="sol-step">
+          <strong>金属板内部的极化强度：</strong>
+          金属不是电介质，无极化现象（自由电荷在表面感应，但内部无固有偶极矩排列）：
+          $$\boxed{\vec{P}_{\text{金属}} = \vec{0}}$$
+        </div>
+        <div class="sol-step">
+          <strong>效果：</strong>嵌入金属板后，两层介质仍串联，金属板使两侧介质独立承受电势差。金属板两面感应 $\pm\sigma_0$（与极板相同），各层介质内 $E$、$D$、$P$ 与例 3 完全相同（因为 $d_1,d_2$ 不变，总电势差不变，金属板零厚度）。
+        </div>
+        <div class="ans-box">
+          <span class="ans-label">答：</span>
+          金属板内部：$\vec{E}=\vec{0}$，$\vec{D}=\vec{0}$，$\vec{P}=\vec{0}$。<br>
+          金属板两侧介质中的各量与例 3 相同（$E_1,E_2,D,P_1,P_2$ 均不变）。
+        </div>
+      </div>
+      <div class="note-box" style="margin-top:12px;">
+        <span class="note-label">嵌入金属板的实质</span>
+        金属板内 $\vec{E}=0$，$\vec{D}=0$，$\vec{P}=0$。它的作用是在界面处"插入"一个等势面，相当于把两层介质的电容器分成两个串联的子电容器，但各子电容器的 $d_1,d_2,\varepsilon_{r1},\varepsilon_{r2}$ 均未变，故最终结果不受影响。这也是<span class="hl">等效电路</span>方法的物理基础。
+      </div>
+    </div>
+
+  </div><!-- /panel-3 -->
+
+</div><!-- /page -->
+
+<script>
+// ── 粒子背景 ────────────────────────────────────────
+(function () {
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  let W, H, pts = [];
+  function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+  window.addEventListener('resize', resize); resize();
+  const COLORS = ['#818cf8','#38bdf8','#c084fc','#34d399'];
+  function spawn() { return { x: Math.random()*W, y: H+10, r: Math.random()*2.5+0.5, speed: Math.random()*0.5+0.15, color: COLORS[Math.random()*COLORS.length|0], op: Math.random()*0.15+0.04 }; }
+  for (let i=0;i<50;i++){const p=spawn();p.y=Math.random()*H;pts.push(p);}
+  function draw(){ctx.clearRect(0,0,W,H);pts.forEach((p,i)=>{p.y-=p.speed;if(p.y<-10)pts[i]=spawn();ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.color;ctx.globalAlpha=p.op;ctx.fill();});ctx.globalAlpha=1;requestAnimationFrame(draw);}
+  draw();
+})();
+
+// ── Tab 切换 ────────────────────────────────────────
+function switchTab(i) {
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i===j));
+  document.querySelectorAll('.tab-panel').forEach((p,j)=>p.classList.toggle('active',i===j));
+}
+
+// ── 辅助函数 ────────────────────────────────────────
+function arrow(ctx, x1, y1, x2, y2, color, hw=6, hl=11) {
+  const dx = x2-x1, dy = y2-y1, len = Math.hypot(dx,dy);
+  if (len < 1) return;
+  const ux = dx/len, uy = dy/len;
+  ctx.save();
+  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 1.8;
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2-ux*hl,y2-uy*hl); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2-ux*hl-uy*hw, y2-uy*hl+ux*hw);
+  ctx.lineTo(x2-ux*hl+uy*hw, y2-uy*hl-ux*hw);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+// ── 分子结构示意图 ──────────────────────────────────
+(function() {
+  const cv = document.getElementById('moleculeCanvas');
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+
+  // 左半：有极分子（无外场，电矩随机）
+  ctx.fillStyle = 'rgba(248,113,113,0.07)';
+  ctx.strokeStyle = 'rgba(248,113,113,0.2)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.roundRect(10, 10, W/2-20, H-20, 10); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#f87171'; ctx.font = '13px "Microsoft YaHei"'; ctx.textAlign = 'center';
+  ctx.fillText('有极分子（无外场）', W/4, 30);
+
+  const polarMols = [
+    {x:90,  y:80,  angle:0.3},
+    {x:160, y:65,  angle:2.1},
+    {x:230, y:90,  angle:-1.0},
+    {x:100, y:145, angle:1.5},
+    {x:175, y:140, angle:-0.5},
+    {x:250, y:130, angle:2.7},
+    {x:130, y:110, angle:0.9},
+    {x:210, y:110, angle:-1.8},
+  ];
+
+  polarMols.forEach(({x, y, angle}) => {
+    const dx = 16*Math.cos(angle), dy = 16*Math.sin(angle);
+    // negative center
+    ctx.fillStyle = '#f87171';
+    ctx.beginPath(); ctx.arc(x-dx/2, y-dy/2, 7, 0, 2*Math.PI); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 10px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('−', x-dx/2, y-dy/2+1);
+    // positive center
+    ctx.fillStyle = '#34d399';
+    ctx.beginPath(); ctx.arc(x+dx/2, y+dy/2, 7, 0, 2*Math.PI); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 10px serif';
+    ctx.fillText('+', x+dx/2, y+dy/2);
+    // dipole arrow
+    arrow(ctx, x-dx/2, y-dy/2, x+dx/2, y+dy/2, 'rgba(251,191,36,0.55)', 4, 8);
+  });
+  ctx.textBaseline = 'alphabetic';
+
+  // 右半：无极分子（正负中心重合）
+  ctx.fillStyle = 'rgba(56,189,248,0.07)';
+  ctx.strokeStyle = 'rgba(56,189,248,0.2)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.roundRect(W/2+10, 10, W/2-20, H-20, 10); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#38bdf8'; ctx.font = '13px "Microsoft YaHei"'; ctx.textAlign = 'center';
+  ctx.fillText('无极分子（无外场）', W*3/4, 30);
+
+  const nonpolarMols = [
+    {x:W/2+80,  y:75},
+    {x:W/2+160, y:70},
+    {x:W/2+230, y:90},
+    {x:W/2+100, y:145},
+    {x:W/2+175, y:140},
+    {x:W/2+245, y:130},
+    {x:W/2+130, y:108},
+    {x:W/2+210, y:110},
+  ];
+
+  nonpolarMols.forEach(({x, y}) => {
+    // cloud (electron cloud)
+    ctx.fillStyle = 'rgba(56,189,248,0.15)';
+    ctx.beginPath(); ctx.ellipse(x, y, 18, 12, 0, 0, 2*Math.PI); ctx.fill();
+    ctx.strokeStyle = 'rgba(56,189,248,0.4)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.ellipse(x, y, 18, 12, 0, 0, 2*Math.PI); ctx.stroke();
+    // center dot (coincident)
+    ctx.fillStyle = '#fbbf24';
+    ctx.beginPath(); ctx.arc(x, y, 4, 0, 2*Math.PI); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.font = '9px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('±', x, y);
+  });
+  ctx.textBaseline = 'alphabetic';
+})();
+
+// ── 电偶极子示意图 ──────────────────────────────────
+(function() {
+  const cv = document.getElementById('dipoleCanvas');
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const cx = W/2, cy = H/2;
+
+  const r = 22, sep = 100;
+  const nx = cx - sep/2, px = cx + sep/2;
+
+  // 连线
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(nx+r, cy); ctx.lineTo(px-r, cy); ctx.stroke();
+
+  // 负电荷
+  ctx.fillStyle = '#f87171';
+  ctx.beginPath(); ctx.arc(nx, cy, r, 0, 2*Math.PI); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 16px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('−', nx, cy+1);
+  ctx.fillStyle = '#f87171'; ctx.font = '13px "Microsoft YaHei"'; ctx.textBaseline = 'top';
+  ctx.fillText('−q', nx, cy+r+6);
+
+  // 正电荷
+  ctx.fillStyle = '#34d399';
+  ctx.beginPath(); ctx.arc(px, cy, r, 0, 2*Math.PI); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 16px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('+', px, cy);
+  ctx.fillStyle = '#34d399'; ctx.font = '13px "Microsoft YaHei"'; ctx.textBaseline = 'top';
+  ctx.fillText('+q', px, cy+r+6);
+
+  // 电偶极矩箭头
+  arrow(ctx, nx, cy-38, px, cy-38, '#fbbf24', 7, 13);
+  ctx.fillStyle = '#fbbf24'; ctx.font = 'italic 14px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+  ctx.fillText('p = ql', cx, cy-42);
+
+  // l 标注
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1; ctx.setLineDash([3,4]);
+  ctx.beginPath(); ctx.moveTo(nx, cy-28); ctx.lineTo(px, cy-28); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(255,255,255,0.45)'; ctx.font = '12px serif'; ctx.textBaseline = 'bottom';
+  ctx.fillText('l', cx+4, cy-28);
+})();
+
+// ── 极化机制示意图 ──────────────────────────────────
+(function() {
+  const cv = document.getElementById('polarizationCanvas');
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+
+  // 外电场箭头（贯穿全图）
+  ctx.fillStyle = '#fbbf24'; ctx.font = '13px "Microsoft YaHei"'; ctx.textAlign = 'center';
+  ctx.fillText('外电场 E₀ →', W/2, 18);
+  for (let x = 30; x < W-20; x += 80) {
+    arrow(ctx, x, 30, x+55, 30, 'rgba(251,191,36,0.4)', 5, 9);
+  }
+
+  // 分隔线
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(W/2, 44); ctx.lineTo(W/2, H-10); ctx.stroke();
+
+  // 左：无极分子位移极化
+  ctx.fillStyle = 'rgba(56,189,248,0.07)';
+  ctx.strokeStyle = 'rgba(56,189,248,0.15)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.roundRect(12, 44, W/2-24, H-54, 8); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#38bdf8'; ctx.font = '12px "Microsoft YaHei"'; ctx.textAlign = 'center';
+  ctx.fillText('无极分子：位移极化', W/4, 62);
+
+  const cols = 4, rows = 2;
+  const cellW = (W/2 - 24) / cols, cellH = (H - 80) / rows;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const mx = 12 + (c + 0.5) * cellW;
+      const my = 72 + (r + 0.5) * cellH;
+      // electron cloud shifted left
+      ctx.fillStyle = 'rgba(56,189,248,0.18)';
+      ctx.beginPath(); ctx.ellipse(mx-6, my, 20, 13, 0, 0, 2*Math.PI); ctx.fill();
+      ctx.strokeStyle = 'rgba(56,189,248,0.5)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.ellipse(mx-6, my, 20, 13, 0, 0, 2*Math.PI); ctx.stroke();
+      // positive nucleus shifted right
+      ctx.fillStyle = '#34d399';
+      ctx.beginPath(); ctx.arc(mx+5, my, 5, 0, 2*Math.PI); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.font = 'bold 8px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText('+', mx+5, my);
+      // induced dipole arrow
+      arrow(ctx, mx-7, my-22, mx+6, my-22, 'rgba(251,191,36,0.7)', 4, 7);
+    }
+  }
+  ctx.textBaseline = 'alphabetic';
+
+  // 右：有极分子取向极化
+  ctx.fillStyle = 'rgba(248,113,113,0.07)';
+  ctx.strokeStyle = 'rgba(248,113,113,0.15)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.roundRect(W/2+12, 44, W/2-24, H-54, 8); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#f87171'; ctx.font = '12px "Microsoft YaHei"'; ctx.textAlign = 'center';
+  ctx.fillText('有极分子：取向极化', W*3/4, 62);
+
+  const polarMols2 = [
+    {x:W/2+55,  y:100, a:-0.15},
+    {x:W/2+130, y:95,  a:0.1},
+    {x:W/2+205, y:100, a:-0.08},
+    {x:W/2+270, y:98,  a:0.18},
+    {x:W/2+55,  y:158, a:0.2},
+    {x:W/2+130, y:155, a:-0.05},
+    {x:W/2+205, y:160, a:0.12},
+    {x:W/2+270, y:155, a:-0.1},
+  ];
+  polarMols2.forEach(({x, y, a}) => {
+    const dx = 14*Math.cos(a), dy = 14*Math.sin(a);
+    ctx.fillStyle = '#f87171';
+    ctx.beginPath(); ctx.arc(x-dx, y-dy, 7, 0, 2*Math.PI); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.font='bold 9px serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('−', x-dx, y-dy+1);
+    ctx.fillStyle = '#34d399';
+    ctx.beginPath(); ctx.arc(x+dx, y+dy, 7, 0, 2*Math.PI); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.fillText('+', x+dx, y+dy);
+    arrow(ctx, x-dx, y-dy, x+dx, y+dy, 'rgba(251,191,36,0.8)', 4, 8);
+  });
+  ctx.textBaseline = 'alphabetic';
+})();
+
+// ── 极化表面电荷示意图 ──────────────────────────────
+(function() {
+  const cv = document.getElementById('polarSurfaceCanvas');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+
+  // 外电场箭头
+  ctx.fillStyle = '#fbbf24'; ctx.font = '12px "Microsoft YaHei"'; ctx.textAlign = 'center';
+  ctx.fillText('外电场 E₀', W/2, 16);
+  for (let x = 20; x < W - 10; x += 90) {
+    arrow(ctx, x, 28, x + 65, 28, 'rgba(251,191,36,0.5)', 5, 9);
+  }
+
+  // 介质块
+  const bx = 120, by = 46, bw = W - 240, bh = H - 70;
+  ctx.fillStyle = 'rgba(99,102,241,0.1)';
+  ctx.strokeStyle = 'rgba(99,102,241,0.35)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 6); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = 'rgba(99,102,241,0.4)'; ctx.font = '13px "Microsoft YaHei"'; ctx.textAlign = 'center';
+  ctx.fillText('电介质', bx + bw / 2, by + bh / 2 + 5);
+
+  // 内部极化偶极子（对齐排列）
+  const cols = 6, rows = 3;
+  const cellW = bw / cols, cellH = bh / rows;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const mx = bx + (c + 0.5) * cellW;
+      const my = by + (r + 0.5) * cellH;
+      const dx = 14;
+      ctx.fillStyle = '#f87171';
+      ctx.beginPath(); ctx.arc(mx - dx, my, 6, 0, 2*Math.PI); ctx.fill();
+      ctx.fillStyle = '#fff'; ctx.font = 'bold 9px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('−', mx - dx, my + 1);
+      ctx.fillStyle = '#34d399';
+      ctx.beginPath(); ctx.arc(mx + dx, my, 6, 0, 2*Math.PI); ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.fillText('+', mx + dx, my);
+    }
+  }
+  ctx.textBaseline = 'alphabetic';
+
+  // 左表面负极化电荷
+  ctx.fillStyle = '#f87171'; ctx.font = 'bold 14px serif'; ctx.textAlign = 'center';
+  for (let i = 0; i < rows; i++) {
+    const y = by + (i + 0.5) * cellH;
+    ctx.fillText('−', bx + 10, y + 5);
+  }
+  ctx.fillStyle = '#f87171'; ctx.font = '12px "Microsoft YaHei"'; ctx.textAlign = 'right';
+  ctx.fillText('σ_P < 0', bx - 4, by + bh / 2 + 4);
+
+  // 右表面正极化电荷
+  ctx.fillStyle = '#34d399'; ctx.font = 'bold 14px serif'; ctx.textAlign = 'center';
+  for (let i = 0; i < rows; i++) {
+    const y = by + (i + 0.5) * cellH;
+    ctx.fillText('+', bx + bw - 10, y + 4);
+  }
+  ctx.fillStyle = '#34d399'; ctx.font = '12px "Microsoft YaHei"'; ctx.textAlign = 'left';
+  ctx.fillText('σ_P > 0', bx + bw + 4, by + bh / 2 + 4);
+})();
+
+// ── 退极化场示意图 ──────────────────────────────────
+(function() {
+  const cv = document.getElementById('fieldWeakenCanvas');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const cy = H / 2;
+
+  // 介质块
+  const bx = 80, bw = W - 160, bh = 100;
+  const by = cy - bh / 2;
+  ctx.fillStyle = 'rgba(99,102,241,0.1)';
+  ctx.strokeStyle = 'rgba(99,102,241,0.3)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 6); ctx.fill(); ctx.stroke();
+
+  // 外场箭头（全程，较粗）
+  for (let y = by + 18; y < by + bh; y += 32) {
+    arrow(ctx, 10, y, bx - 6, y, '#fbbf24', 6, 11);
+    arrow(ctx, bx + bw + 6, y, W - 10, y, '#fbbf24', 6, 11);
+  }
+  ctx.fillStyle = '#fbbf24'; ctx.font = '12px "Microsoft YaHei"'; ctx.textAlign = 'center';
+  ctx.fillText('E₀', 45, by - 8);
+  ctx.fillText('E₀', W - 45, by - 8);
+
+  // 退极化场箭头（介质内，向左，较细）
+  for (let y = by + 18; y < by + bh; y += 32) {
+    arrow(ctx, bx + bw - 30, y, bx + 30, y, '#f87171', 5, 9);
+  }
+  ctx.fillStyle = '#f87171'; ctx.font = '12px "Microsoft YaHei"'; ctx.textAlign = 'center';
+  ctx.fillText("E' (退极化场)", bx + bw / 2, by + bh + 18);
+
+  // 合场箭头（介质内，向右，中等）
+  for (let y = by + 18; y < by + bh; y += 32) {
+    arrow(ctx, bx + 18, y - 10, bx + bw - 18, y - 10, '#34d399', 5, 9);
+  }
+  ctx.fillStyle = '#34d399'; ctx.font = '12px "Microsoft YaHei"'; ctx.textAlign = 'center';
+  ctx.fillText('E = E₀/εᵣ (合场)', bx + bw / 2, by - 10);
+
+  // 极化面电荷符号
+  ctx.fillStyle = '#f87171'; ctx.font = 'bold 15px serif'; ctx.textAlign = 'center';
+  for (let y = by + 18; y < by + bh; y += 28) ctx.fillText('−', bx + 10, y + 6);
+  ctx.fillStyle = '#34d399';
+  for (let y = by + 18; y < by + bh; y += 28) ctx.fillText('+', bx + bw - 10, y + 5);
+})();
+
+// ── 击穿示意图 ──────────────────────────────────────
+(function() {
+  const cv = document.getElementById('breakdownCanvas');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const cy = H / 2;
+
+  // 两块极板
+  const plateH = 120, plateW = 18;
+  const lx = 60, rx = W - 60 - plateW;
+  const py = cy - plateH / 2;
+  ctx.fillStyle = 'rgba(99,102,241,0.35)';
+  ctx.fillRect(lx, py, plateW, plateH);
+  ctx.fillRect(rx, py, plateW, plateH);
+  ctx.fillStyle = '#34d399'; ctx.font = 'bold 13px serif'; ctx.textAlign = 'center';
+  for (let y = py + 12; y < py + plateH - 6; y += 22) ctx.fillText('+', lx + plateW / 2, y + 4);
+  ctx.fillStyle = '#f87171';
+  for (let y = py + 12; y < py + plateH - 6; y += 22) ctx.fillText('−', rx + plateW / 2, y + 5);
+
+  // 强电场箭头
+  for (let y = py + 14; y < py + plateH; y += 36) {
+    arrow(ctx, lx + plateW + 8, y, rx - 8, y, 'rgba(251,191,36,0.55)', 5, 9);
+  }
+  ctx.fillStyle = '#fbbf24'; ctx.font = 'bold 13px "Microsoft YaHei"'; ctx.textAlign = 'center';
+  ctx.fillText('强电场  E > Eᵦ', (lx + rx) / 2 + plateW / 2, py - 10);
+
+  // 介质区（部分击穿，画闪电通道）
+  ctx.save();
+  ctx.strokeStyle = 'rgba(251,191,36,0.9)'; ctx.lineWidth = 2.5;
+  ctx.shadowColor = '#fbbf24'; ctx.shadowBlur = 8;
+  ctx.beginPath();
+  const sx = lx + plateW + 6, ex = rx - 6;
+  const pts = [
+    [sx, cy],
+    [sx + (ex-sx)*0.2, cy - 18],
+    [sx + (ex-sx)*0.4, cy + 14],
+    [sx + (ex-sx)*0.6, cy - 10],
+    [sx + (ex-sx)*0.8, cy + 20],
+    [ex, cy],
+  ];
+  ctx.moveTo(pts[0][0], pts[0][1]);
+  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+  ctx.stroke();
+  ctx.restore();
+
+  // 游离电荷（自由电子）沿通道
+  const freeEs = [0.15, 0.35, 0.55, 0.75];
+  freeEs.forEach(t => {
+    const x = sx + (ex - sx) * t;
+    const y = cy + (t < 0.3 ? -10 : t < 0.5 ? 10 : t < 0.7 ? -6 : 14) * ((t - 0.5) * 2);
+    ctx.fillStyle = '#818cf8';
+    ctx.beginPath(); ctx.arc(x, y + cy * 0, 5, 0, 2*Math.PI); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 8px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('e⁻', x, y + cy * 0);
+  });
+  ctx.textBaseline = 'alphabetic';
+
+  ctx.fillStyle = '#f87171'; ctx.font = '12px "Microsoft YaHei"'; ctx.textAlign = 'center';
+  ctx.fillText('放电通道（束缚电荷 → 自由电荷，介质导通）', W / 2, py + plateH + 20);
+})();
+
+// ── σ' = Pcosθ 示意图 ───────────────────────────────
+(function() {
+  const cv = document.getElementById('sigmaCanvas');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const cy = H / 2;
+
+  // 外电场
+  ctx.fillStyle = '#fbbf24'; ctx.font = '12px "Microsoft YaHei"'; ctx.textAlign = 'center';
+  ctx.fillText('E₀ →', W / 2, 14);
+  arrow(ctx, 18, cy - 30, 80, cy - 30, '#fbbf24', 5, 9);
+  arrow(ctx, W - 80, cy - 30, W - 18, cy - 30, '#fbbf24', 5, 9);
+
+  // 介质块
+  const bx = 110, bw = W - 220, bh = 100, by = cy - bh / 2;
+  ctx.fillStyle = 'rgba(99,102,241,0.1)';
+  ctx.strokeStyle = 'rgba(99,102,241,0.3)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 6); ctx.fill(); ctx.stroke();
+
+  // P 箭头（居中）
+  arrow(ctx, bx + bw / 2 - 45, cy, bx + bw / 2 + 45, cy, '#c084fc', 6, 11);
+  ctx.fillStyle = '#c084fc'; ctx.font = 'italic 13px serif'; ctx.textAlign = 'center';
+  ctx.fillText('P', bx + bw / 2, cy - 8);
+
+  // 左表面：n̂ 向左，σ' < 0
+  arrow(ctx, bx - 10, cy + 20, bx - 46, cy + 20, '#38bdf8', 5, 9);
+  ctx.fillStyle = '#38bdf8'; ctx.font = '11px "Microsoft YaHei"'; ctx.textAlign = 'right';
+  ctx.fillText('n̂', bx - 50, cy + 24);
+  ctx.fillStyle = '#f87171'; ctx.font = 'bold 16px serif'; ctx.textAlign = 'center';
+  for (let y = by + 14; y < by + bh; y += 24) ctx.fillText('−', bx + 10, y + 6);
+  ctx.fillStyle = '#f87171'; ctx.font = '12px "Microsoft YaHei"'; ctx.textAlign = 'center';
+  ctx.fillText("σ' < 0", bx - 30, by - 6);
+
+  // 右表面：n̂ 向右，σ' > 0
+  arrow(ctx, bx + bw + 10, cy + 20, bx + bw + 46, cy + 20, '#38bdf8', 5, 9);
+  ctx.fillStyle = '#38bdf8'; ctx.font = '11px "Microsoft YaHei"'; ctx.textAlign = 'left';
+  ctx.fillText('n̂', bx + bw + 50, cy + 24);
+  ctx.fillStyle = '#34d399'; ctx.font = 'bold 16px serif'; ctx.textAlign = 'center';
+  for (let y = by + 14; y < by + bh; y += 24) ctx.fillText('+', bx + bw - 10, y + 5);
+  ctx.fillStyle = '#34d399'; ctx.font = '12px "Microsoft YaHei"'; ctx.textAlign = 'center';
+  ctx.fillText("σ' > 0", bx + bw + 30, by - 6);
+})();
+
+// ── 平行板电容器例题示意图 ─────────────────────────
+(function() {
+  const cv = document.getElementById('capCanvas');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const cy = H / 2;
+
+  const plateH = 130, plateW = 20, gap = W - 120;
+  const lx = 50, rx = lx + gap;
+  const py = cy - plateH / 2;
+
+  // 介质填充
+  ctx.fillStyle = 'rgba(99,102,241,0.1)';
+  ctx.strokeStyle = 'rgba(99,102,241,0.2)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.roundRect(lx + plateW, py, gap - plateW, plateH, 4); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = 'rgba(99,102,241,0.35)'; ctx.font = '12px "Microsoft YaHei"'; ctx.textAlign = 'center';
+  ctx.fillText('均匀电介质 χₑ', lx + gap / 2 + plateW / 2, cy + 5);
+
+  // 极板
+  ctx.fillStyle = 'rgba(56,189,248,0.35)';
+  ctx.fillRect(lx, py, plateW, plateH);
+  ctx.fillStyle = 'rgba(248,113,113,0.35)';
+  ctx.fillRect(rx, py, plateW, plateH);
+
+  // 自由电荷符号
+  ctx.fillStyle = '#34d399'; ctx.font = 'bold 14px serif'; ctx.textAlign = 'center';
+  for (let y = py + 14; y < py + plateH; y += 24) ctx.fillText('+', lx + plateW / 2, y + 5);
+  ctx.fillStyle = '#f87171';
+  for (let y = py + 14; y < py + plateH; y += 24) ctx.fillText('−', rx + plateW / 2, y + 6);
+
+  // 极化电荷（介质表面）
+  ctx.fillStyle = '#f87171'; ctx.font = 'bold 13px serif';
+  for (let y = py + 18; y < py + plateH; y += 28) ctx.fillText('−', lx + plateW + 8, y + 5);
+  ctx.fillStyle = '#34d399';
+  for (let y = py + 18; y < py + plateH; y += 28) ctx.fillText('+', rx - 14, y + 4);
+
+  // E1 箭头（蓝色，全程）
+  for (let y = py + 16; y < py + plateH - 10; y += 36) {
+    arrow(ctx, lx + plateW + 22, y, rx - 16, y, 'rgba(56,189,248,0.7)', 5, 9);
+  }
+  ctx.fillStyle = '#38bdf8'; ctx.font = '12px "Microsoft YaHei"'; ctx.textAlign = 'left';
+  ctx.fillText('E₁=σ₀/ε₀', lx + plateW + 24, py - 8);
+
+  // E2 箭头（红色，向左）
+  for (let y = py + 26; y < py + plateH - 10; y += 36) {
+    arrow(ctx, rx - 20, y, lx + plateW + 26, y, 'rgba(248,113,113,0.6)', 4, 8);
+  }
+  ctx.fillStyle = '#f87171'; ctx.textAlign = 'right';
+  ctx.fillText("E₂=−σ'/ε₀", rx - 22, py - 8);
+
+  // 标注
+  ctx.fillStyle = '#34d399'; ctx.font = '12px "Microsoft YaHei"'; ctx.textAlign = 'center';
+  ctx.fillText("σ'", lx + plateW + 20, cy + plateH / 2 + 10);
+  ctx.fillText("σ'", rx - 16, cy + plateH / 2 + 10);
+  ctx.fillStyle = '#38bdf8';
+  ctx.fillText('σ₀', lx + plateW / 2, py - 8);
+  ctx.fillStyle = '#f87171';
+  ctx.fillText('σ₀', rx + plateW / 2, py - 8);
+})();
+
+// ── 例2 并联平行板示意图 ───────────────────────────
+(function() {
+  const cv = document.getElementById('parallelCanvas');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const cy = H / 2;
+
+  const plateH = 130, plateW = 18, totalGap = W - 130;
+  const lx = 55, rx = lx + totalGap;
+  const py = cy - plateH / 2;
+  const midX = lx + plateW + totalGap / 2;
+
+  // 左半介质
+  ctx.fillStyle = 'rgba(99,102,241,0.13)';
+  ctx.strokeStyle = 'rgba(99,102,241,0.2)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.roundRect(lx + plateW, py, totalGap / 2, plateH, 0); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = 'rgba(99,102,241,0.45)'; ctx.font = '12px "Microsoft YaHei"'; ctx.textAlign = 'center';
+  ctx.fillText('εᵣ = 5', lx + plateW + totalGap / 4, cy + 5);
+
+  // 右半真空
+  ctx.fillStyle = 'rgba(255,255,255,0.02)';
+  ctx.beginPath(); ctx.roundRect(midX, py, totalGap / 2, plateH, 0); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.font = '12px "Microsoft YaHei"';
+  ctx.fillText('真空', midX + totalGap / 4, cy + 5);
+
+  // 中间分界线
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(midX, py); ctx.lineTo(midX, py + plateH); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // 极板
+  ctx.fillStyle = 'rgba(56,189,248,0.35)';
+  ctx.fillRect(lx, py, plateW, plateH);
+  ctx.fillStyle = 'rgba(248,113,113,0.35)';
+  ctx.fillRect(rx, py, plateW, plateH);
+
+  // 自由电荷
+  ctx.fillStyle = '#34d399'; ctx.font = 'bold 14px serif'; ctx.textAlign = 'center';
+  for (let y = py + 14; y < py + plateH; y += 24) ctx.fillText('+', lx + plateW / 2, y + 5);
+  ctx.fillStyle = '#f87171';
+  for (let y = py + 14; y < py + plateH; y += 24) ctx.fillText('−', rx + plateW / 2, y + 6);
+
+  // E箭头
+  for (let y = py + 16; y < py + plateH - 8; y += 36) {
+    arrow(ctx, lx + plateW + 12, y, midX - 12, y, 'rgba(251,191,36,0.7)', 5, 9);
+    arrow(ctx, midX + 12, y, rx - 12, y, 'rgba(251,191,36,0.45)', 5, 9);
+  }
+  ctx.fillStyle = '#fbbf24'; ctx.font = '12px "Microsoft YaHei"'; ctx.textAlign = 'center';
+  ctx.fillText('E₁ = E₂ = V₀/d', lx + plateW + totalGap / 2 + plateW / 2, py - 8);
+
+  // 标注
+  ctx.fillStyle = '#38bdf8'; ctx.font = '12px "Microsoft YaHei"'; ctx.textAlign = 'left';
+  ctx.fillText('V₀ = 300V', rx + plateW + 6, cy);
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1; ctx.setLineDash([3,4]);
+  ctx.beginPath(); ctx.moveTo(lx, py - 14); ctx.lineTo(rx + plateW, py - 14); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.textAlign = 'center';
+  ctx.fillText('d', lx + plateW + totalGap / 2, py - 18);
+})();
+
+// ── 例3 两层介质示意图 ─────────────────────────────
+(function() {
+  const cv = document.getElementById('twoLayerCanvas');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const cy = H / 2;
+
+  const plateH = 130, plateW = 18;
+  const lx = 55, totalGap = W - 140;
+  const rx = lx + totalGap + plateW;
+  const py = cy - plateH / 2;
+
+  // d1 区域 (2mm / 5mm 比例)
+  const d1frac = 2 / 5, d2frac = 3 / 5;
+  const d1w = totalGap * d1frac, d2w = totalGap * d2frac;
+  const midX = lx + plateW + d1w;
+
+  // 层1
+  ctx.fillStyle = 'rgba(99,102,241,0.15)';
+  ctx.strokeStyle = 'rgba(99,102,241,0.2)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.roundRect(lx + plateW, py, d1w, plateH, 0); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = 'rgba(99,102,241,0.5)'; ctx.font = '12px "Microsoft YaHei"'; ctx.textAlign = 'center';
+  ctx.fillText('εᵣ₁=5', lx + plateW + d1w / 2, cy + 4);
+  ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.font = '11px "Microsoft YaHei"';
+  ctx.fillText('d₁=2mm', lx + plateW + d1w / 2, cy + 20);
+
+  // 层2
+  ctx.fillStyle = 'rgba(56,189,248,0.1)';
+  ctx.strokeStyle = 'rgba(56,189,248,0.2)';
+  ctx.beginPath(); ctx.roundRect(midX, py, d2w, plateH, 0); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = 'rgba(56,189,248,0.5)'; ctx.font = '12px "Microsoft YaHei"';
+  ctx.fillText('εᵣ₂=2', midX + d2w / 2, cy + 4);
+  ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.font = '11px "Microsoft YaHei"';
+  ctx.fillText('d₂=3mm', midX + d2w / 2, cy + 20);
+
+  // 极板
+  ctx.fillStyle = 'rgba(56,189,248,0.35)';
+  ctx.fillRect(lx, py, plateW, plateH);
+  ctx.fillStyle = 'rgba(248,113,113,0.35)';
+  ctx.fillRect(rx - plateW, py, plateW, plateH);
+
+  // 标注 A/B 和电势差
+  ctx.fillStyle = '#38bdf8'; ctx.font = '13px "Microsoft YaHei"'; ctx.textAlign = 'center';
+  ctx.fillText('A (+)', lx + plateW / 2, py - 8);
+  ctx.fillStyle = '#f87171';
+  ctx.fillText('B (−)', rx - plateW / 2, py - 8);
+
+  // D箭头（贯通，同一大小）
+  for (let y = py + 16; y < py + plateH - 8; y += 38) {
+    arrow(ctx, lx + plateW + 6, y, rx - plateW - 6, y, 'rgba(192,132,252,0.6)', 5, 9);
+  }
+  ctx.fillStyle = '#c084fc'; ctx.font = '11px "Microsoft YaHei"'; ctx.textAlign = 'center';
+  ctx.fillText('D₁ = D₂ = σ₀', lx + plateW + totalGap / 2, py - 22);
+
+  // E₁, E₂ 标注（大小不同）
+  ctx.fillStyle = '#fbbf24'; ctx.font = '11px "Microsoft YaHei"';
+  ctx.fillText('E₁', lx + plateW + d1w / 2, py + plateH + 16);
+  ctx.fillText('E₂ > E₁', midX + d2w / 2, py + plateH + 16);
+})();
+</script>
+
+<!-- ── 笔记工具栏 ── -->
+<style>
+.note-fab {
+  position: fixed; bottom: 28px; right: 28px; z-index: 1000;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+}
+.fab-main {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 22px; box-shadow: 0 4px 20px rgba(99,102,241,0.5);
+  transition: transform 0.2s, box-shadow 0.2s;
+  color: #fff;
+}
+.fab-main:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(99,102,241,0.65); }
+.fab-main.active { background: linear-gradient(135deg, #7c3aed, #a78bfa); transform: rotate(45deg); }
+.fab-menu {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+  opacity: 0; pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.fab-menu.open { opacity: 1; pointer-events: all; transform: translateY(0); }
+.fab-item {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(15,12,41,0.92); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px; padding: 9px 16px 9px 12px;
+  cursor: pointer; white-space: nowrap;
+  backdrop-filter: blur(12px);
+  transition: border-color 0.2s, background 0.2s;
+  font-family: "Microsoft YaHei", sans-serif;
+}
+.fab-item:hover { border-color: rgba(129,140,248,0.4); background: rgba(99,102,241,0.15); }
+.fab-item .fi-icon { font-size: 17px; }
+.fab-item .fi-label { font-size: 13px; color: rgba(255,255,255,0.8); }
+.fab-item.starred .fi-label { color: #fbbf24; }
+.fab-item.starred { border-color: rgba(251,191,36,0.35); }
+.fab-item.read-done .fi-label { color: #34d399; }
+.fab-item.read-done { border-color: rgba(52,211,153,0.35); }
+.note-drawer {
+  position: fixed; bottom: 0; right: 0; left: 0; z-index: 999;
+  background: rgba(10,8,30,0.96);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(20px);
+  padding: 20px 28px 28px;
+  transform: translateY(100%);
+  transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
+}
+.note-drawer.open { transform: translateY(0); }
+.drawer-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.drawer-title { font-size: 14px; font-weight: 700; color: #a5b4fc; font-family: "Microsoft YaHei",sans-serif; letter-spacing: 1px; }
+.drawer-close { font-size: 20px; color: rgba(255,255,255,0.4); cursor: pointer; transition: color 0.2s; line-height: 1; }
+.drawer-close:hover { color: #fff; }
+.drawer-textarea {
+  width: 100%; height: 120px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; padding: 12px 16px;
+  color: #fff; font-size: 14px; font-family: "Microsoft YaHei",sans-serif;
+  resize: vertical; outline: none; line-height: 1.8;
+  transition: border-color 0.2s;
+}
+.drawer-textarea:focus { border-color: rgba(129,140,248,0.5); }
+.drawer-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+.drawer-hint { font-size: 11px; color: rgba(255,255,255,0.25); font-family: "Microsoft YaHei",sans-serif; }
+.drawer-save {
+  background: linear-gradient(135deg, #6366f1, #818cf8); border: none;
+  color: #fff; font-size: 13px; font-weight: 600; padding: 8px 22px; border-radius: 10px;
+  cursor: pointer; font-family: "Microsoft YaHei",sans-serif; transition: opacity 0.2s;
+}
+.drawer-save:hover { opacity: 0.85; }
+.phy-toast {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: rgba(15,12,41,0.95); border: 1px solid rgba(129,140,248,0.3);
+  border-radius: 24px; padding: 10px 22px;
+  font-size: 13px; color: rgba(255,255,255,0.85); font-family: "Microsoft YaHei",sans-serif;
+  z-index: 1100; opacity: 0;
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none; white-space: nowrap;
+}
+.phy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+
+<div class="note-fab">
+  <div class="fab-menu" id="fabMenu">
+    <div class="fab-item" id="fabStar" onclick="toggleStar()">
+      <span class="fi-icon">☆</span>
+      <span class="fi-label">收藏此节</span>
+    </div>
+    <div class="fab-item" id="fabRead" onclick="toggleRead()">
+      <span class="fi-icon">○</span>
+      <span class="fi-label">标记已读</span>
+    </div>
+    <div class="fab-item" onclick="openDrawer()">
+      <span class="fi-icon">📝</span>
+      <span class="fi-label">我的笔记</span>
+    </div>
+  </div>
+  <button class="fab-main" id="fabBtn" onclick="toggleFab()" title="工具">✦</button>
+</div>
+
+<div class="note-drawer" id="noteDrawer">
+  <div class="drawer-header">
+    <div class="drawer-title">📝 我的笔记 · §2-2</div>
+    <div class="drawer-close" onclick="closeDrawer()">×</div>
+  </div>
+  <textarea class="drawer-textarea" id="drawerTA" placeholder="在此记录你的理解、疑问或总结……"></textarea>
+  <div class="drawer-footer">
+    <span class="drawer-hint">自动保存到本地，刷新不丢失</span>
+    <button class="drawer-save" onclick="saveNote()">保存</button>
+  </div>
+</div>
+
+<div class="phy-toast" id="phyToast"></div>
+
+<script>
+(function(){
+  const PID = '2-2';
+  const SK  = 'phy26_note_' + PID;
+  const STK = 'phy26_star_' + PID;
+  const RDK = 'phy26_read_' + PID;
+  let fabOpen = false;
+
+  function showToast(msg) {
+    const t = document.getElementById('phyToast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  window.toggleFab = function() {
+    fabOpen = !fabOpen;
+    document.getElementById('fabMenu').classList.toggle('open', fabOpen);
+    document.getElementById('fabBtn').classList.toggle('active', fabOpen);
+  };
+
+  window.toggleStar = function() {
+    const starred = localStorage.getItem(STK) === '1';
+    if (starred) { localStorage.removeItem(STK); showToast('已取消收藏'); }
+    else { localStorage.setItem(STK, '1'); showToast('⭐ 已收藏此节'); }
+    refreshStarUI();
+  };
+
+  window.toggleRead = function() {
+    const read = localStorage.getItem(RDK) === '1';
+    if (read) { localStorage.removeItem(RDK); showToast('已取消已读标记'); }
+    else { localStorage.setItem(RDK, '1'); showToast('✓ 已标记为已读'); }
+    refreshReadUI();
+  };
+
+  function refreshStarUI() {
+    const starred = localStorage.getItem(STK) === '1';
+    const el = document.getElementById('fabStar');
+    el.querySelector('.fi-icon').textContent = starred ? '★' : '☆';
+    el.querySelector('.fi-label').textContent = starred ? '已收藏' : '收藏此节';
+    el.classList.toggle('starred', starred);
+  }
+
+  function refreshReadUI() {
+    const read = localStorage.getItem(RDK) === '1';
+    const el = document.getElementById('fabRead');
+    el.querySelector('.fi-icon').textContent = read ? '✓' : '○';
+    el.querySelector('.fi-label').textContent = read ? '已读' : '标记已读';
+    el.classList.toggle('read-done', read);
+  }
+
+  window.openDrawer = function() {
+    document.getElementById('drawerTA').value = localStorage.getItem(SK) || '';
+    document.getElementById('noteDrawer').classList.add('open');
+    document.getElementById('fabMenu').classList.remove('open');
+    document.getElementById('fabBtn').classList.remove('active');
+    fabOpen = false;
+    setTimeout(() => document.getElementById('drawerTA').focus(), 350);
+  };
+
+  window.closeDrawer = function() {
+    document.getElementById('noteDrawer').classList.remove('open');
+  };
+
+  window.saveNote = function() {
+    const val = document.getElementById('drawerTA').value.trim();
+    if (val) { localStorage.setItem(SK, val); showToast('✓ 笔记已保存'); }
+    else { localStorage.removeItem(SK); showToast('笔记已清空'); }
+    closeDrawer();
+  };
+
+  let saveTimer;
+  document.getElementById('drawerTA').addEventListener('input', function() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      const val = this.value.trim();
+      if (val) localStorage.setItem(SK, val);
+    }, 1500);
+  });
+
+  refreshStarUI(); refreshReadUI();
+
+  if (localStorage.getItem(SK)) {
+    const noteItem = document.querySelector('.fab-item:last-of-type .fi-icon');
+    if (noteItem) noteItem.textContent = '📋';
+  }
+})();
+</script>
+</body>
+</html>

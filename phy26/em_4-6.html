@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>4-6 麦克斯韦方程组·电磁波 — 电磁学</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Times New Roman","Microsoft YaHei","PingFang SC",serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;color:#fff}
+    canvas#particles{position:fixed;inset:0;pointer-events:none;z-index:0}
+    .topbar{position:relative;z-index:10;display:flex;align-items:center;gap:14px;padding:18px 36px;border-bottom:1px solid rgba(255,255,255,0.07);background:rgba(15,12,41,0.7);backdrop-filter:blur(12px);font-family:"Microsoft YaHei",sans-serif}
+    .back-btn{color:rgba(255,255,255,0.5);font-size:14px;cursor:pointer;text-decoration:none;transition:color .2s}.back-btn:hover{color:#fbbf24}
+    .topbar-title{font-size:16px;font-weight:700;letter-spacing:1px}
+    .topbar-sub{margin-left:auto;font-size:12px;color:rgba(255,255,255,0.3)}
+    .tabs{display:flex;gap:10px;margin-bottom:32px;font-family:"Microsoft YaHei",sans-serif;flex-wrap:wrap}
+    .tab{padding:9px 22px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.5);transition:all .2s}
+    .tab.active{background:linear-gradient(135deg,#f59e0b,#fbbf24);border-color:transparent;color:#1a1200;box-shadow:0 4px 16px rgba(251,191,36,0.4)}
+    .tab-panel{display:none}.tab-panel.active{display:block}
+    .page{position:relative;z-index:10;max-width:860px;margin:0 auto;padding:36px 24px 80px}
+    .card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:16px;padding:28px 32px;margin-bottom:20px}
+    .card-title{font-size:16px;font-weight:700;color:#fbbf24;margin-bottom:14px;display:flex;align-items:center;gap:8px;font-family:"Microsoft YaHei",sans-serif}
+    .card-title::before{content:"";display:inline-block;width:4px;height:18px;border-radius:2px;background:linear-gradient(#f59e0b,#fbbf24);flex-shrink:0}
+    .card p{font-size:15px;color:rgba(255,255,255,0.8);line-height:2}.card p+p{margin-top:10px}
+    .hl{color:#fbbf24;font-weight:600}.hl-blue{color:#38bdf8;font-weight:600}.hl-green{color:#34d399;font-weight:600}.hl-red{color:#f87171;font-weight:600}.hl-purple{color:#c084fc;font-weight:600}
+    .katex{color:#e2e8f0;font-size:1.05em}.katex-display{margin:14px 0}.katex-display>.katex{color:#fde68a}
+    .prop-list{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:12px}
+    .prop-item{display:flex;gap:14px;align-items:flex-start;background:rgba(255,255,255,0.03);border-radius:10px;padding:14px 18px;border-left:3px solid #f59e0b}
+    .prop-item:nth-child(2){border-left-color:#38bdf8}.prop-item:nth-child(3){border-left-color:#34d399}.prop-item:nth-child(4){border-left-color:#f87171}
+    .prop-num{min-width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#1a1200;font-family:"Microsoft YaHei",sans-serif}
+    .prop-item:nth-child(2) .prop-num{background:linear-gradient(135deg,#0ea5e9,#38bdf8);color:#fff}.prop-item:nth-child(3) .prop-num{background:linear-gradient(135deg,#10b981,#34d399);color:#fff}.prop-item:nth-child(4) .prop-num{background:linear-gradient(135deg,#ef4444,#f87171);color:#fff}
+    .prop-body{font-size:14.5px;color:rgba(255,255,255,0.78);line-height:1.9}.prop-body strong{color:#fff;font-family:"Microsoft YaHei",sans-serif}
+    .note-box{background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);border-radius:12px;padding:16px 20px;margin-top:14px;font-size:14px;color:rgba(255,255,255,0.7);line-height:1.9;font-family:"Microsoft YaHei",sans-serif}
+    .note-box .note-label{font-weight:700;color:#fbbf24;margin-bottom:4px;display:block}
+    .green-box{background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.2);border-radius:12px;padding:16px 20px;margin-top:14px;font-size:14px;color:rgba(255,255,255,0.75);line-height:1.9;font-family:"Microsoft YaHei",sans-serif}
+    .green-box .note-label{font-weight:700;color:#34d399;margin-bottom:4px;display:block}
+    .blue-box{background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.2);border-radius:12px;padding:16px 20px;margin-top:14px;font-size:14px;color:rgba(255,255,255,0.75);line-height:1.9;font-family:"Microsoft YaHei",sans-serif}
+    .blue-box .note-label{font-weight:700;color:#38bdf8;margin-bottom:4px;display:block}
+    .eg-block{background:rgba(251,191,36,0.04);border:1px solid rgba(251,191,36,0.15);border-radius:14px;padding:24px 28px;margin-bottom:20px}
+    .eg-title{font-size:15px;font-weight:700;color:#fbbf24;margin-bottom:14px;font-family:"Microsoft YaHei",sans-serif;display:flex;align-items:center;gap:8px}
+    .eg-title::before{content:"";display:inline-block;width:4px;height:16px;background:linear-gradient(#f59e0b,#fbbf24);border-radius:2px;flex-shrink:0}
+    .eg-block p{font-size:14.5px;color:rgba(255,255,255,0.8);line-height:2}.eg-block p+p{margin-top:8px}
+    .sol-steps{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+    .sol-step{background:rgba(255,255,255,0.025);border-left:3px solid #f59e0b;border-radius:0 8px 8px 0;padding:12px 16px;font-size:14.5px;color:rgba(255,255,255,0.78);line-height:2}
+    .sol-step:nth-child(2){border-left-color:#38bdf8}.sol-step:nth-child(3){border-left-color:#34d399}.sol-step:nth-child(4){border-left-color:#f87171}.sol-step:nth-child(5){border-left-color:#c084fc}
+    .sol-step strong{color:#fff;font-family:"Microsoft YaHei",sans-serif}
+    .ans-box{background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:10px;padding:12px 18px;margin-top:12px;font-size:14.5px;color:rgba(255,255,255,0.85);line-height:2}
+    .ans-box .ans-label{color:#fbbf24;font-weight:700;font-family:"Microsoft YaHei",sans-serif}
+    canvas.demo-canvas{display:block;margin:18px auto 0;background:rgba(0,0,0,0.25);border-radius:12px;border:1px solid rgba(255,255,255,0.07)}
+    .demo-label{text-align:center;font-size:12.5px;color:rgba(255,255,255,0.35);font-family:"Microsoft YaHei",sans-serif;margin-top:8px}
+    .sim-ctrl{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+    .sim-btn{padding:7px 20px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:13px;font-family:"Microsoft YaHei",sans-serif;cursor:pointer;transition:all .2s}
+    .sim-btn:hover{background:rgba(245,158,11,0.25);border-color:rgba(251,191,36,0.5);color:#fff}
+    .sim-btn.primary{background:linear-gradient(135deg,#f59e0b,#fbbf24);border-color:transparent;color:#1a1200;font-weight:700}
+    .maxwell-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+    .maxwell-eq{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:16px 20px}
+    .maxwell-eq-num{font-size:11px;color:rgba(255,255,255,0.35);font-family:"Microsoft YaHei",sans-serif;margin-bottom:6px;letter-spacing:0.8px}
+    .maxwell-eq-name{font-size:13px;font-weight:700;font-family:"Microsoft YaHei",sans-serif;margin-bottom:8px}
+    .maxwell-eq:nth-child(1) .maxwell-eq-name{color:#fbbf24}
+    .maxwell-eq:nth-child(2) .maxwell-eq-name{color:#38bdf8}
+    .maxwell-eq:nth-child(3) .maxwell-eq-name{color:#34d399}
+    .maxwell-eq:nth-child(4) .maxwell-eq-name{color:#f87171}
+    .maxwell-eq-body{font-size:13.5px;color:rgba(255,255,255,0.7);line-height:1.8}
+    .slider-row{display:flex;align-items:center;gap:14px;margin-top:14px;font-family:"Microsoft YaHei",sans-serif;font-size:13px;color:rgba(255,255,255,0.65)}
+    .slider-row input[type=range]{flex:1;accent-color:#fbbf24}
+    .slider-val{min-width:60px;text-align:right;color:#fbbf24;font-weight:600}
+    .readout-row{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap}
+    .readout{flex:1;min-width:120px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px 16px;text-align:center}
+    .readout-val{font-size:22px;font-weight:800;color:#fbbf24;font-family:"Times New Roman",serif}
+    .readout-label{font-size:11px;color:rgba(255,255,255,0.35);font-family:"Microsoft YaHei",sans-serif;margin-top:4px;letter-spacing:1px}
+  </style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">§4-6 &nbsp;麦克斯韦方程组 · 电磁波</div>
+    <span class="topbar-course">普通物理（卓越班）下册 · 电磁学</span>
+  </div>
+  <div class="topbar-sub">NUSEP26 · 普通物理（卓）下</div>
+</div>
+
+<div class="page">
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(0)">麦克斯韦方程组</div>
+    <div class="tab" onclick="switchTab(1)">电磁波</div>
+    <div class="tab" onclick="switchTab(2)">仿真：电磁波传播</div>
+    <div class="tab" onclick="switchTab(3)">例题</div>
+  </div>
+
+  <!-- ══ Tab 0：麦克斯韦方程组 ══ -->
+  <div class="tab-panel active" id="panel-0">
+    <div class="card">
+      <div class="card-title">麦克斯韦方程组（积分形式）</div>
+      <p>麦克斯韦将电磁学的基本规律总结为四个方程，构成了经典电磁理论的完整体系：</p>
+      <div class="maxwell-grid">
+        <div class="maxwell-eq">
+          <div class="maxwell-eq-num">方程 I</div>
+          <div class="maxwell-eq-name">高斯定理（电场）</div>
+          <div class="maxwell-eq-body">$$\oiint_S \vec{D}\cdot d\vec{S} = \iiint_V \rho\,dV$$变化的电场有源，自由电荷是电场的源。</div>
+        </div>
+        <div class="maxwell-eq">
+          <div class="maxwell-eq-num">方程 II</div>
+          <div class="maxwell-eq-name">高斯定理（磁场）</div>
+          <div class="maxwell-eq-body">$$\oiint_S \vec{B}\cdot d\vec{S} = 0$$磁场无源，不存在磁单极子。</div>
+        </div>
+        <div class="maxwell-eq">
+          <div class="maxwell-eq-num">方程 III</div>
+          <div class="maxwell-eq-name">法拉第感应定律</div>
+          <div class="maxwell-eq-body">$$\oint_L \vec{E}\cdot d\vec{l} = -\iint_S \frac{\partial \vec{B}}{\partial t}\cdot d\vec{S}$$变化的磁场激发涡旋电场。</div>
+        </div>
+        <div class="maxwell-eq">
+          <div class="maxwell-eq-num">方程 IV</div>
+          <div class="maxwell-eq-name">安培-麦克斯韦定律</div>
+          <div class="maxwell-eq-body">$$\oint_L \vec{H}\cdot d\vec{l} = \iint_S \!\left(\vec{j}_c + \frac{\partial \vec{D}}{\partial t}\right)\!\cdot d\vec{S}$$传导电流和位移电流共同激发磁场。</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">麦克斯韦方程组（微分形式）</div>
+      <p>利用高斯散度定理和斯托克斯定理，可将积分形式转化为微分形式：</p>
+      $$\nabla\cdot\vec{D} = \rho, \quad \nabla\cdot\vec{B} = 0$$
+      $$\nabla\times\vec{E} = -\frac{\partial\vec{B}}{\partial t}, \quad \nabla\times\vec{H} = \vec{j}_c + \frac{\partial\vec{D}}{\partial t}$$
+      <div class="note-box">
+        <span class="note-label">辅助关系</span>
+        在线性各向同性介质中：$\vec{D} = \varepsilon\vec{E} = \varepsilon_0\varepsilon_r\vec{E}$，$\vec{B} = \mu\vec{H} = \mu_0\mu_r\vec{H}$，$\vec{j}_c = \gamma\vec{E}$（欧姆定律微分形式）。
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">方程组的对称性与深刻含义</div>
+      <ul class="prop-list">
+        <li class="prop-item"><span class="prop-num">①</span><div class="prop-body"><strong>电磁对称性</strong>：方程 III 和 IV 揭示了电场与磁场的相互激发：$\partial\vec{B}/\partial t$ 激发 $\vec{E}$，$\partial\vec{D}/\partial t$ 激发 $\vec{H}$</div></li>
+        <li class="prop-item"><span class="prop-num">②</span><div class="prop-body"><strong>预言电磁波</strong>：在无源区域（$\rho=0$，$\vec{j}_c=0$），方程组预言了以速度 $c = 1/\sqrt{\varepsilon_0\mu_0}$ 传播的电磁波</div></li>
+        <li class="prop-item"><span class="prop-num">③</span><div class="prop-body"><strong>统一光与电磁</strong>：$c = 3\times10^8\,\text{m/s}$ 与光速完全一致，证明光是一种电磁波</div></li>
+        <li class="prop-item"><span class="prop-num">④</span><div class="prop-body"><strong>相对论基础</strong>：麦克斯韦方程组在洛伦兹变换下保持不变，是狭义相对论的出发点之一</div></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ══ Tab 1：电磁波 ══ -->
+  <div class="tab-panel" id="panel-1">
+    <div class="card">
+      <div class="card-title">电磁波的产生与传播</div>
+      <p>在无源区域，麦克斯韦方程组给出波动方程：</p>
+      $$\nabla^2\vec{E} = \varepsilon\mu\frac{\partial^2\vec{E}}{\partial t^2}, \quad \nabla^2\vec{H} = \varepsilon\mu\frac{\partial^2\vec{H}}{\partial t^2}$$
+      <p>波速：$u = \dfrac{1}{\sqrt{\varepsilon\mu}} = \dfrac{c}{\sqrt{\varepsilon_r\mu_r}}$，真空中 $c = \dfrac{1}{\sqrt{\varepsilon_0\mu_0}} \approx 3\times10^8\,\text{m/s}$。</p>
+      <div class="blue-box">
+        <span class="note-label">平面电磁波的解</span>
+        沿 $x$ 方向传播的平面波：$E_y = E_0\cos(\omega t - kx)$，$H_z = H_0\cos(\omega t - kx)$，其中 $k = \omega/u = 2\pi/\lambda$。
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">电磁波的基本性质</div>
+      <ul class="prop-list">
+        <li class="prop-item"><span class="prop-num">横</span><div class="prop-body"><strong>横波</strong>：$\vec{E}$、$\vec{H}$ 均垂直于传播方向，且 $\vec{E}\perp\vec{H}$，三者构成右手系：$\vec{E}\times\vec{H}$ 指向传播方向</div></li>
+        <li class="prop-item"><span class="prop-num">同</span><div class="prop-body"><strong>同相位</strong>：$\vec{E}$ 与 $\vec{H}$ 振动相位相同，同时达到最大值，同时为零</div></li>
+        <li class="prop-item"><span class="prop-num">比</span><div class="prop-body"><strong>振幅关系</strong>：$\sqrt{\varepsilon}E_0 = \sqrt{\mu}H_0$，即 $E_0/H_0 = \sqrt{\mu/\varepsilon}$（波阻抗）；真空中 $E_0 = cB_0$</div></li>
+        <li class="prop-item"><span class="prop-num">能</span><div class="prop-body"><strong>能量均分</strong>：电场能量密度 $\omega_e = \frac{1}{2}\varepsilon E^2$ 等于磁场能量密度 $\omega_m = \frac{1}{2}\mu H^2$，总能量密度 $\omega = \varepsilon E^2 = \mu H^2$</div></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">坡印廷矢量与辐射强度</div>
+      <p>电磁波携带能量，单位时间通过单位面积的能量（辐射强度）由<span class="hl">坡印廷矢量</span>描述：</p>
+      $$\vec{S} = \vec{E}\times\vec{H}$$
+      <p>$|\vec{S}|$ 的单位为 W/m²，方向为能量传播方向（即电磁波传播方向）。</p>
+      <p>平均辐射强度（光强）：$\bar{S} = \dfrac{1}{2}E_0 H_0 = \dfrac{E_0^2}{2\mu u} = \dfrac{1}{2}\varepsilon u E_0^2$</p>
+      <div class="green-box">
+        <span class="note-label">光压</span>
+        电磁波照射到物体上会产生辐射压力（光压）。完全吸收时：$p = I/c$；完全反射时：$p = 2I/c$，其中 $I$ 为辐射强度（W/m²）。
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Tab 2：仿真：电磁波传播 ══ -->
+  <div class="tab-panel" id="panel-2">
+    <div class="card">
+      <div class="card-title">交互仿真：平面电磁波</div>
+      <p>平面电磁波沿 $x$ 方向传播，$\vec{E}$ 沿 $y$ 方向，$\vec{H}$ 沿 $z$ 方向。调节频率和振幅，观察 $\vec{E}$、$\vec{H}$ 的空间分布和坡印廷矢量。</p>
+      <div class="slider-row">
+        <span>频率 $f$ =</span>
+        <input type="range" id="slF" min="0.5" max="5" step="0.5" value="2" oninput="updateWave()">
+        <span class="slider-val" id="valF">2.0 Hz</span>
+      </div>
+      <div class="slider-row">
+        <span>振幅 $E_0$ =</span>
+        <input type="range" id="slA" min="0.2" max="2" step="0.1" value="1" oninput="updateWave()">
+        <span class="slider-val" id="valA">1.0</span>
+      </div>
+      <div class="sim-ctrl">
+        <button class="sim-btn primary" id="btnWave" onclick="toggleWave()">▶ 播放</button>
+        <button class="sim-btn" onclick="resetWave()">重置</button>
+      </div>
+      <div class="readout-row">
+        <div class="readout"><div class="readout-val" id="roE">—</div><div class="readout-label">E (归一化)</div></div>
+        <div class="readout"><div class="readout-val" id="roH">—</div><div class="readout-label">H (归一化)</div></div>
+        <div class="readout"><div class="readout-val" id="roS">—</div><div class="readout-label">|S| (归一化)</div></div>
+        <div class="readout"><div class="readout-val" id="roLam">—</div><div class="readout-label">λ (归一化)</div></div>
+      </div>
+      <canvas id="waveCanvas" class="demo-canvas" width="620" height="300"></canvas>
+      <div class="demo-label">金：$E_y(x,t)$；蓝：$H_z(x,t)$；绿箭头：坡印廷矢量 $\vec{S} = \vec{E}\times\vec{H}$</div>
+    </div>
+  </div>
+
+  <!-- ══ Tab 3：例题 ══ -->
+  <div class="tab-panel" id="panel-3">
+    <div class="eg-block">
+      <div class="eg-title">例题 1：电磁波的能量与光压</div>
+      <p>太阳光在地球表面的辐射强度（太阳常数）约为 $I = 1.4\,\text{kW/m}^2$。求：(1) 地球表面电场振幅 $E_0$；(2) 太阳光对完全吸收表面的光压 $p$。</p>
+      <div class="sol-steps">
+        <div class="sol-step"><strong>平均辐射强度</strong>：$I = \bar{S} = \dfrac{1}{2}\varepsilon_0 c E_0^2$，故：$$E_0 = \sqrt{\frac{2I}{\varepsilon_0 c}} = \sqrt{\frac{2\times1400}{8.85\times10^{-12}\times3\times10^8}} \approx 1027\,\text{V/m}$$</div>
+        <div class="sol-step"><strong>磁场振幅</strong>：$B_0 = E_0/c \approx 3.42\,\mu\text{T}$，$H_0 = B_0/\mu_0 \approx 2.72\,\text{A/m}$</div>
+        <div class="sol-step"><strong>光压（完全吸收）</strong>：$$p = \frac{I}{c} = \frac{1400}{3\times10^8} \approx 4.67\,\mu\text{Pa}$$</div>
+      </div>
+      <div class="ans-box"><span class="ans-label">结果：</span>$E_0 \approx 1027\,\text{V/m}$，$B_0 \approx 3.42\,\mu\text{T}$，光压 $p \approx 4.67\,\mu\text{Pa}$（极小，但对微粒和航天器有实际影响）。</div>
+    </div>
+
+    <div class="eg-block">
+      <div class="eg-title">例题 2：介质中的电磁波速度</div>
+      <p>玻璃的相对介电常数 $\varepsilon_r = 2.25$，相对磁导率 $\mu_r \approx 1$。求：(1) 光在玻璃中的传播速度；(2) 折射率 $n$；(3) 玻璃中电场与磁场的振幅关系。</p>
+      <div class="sol-steps">
+        <div class="sol-step"><strong>传播速度</strong>：$$u = \frac{c}{\sqrt{\varepsilon_r\mu_r}} = \frac{3\times10^8}{\sqrt{2.25}} = 2\times10^8\,\text{m/s}$$</div>
+        <div class="sol-step"><strong>折射率</strong>：$n = c/u = \sqrt{\varepsilon_r\mu_r} = 1.5$（与实验值吻合）</div>
+        <div class="sol-step"><strong>振幅关系</strong>：$E_0/H_0 = \sqrt{\mu/\varepsilon} = \sqrt{\mu_0/(\varepsilon_0\times2.25)} \approx 251\,\Omega$</div>
+      </div>
+      <div class="ans-box"><span class="ans-label">结果：</span>$u = 2\times10^8\,\text{m/s}$，$n = 1.5$，波阻抗 $\approx 251\,\Omega$（真空波阻抗 $\approx 377\,\Omega$）。</div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<!-- Particle BG -->
+<script>
+(function(){
+  const cv=document.getElementById('particles'),cx=cv.getContext('2d');
+  let W,H,pts=[];
+  function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  for(let i=0;i<90;i++)pts.push({x:Math.random()*2000,y:Math.random()*1200,vx:(Math.random()-.5)*0.3,vy:(Math.random()-.5)*0.3,r:Math.random()*1.6+0.4,a:Math.random()*0.5+0.1});
+  (function frame(){cx.clearRect(0,0,W,H);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle=`rgba(192,132,252,${p.a*0.4})`;cx.fill();});requestAnimationFrame(frame);})();
+})();
+</script>
+
+<script>
+function switchTab(i){
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',j===i));
+  document.querySelectorAll('.tab-panel').forEach((p,j)=>p.classList.toggle('active',j===i));
+  if(i===2){updateWave();}
+}
+</script>
+
+<!-- Wave simulation -->
+<script>
+let waveT=0, waveAnim=null, waveRunning=false;
+
+function updateWave(){
+  const f=parseFloat(document.getElementById('slF').value);
+  const A=parseFloat(document.getElementById('slA').value);
+  document.getElementById('valF').textContent=f.toFixed(1)+' Hz';
+  document.getElementById('valA').textContent=A.toFixed(1);
+  const lam=(1/f).toFixed(2);
+  document.getElementById('roLam').textContent=lam;
+  drawWave();
+}
+
+function toggleWave(){
+  if(waveRunning){
+    cancelAnimationFrame(waveAnim);waveAnim=null;waveRunning=false;
+    document.getElementById('btnWave').textContent='▶ 播放';
+    return;
+  }
+  waveRunning=true;
+  document.getElementById('btnWave').textContent='⏸ 暂停';
+  function frame(){waveT+=0.016;drawWave();waveAnim=requestAnimationFrame(frame);}
+  frame();
+}
+
+function resetWave(){
+  waveT=0;waveRunning=false;
+  if(waveAnim){cancelAnimationFrame(waveAnim);waveAnim=null;}
+  document.getElementById('btnWave').textContent='▶ 播放';
+  updateWave();
+}
+
+function drawWave(){
+  const cv=document.getElementById('waveCanvas');if(!cv)return;
+  const ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  const f=parseFloat(document.getElementById('slF').value)||2;
+  const A=parseFloat(document.getElementById('slA').value)||1;
+  const omega=2*Math.PI*f;
+  const k=2*Math.PI*f; // normalized: c=1
+  const pad={l:30,r:20,t:20,b:30};
+  const gW=W-pad.l-pad.r,gH=H-pad.t-pad.b;
+  const cy=pad.t+gH/2;
+  const amp=gH*0.38*A;
+
+  // Axes
+  ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(pad.l,cy);ctx.lineTo(pad.l+gW,cy);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,pad.t+gH);ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,0.3)';ctx.font='11px "Microsoft YaHei"';ctx.textAlign='left';
+  ctx.fillText('x →',pad.l+gW-20,cy-6);
+
+  // E_y curve (gold)
+  ctx.strokeStyle='rgba(251,191,36,0.9)';ctx.lineWidth=2.5;ctx.beginPath();
+  for(let px=0;px<=gW;px++){
+    const x=px/gW*4;
+    const Ey=A*Math.cos(omega*waveT-k*x);
+    const y=cy-Ey*amp;
+    px===0?ctx.moveTo(pad.l+px,y):ctx.lineTo(pad.l+px,y);
+  }
+  ctx.stroke();
+
+  // H_z curve (blue)
+  ctx.strokeStyle='rgba(56,189,248,0.85)';ctx.lineWidth=2;ctx.beginPath();
+  for(let px=0;px<=gW;px++){
+    const x=px/gW*4;
+    const Hz=A*Math.cos(omega*waveT-k*x);
+    const y=cy-Hz*amp*0.7; // slightly smaller for visual separation
+    px===0?ctx.moveTo(pad.l+px,y):ctx.lineTo(pad.l+px,y);
+  }
+  ctx.stroke();
+
+  // Poynting vector arrows (green) at sample points
+  const nArrows=8;
+  for(let i=0;i<nArrows;i++){
+    const px=gW*(i+0.5)/nArrows;
+    const x=px/gW*4;
+    const Ey=A*Math.cos(omega*waveT-k*x);
+    const S=Ey*Ey; // S ∝ E²
+    const arrowLen=S*30*A;
+    if(arrowLen>2){
+      ctx.strokeStyle='rgba(52,211,153,0.7)';ctx.fillStyle='rgba(52,211,153,0.7)';ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.moveTo(pad.l+px,cy+10);ctx.lineTo(pad.l+px+arrowLen,cy+10);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(pad.l+px+arrowLen,cy+10);ctx.lineTo(pad.l+px+arrowLen-6,cy+6);ctx.lineTo(pad.l+px+arrowLen-6,cy+14);ctx.closePath();ctx.fill();
+    }
+  }
+
+  // Legend
+  ctx.font='12px "Microsoft YaHei"';ctx.textAlign='left';
+  ctx.fillStyle='rgba(251,191,36,0.9)';ctx.fillText('E_y',pad.l+6,pad.t+16);
+  ctx.fillStyle='rgba(56,189,248,0.85)';ctx.fillText('H_z',pad.l+40,pad.t+16);
+  ctx.fillStyle='rgba(52,211,153,0.7)';ctx.fillText('S →',pad.l+74,pad.t+16);
+
+  // Readouts
+  const Ecur=A*Math.cos(omega*waveT);
+  const Hcur=Ecur;
+  const Scur=Math.abs(Ecur*Hcur);
+  document.getElementById('roE').textContent=Ecur.toFixed(2);
+  document.getElementById('roH').textContent=Hcur.toFixed(2);
+  document.getElementById('roS').textContent=Scur.toFixed(2);
+}
+
+window.addEventListener('DOMContentLoaded',function(){updateWave();});
+</script>
+
+<!-- FAB -->
+<style>
+.note-fab{position:fixed;bottom:28px;right:28px;z-index:1000;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.fab-main{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#fbbf24);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 20px rgba(251,191,36,0.5);transition:transform .2s,box-shadow .2s;color:#1a1200}
+.fab-main:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(251,191,36,0.65)}
+.fab-main.active{background:linear-gradient(135deg,#d97706,#f59e0b);transform:rotate(45deg)}
+.fab-menu{display:flex;flex-direction:column;align-items:flex-end;gap:8px;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .2s,transform .2s}
+.fab-menu.open{opacity:1;pointer-events:all;transform:translateY(0)}
+.fab-item{display:flex;align-items:center;gap:10px;background:rgba(15,12,41,0.92);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:9px 16px 9px 12px;cursor:pointer;white-space:nowrap;backdrop-filter:blur(12px);transition:border-color .2s,background .2s;font-family:"Microsoft YaHei",sans-serif}
+.fab-item:hover{border-color:rgba(251,191,36,0.4);background:rgba(245,158,11,0.15)}
+.fab-item .fi-icon{font-size:17px}.fab-item .fi-label{font-size:13px;color:rgba(255,255,255,0.8)}
+.fab-item.starred .fi-label{color:#fbbf24}.fab-item.starred{border-color:rgba(251,191,36,0.35)}
+.fab-item.read-done .fi-label{color:#34d399}.fab-item.read-done{border-color:rgba(52,211,153,0.35)}
+.note-drawer{position:fixed;bottom:0;right:0;left:0;z-index:999;background:rgba(10,8,30,0.96);border-top:1px solid rgba(255,255,255,0.1);backdrop-filter:blur(20px);padding:20px 28px 28px;transform:translateY(100%);transition:transform .32s cubic-bezier(0.4,0,0.2,1)}
+.note-drawer.open{transform:translateY(0)}
+.drawer-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.drawer-title{font-size:14px;font-weight:700;color:#fbbf24;font-family:"Microsoft YaHei",sans-serif;letter-spacing:1px}
+.drawer-close{font-size:20px;color:rgba(255,255,255,0.4);cursor:pointer;transition:color .2s;line-height:1}
+.drawer-close:hover{color:#fff}
+.drawer-textarea{width:100%;height:120px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 16px;color:#fff;font-size:14px;font-family:"Microsoft YaHei",sans-serif;resize:vertical;outline:none;line-height:1.8;transition:border-color .2s}
+.drawer-textarea:focus{border-color:rgba(251,191,36,0.5)}
+.drawer-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.drawer-hint{font-size:11px;color:rgba(255,255,255,0.25);font-family:"Microsoft YaHei",sans-serif}
+.drawer-save{background:linear-gradient(135deg,#f59e0b,#fbbf24);border:none;color:#1a1200;font-size:13px;font-weight:700;padding:8px 22px;border-radius:10px;cursor:pointer;font-family:"Microsoft YaHei",sans-serif;transition:opacity .2s}
+.drawer-save:hover{opacity:0.85}
+.phy-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(15,12,41,0.95);border:1px solid rgba(251,191,36,0.3);border-radius:24px;padding:10px 22px;font-size:13px;color:rgba(255,255,255,0.85);font-family:"Microsoft YaHei",sans-serif;z-index:1100;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap}
+.phy-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+
+<div class="note-fab">
+  <div class="fab-menu" id="fabMenu">
+    <div class="fab-item" id="fabStar" onclick="toggleStar()"><span class="fi-icon">☆</span><span class="fi-label">收藏此节</span></div>
+    <div class="fab-item" id="fabRead" onclick="toggleRead()"><span class="fi-icon">○</span><span class="fi-label">标记已读</span></div>
+    <div class="fab-item" onclick="openDrawer()"><span class="fi-icon">📝</span><span class="fi-label">我的笔记</span></div>
+  </div>
+  <button class="fab-main" id="fabBtn" onclick="toggleFab()" title="工具">✦</button>
+</div>
+
+<div class="note-drawer" id="noteDrawer">
+  <div class="drawer-header">
+    <div class="drawer-title">📝 我的笔记 · §4-6</div>
+    <div class="drawer-close" onclick="closeDrawer()">×</div>
+  </div>
+  <textarea class="drawer-textarea" id="drawerTA" placeholder="在此记录你的理解、疑问或总结……"></textarea>
+  <div class="drawer-footer">
+    <span class="drawer-hint">自动保存到本地，刷新不丢失</span>
+    <button class="drawer-save" onclick="saveNote()">保存</button>
+  </div>
+</div>
+<div class="phy-toast" id="phyToast"></div>
+
+<script>
+(function(){
+  const PID='4-6',SK='phy26_note_'+PID,STK='phy26_star_'+PID,RDK='phy26_read_'+PID;
+  let fabOpen=false;
+  function showToast(msg){const t=document.getElementById('phyToast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
+  window.toggleFab=function(){fabOpen=!fabOpen;document.getElementById('fabMenu').classList.toggle('open',fabOpen);document.getElementById('fabBtn').classList.toggle('active',fabOpen);};
+  window.toggleStar=function(){const s=localStorage.getItem(STK)==='1';if(s){localStorage.removeItem(STK);showToast('已取消收藏');}else{localStorage.setItem(STK,'1');showToast('已收藏此节');}refreshStarUI();};
+  window.toggleRead=function(){const r=localStorage.getItem(RDK)==='1';if(r){localStorage.removeItem(RDK);showToast('已取消已读标记');}else{localStorage.setItem(RDK,'1');showToast('已标记为已读');}refreshReadUI();};
+  function refreshStarUI(){const s=localStorage.getItem(STK)==='1';const el=document.getElementById('fabStar');el.querySelector('.fi-icon').textContent=s?'★':'☆';el.querySelector('.fi-label').textContent=s?'已收藏':'收藏此节';el.classList.toggle('starred',s);}
+  function refreshReadUI(){const r=localStorage.getItem(RDK)==='1';const el=document.getElementById('fabRead');el.querySelector('.fi-icon').textContent=r?'✓':'○';el.querySelector('.fi-label').textContent=r?'已读':'标记已读';el.classList.toggle('read-done',r);}
+  window.openDrawer=function(){document.getElementById('drawerTA').value=localStorage.getItem(SK)||'';document.getElementById('noteDrawer').classList.add('open');document.getElementById('fabMenu').classList.remove('open');document.getElementById('fabBtn').classList.remove('active');fabOpen=false;setTimeout(()=>document.getElementById('drawerTA').focus(),350);};
+  window.closeDrawer=function(){document.getElementById('noteDrawer').classList.remove('open');};
+  window.saveNote=function(){const val=document.getElementById('drawerTA').value.trim();if(val){localStorage.setItem(SK,val);showToast('笔记已保存');}else{localStorage.removeItem(SK);showToast('笔记已清空');}closeDrawer();};
+  let saveTimer;document.getElementById('drawerTA').addEventListener('input',function(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{const val=this.value.trim();if(val)localStorage.setItem(SK,val);},1500);});
+  refreshStarUI();refreshReadUI();
+})();
+</script>
+</body>
+</html>

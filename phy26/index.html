@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>普通物理（卓）下 — 电磁学</title>
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      :root {
+        --em1: #6366f1;
+        --em2: #818cf8;
+        --em3: #a5b4fc;
+        --accent: #38bdf8;
+        --bg0: #07061a;
+        --bg1: #0f0c29;
+        --bg2: #1a1740;
+      }
+
+      html, body {
+        width: 100%; height: 100%;
+        overflow: hidden;
+      }
+
+      body {
+        font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        background: var(--bg0);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+
+      /* ── 深空背景渐变 ── */
+      .bg-gradient {
+        position: fixed;
+        inset: 0;
+        background:
+          radial-gradient(ellipse 90% 70% at 50% -10%, rgba(99,102,241,0.28) 0%, transparent 65%),
+          radial-gradient(ellipse 60% 50% at 85% 100%, rgba(56,189,248,0.16) 0%, transparent 55%),
+          radial-gradient(ellipse 55% 45% at 5% 85%, rgba(168,85,247,0.14) 0%, transparent 55%),
+          radial-gradient(ellipse 40% 35% at 50% 50%, rgba(99,102,241,0.06) 0%, transparent 70%),
+          linear-gradient(180deg, #07061a 0%, #0f0c29 50%, #0a0820 100%);
+        z-index: 0;
+      }
+
+      /* ── 粒子画布 ── */
+      #particles {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      /* ── 电磁场线装饰（SVG 网格） ── */
+      .field-lines {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        opacity: 0.04;
+        background-image:
+          repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(99,102,241,0.8) 60px),
+          repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(99,102,241,0.8) 60px);
+      }
+
+      /* ── 主内容层 ── */
+      .container {
+        position: relative;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+        width: 100%;
+        padding: 0 24px;
+        text-align: center;
+      }
+
+      /* ── 顶部 badge ── */
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        letter-spacing: 3.5px;
+        text-transform: uppercase;
+        color: var(--em3);
+        background: rgba(99,102,241,0.1);
+        border: 1px solid rgba(99,102,241,0.3);
+        border-radius: 100px;
+        padding: 6px 18px;
+        margin-bottom: 32px;
+        animation: fadeDown 0.7s 0.1s both;
+      }
+      .badge::before {
+        content: "";
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        background: var(--em2);
+        box-shadow: 0 0 8px var(--em2);
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50%       { opacity: 0.5; transform: scale(0.8); }
+      }
+
+      /* ── 大标题 ── */
+      .hero-title {
+        font-size: clamp(52px, 10vw, 96px);
+        font-weight: 900;
+        letter-spacing: 4px;
+        line-height: 1.1;
+        color: #fff;
+        animation: fadeDown 0.7s 0.2s both;
+        margin-bottom: 4px;
+      }
+      .hero-title .gradient-text {
+        background: linear-gradient(100deg, #818cf8 0%, #c084fc 40%, #38bdf8 80%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        filter: drop-shadow(0 0 30px rgba(129,140,248,0.4));
+      }
+
+      /* ── 副标题 ── */
+      .hero-sub {
+        font-size: clamp(13px, 2vw, 17px);
+        color: rgba(255,255,255,0.38);
+        letter-spacing: 2px;
+        margin-bottom: 48px;
+        animation: fadeDown 0.7s 0.3s both;
+      }
+
+      /* ── 电磁学分支标签 ── */
+      .branches {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-bottom: 56px;
+        animation: fadeDown 0.7s 0.4s both;
+      }
+      .branch-tag {
+        font-size: 12px;
+        color: rgba(255,255,255,0.55);
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 100px;
+        padding: 5px 16px;
+        letter-spacing: 1px;
+        transition: all 0.25s;
+        cursor: default;
+      }
+      .branch-tag:hover {
+        background: rgba(99,102,241,0.18);
+        border-color: rgba(99,102,241,0.45);
+        color: #a5b4fc;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(99,102,241,0.2);
+      }
+      .branch-tag.hi {
+        color: var(--em3);
+        background: rgba(99,102,241,0.12);
+        border-color: rgba(99,102,241,0.3);
+      }
+      .branch-tag.hi:hover {
+        background: rgba(99,102,241,0.25);
+        border-color: rgba(129,140,248,0.6);
+        color: #fff;
+        box-shadow: 0 4px 20px rgba(99,102,241,0.35);
+      }
+
+      /* ── 主进入按钮 ── */
+      .enter-btn {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        font-family: "Microsoft YaHei", sans-serif;
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        color: #fff;
+        background: linear-gradient(135deg, #5254cc, #7c3aed, #4f86c6);
+        background-size: 200% 200%;
+        border: none;
+        border-radius: 16px;
+        padding: 18px 52px;
+        cursor: pointer;
+        text-decoration: none;
+        box-shadow:
+          0 0 0 1px rgba(99,102,241,0.4),
+          0 8px 32px rgba(99,102,241,0.35),
+          0 2px 8px rgba(0,0,0,0.4);
+        transition: transform 0.22s, box-shadow 0.22s;
+        animation: fadeUp 0.7s 0.5s both;
+        overflow: hidden;
+      }
+      .enter-btn::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
+        border-radius: inherit;
+      }
+      .enter-btn::after {
+        content: "";
+        position: absolute;
+        top: -50%; left: -50%;
+        width: 200%; height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 60%);
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .enter-btn:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow:
+          0 0 0 1px rgba(129,140,248,0.6),
+          0 16px 48px rgba(99,102,241,0.5),
+          0 4px 12px rgba(0,0,0,0.4);
+      }
+      .enter-btn:hover::after { opacity: 1; }
+      .enter-btn:active { transform: translateY(0) scale(0.99); }
+
+      .enter-btn .arrow {
+        font-size: 20px;
+        transition: transform 0.22s;
+      }
+      .enter-btn:hover .arrow { transform: translateX(4px); }
+
+      /* ── 统计数字栏 ── */
+      .stats {
+        display: flex;
+        gap: 40px;
+        margin-top: 52px;
+        animation: fadeUp 0.7s 0.6s both;
+      }
+      .stat {
+        text-align: center;
+      }
+      .stat-num {
+        font-size: 28px;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: 1px;
+        line-height: 1;
+      }
+      .stat-num span {
+        background: linear-gradient(90deg, var(--em2), var(--accent));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .stat-label {
+        font-size: 11px;
+        color: rgba(255,255,255,0.3);
+        letter-spacing: 1.5px;
+        margin-top: 6px;
+        text-transform: uppercase;
+      }
+
+      .stat-divider {
+        width: 1px;
+        background: rgba(255,255,255,0.08);
+        align-self: stretch;
+      }
+
+      /* ── 课程全名 ── */
+      .course-title {
+        font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        font-size: 19px;
+        color: rgba(255,255,255,0.85);
+        letter-spacing: 3px;
+        margin-bottom: 16px;
+        animation: fadeDown 0.7s 0.15s both;
+      }
+
+      /* ── 底部署名 ── */
+      .footer {
+        position: fixed;
+        bottom: 28px;
+        left: 0; right: 0;
+        text-align: center;
+        font-size: 11.5px;
+        color: rgba(255,255,255,0.22);
+        letter-spacing: 0.8px;
+        z-index: 10;
+        animation: fadeUp 0.7s 0.8s both;
+      }
+
+      /* ── 动画 ── */
+      @keyframes fadeDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      /* ── 流光扫描线 ── */
+      .scanline {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, rgba(129,140,248,0.6), transparent);
+        animation: scan 6s linear infinite;
+        z-index: 2;
+        pointer-events: none;
+      }
+      @keyframes scan {
+        0%   { top: -4px; opacity: 0; }
+        5%   { opacity: 1; }
+        95%  { opacity: 1; }
+        100% { top: 100vh; opacity: 0; }
+      }
+
+      /* ── 角落装饰 ── */
+      .corner {
+        position: fixed;
+        width: 120px; height: 120px;
+        border: 1px solid rgba(99,102,241,0.15);
+        z-index: 2;
+        pointer-events: none;
+      }
+      .corner-tl { top: 24px; left: 24px; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
+      .corner-tr { top: 24px; right: 24px; border-left: none; border-bottom: none; border-radius: 0 8px 0 0; }
+      .corner-bl { bottom: 24px; left: 24px; border-right: none; border-top: none; border-radius: 0 0 0 8px; }
+      .corner-br { bottom: 24px; right: 24px; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
+
+      /* ── 左右侧标签 ── */
+      .side-label {
+        position: fixed;
+        font-size: 10px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: rgba(99,102,241,0.35);
+        z-index: 2;
+        pointer-events: none;
+      }
+      .side-label-l {
+        left: 20px; top: 50%;
+        transform: rotate(-90deg) translateX(-50%);
+        transform-origin: left center;
+      }
+      .side-label-r {
+        right: 20px; top: 50%;
+        transform: rotate(90deg) translateX(50%);
+        transform-origin: right center;
+      }
+
+      /* ── 响应式 ── */
+      @media (max-width: 600px) {
+        .stats { gap: 24px; }
+        .stat-num { font-size: 22px; }
+        .corner { width: 60px; height: 60px; }
+        .side-label { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="bg-gradient"></div>
+    <div class="field-lines"></div>
+    <div class="scanline"></div>
+    <canvas id="particles"></canvas>
+
+    <!-- 角落装饰 -->
+    <div class="corner corner-tl"></div>
+    <div class="corner corner-tr"></div>
+    <div class="corner corner-bl"></div>
+    <div class="corner corner-br"></div>
+
+    <!-- 侧边标签 -->
+    <div class="side-label side-label-l">NUSEP26 · 同济大学</div>
+    <div class="side-label side-label-r">Electromagnetic Theory</div>
+
+    <div class="container">
+      <div class="badge">NUSEP26 &nbsp;·&nbsp; 2026 &nbsp;·&nbsp; 普通物理（卓）下</div>
+
+      <div class="course-title">普通物理（卓越班）下册 — 电磁学</div>
+
+      <h1 class="hero-title">
+        <span class="gradient-text">电磁学</span>
+      </h1>
+
+      <p class="hero-sub">实验仿真 &nbsp;·&nbsp; 电子笔记</p>
+
+      <div class="branches">
+        <span class="branch-tag hi">⚡ 静电场</span>
+        <span class="branch-tag hi">🔷 导体与电介质</span>
+        <span class="branch-tag hi">🧲 恒定磁场</span>
+        <span class="branch-tag hi">🌀 变化的电磁场</span>
+      </div>
+
+      <a class="enter-btn" href="em.html">
+        进入学习
+        <span class="arrow">→</span>
+      </a>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-num"><span>4</span></div>
+          <div class="stat-label">章节</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <div class="stat-num"><span>22+</span></div>
+          <div class="stat-label">知识点</div>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <div class="stat-num"><span>34</span></div>
+          <div class="stat-label">实验仿真</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      技术开发：尹梓骏 2552840　·　技术支持：王俊博、徐帆　·　同济大学启迪书院　·　仅供教学实验参考
+    </div>
+
+    <script>
+      (function () {
+        const canvas = document.getElementById('particles');
+        const ctx = canvas.getContext('2d');
+        let W, H, pts = [];
+
+        function resize() {
+          W = canvas.width = innerWidth;
+          H = canvas.height = innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        const COLORS = ['#818cf8', '#6366f1', '#a5b4fc', '#38bdf8', '#c084fc'];
+
+        function spawn(randomY) {
+          return {
+            x: Math.random() * W,
+            y: randomY ? Math.random() * H : H + 10,
+            r: Math.random() * 2 + 0.5,
+            speed: Math.random() * 0.4 + 0.1,
+            color: COLORS[Math.random() * COLORS.length | 0],
+            op: Math.random() * 0.18 + 0.04,
+            drift: (Math.random() - 0.5) * 0.15,
+          };
+        }
+
+        for (let i = 0; i < 70; i++) pts.push(spawn(true));
+
+        function draw() {
+          ctx.clearRect(0, 0, W, H);
+          pts.forEach((p, i) => {
+            p.y -= p.speed;
+            p.x += p.drift;
+            if (p.y < -10 || p.x < -10 || p.x > W + 10) pts[i] = spawn(false);
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = p.op;
+            ctx.fill();
+          });
+          ctx.globalAlpha = 1;
+          requestAnimationFrame(draw);
+        }
+        draw();
+      })();
+    </script>
+  </body>
+</html>

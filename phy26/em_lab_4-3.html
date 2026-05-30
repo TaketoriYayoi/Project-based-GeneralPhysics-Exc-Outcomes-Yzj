@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>§4-3 自感和互感 — 仿真实验</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI','Microsoft YaHei',sans-serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;color:#e2e8f0;display:flex;flex-direction:column;overflow:hidden}
+  #topbar{display:flex;align-items:center;gap:14px;padding:10px 20px;background:rgba(255,255,255,0.05);border-bottom:1px solid rgba(255,255,255,0.1);backdrop-filter:blur(8px);flex-shrink:0;z-index:10}
+  #topbar a.back-btn{text-decoration:none;color:#fbbf24;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:8px;padding:5px 13px;font-size:13px;transition:background .2s}
+  #topbar a.back-btn:hover{background:rgba(251,191,36,0.22)}
+  .topbar-title-wrap{display:flex;flex-direction:column;gap:2px}
+  .topbar-title{font-size:16px;font-weight:700;color:#fff}
+  .topbar-course{font-size:11px;color:rgba(255,255,255,0.38);letter-spacing:1px}
+  .topbar-sub{margin-left:auto;font-size:12px;color:rgba(255,255,255,0.3)}
+  #main{display:flex;flex:1;overflow:hidden}
+  #sidebar{width:260px;flex-shrink:0;background:rgba(255,255,255,0.04);border-right:1px solid rgba(255,255,255,0.08);overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:14px}
+  #sidebar::-webkit-scrollbar{width:4px}
+  #sidebar::-webkit-scrollbar-thumb{background:rgba(251,191,36,0.3);border-radius:2px}
+  .section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#fbbf24;margin-bottom:6px;border-bottom:1px solid rgba(251,191,36,0.2);padding-bottom:4px}
+  .exp-btn{width:100%;text-align:left;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 14px;cursor:pointer;color:rgba(255,255,255,0.7);font-size:13px;font-family:'Microsoft YaHei',sans-serif;transition:all .2s;display:flex;align-items:center;gap:10px}
+  .exp-btn:hover{background:rgba(251,191,36,0.1);border-color:rgba(251,191,36,0.3);color:#fff}
+  .exp-btn.active{background:rgba(251,191,36,0.15);border-color:rgba(251,191,36,0.5);color:#fbbf24;font-weight:600}
+  .exp-icon{font-size:18px;flex-shrink:0}
+  .exp-info{display:flex;flex-direction:column;gap:2px}
+  .exp-name{font-size:13px;font-weight:600}
+  .exp-desc{font-size:11px;color:rgba(255,255,255,0.4)}
+  .ctrl-group{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px}
+  .ctrl-label{font-size:11px;color:rgba(255,255,255,0.45);letter-spacing:0.8px;margin-bottom:8px;font-family:'Microsoft YaHei',sans-serif}
+  .slider-wrap{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+  .slider-wrap label{font-size:12px;color:rgba(255,255,255,0.6);min-width:60px;font-family:'Microsoft YaHei',sans-serif}
+  .slider-wrap input[type=range]{flex:1;accent-color:#fbbf24;height:4px}
+  .slider-wrap span{font-size:12px;color:#fbbf24;font-weight:600;min-width:52px;text-align:right}
+  .action-btn{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(251,191,36,0.3);background:rgba(251,191,36,0.1);color:#fbbf24;font-size:13px;font-family:'Microsoft YaHei',sans-serif;cursor:pointer;transition:all .2s;margin-top:4px}
+  .action-btn:hover{background:rgba(251,191,36,0.25);border-color:rgba(251,191,36,0.6);color:#fff}
+  .action-btn.primary{background:linear-gradient(135deg,#f59e0b,#fbbf24);border-color:transparent;color:#1a1200;font-weight:700}
+  .readout-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+  .readout{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:8px 10px;text-align:center}
+  .readout-val{font-size:16px;font-weight:800;color:#fbbf24;font-family:'Times New Roman',serif}
+  .readout-label{font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px;letter-spacing:0.5px}
+  #canvas-area{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  #exp-title-bar{padding:10px 20px;background:rgba(0,0,0,0.2);border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:12px;flex-shrink:0}
+  #exp-title{font-size:15px;font-weight:700;color:#fbbf24;font-family:'Microsoft YaHei',sans-serif}
+  #exp-subtitle{font-size:12px;color:rgba(255,255,255,0.4)}
+  #canvas-wrap{flex:1;overflow:hidden}
+  canvas#simCanvas{display:block;width:100%;height:100%;background:rgba(0,0,0,0.3)}
+  #info-bar{padding:8px 20px;background:rgba(0,0,0,0.2);border-top:1px solid rgba(255,255,255,0.06);font-size:12px;color:rgba(255,255,255,0.4);font-family:'Microsoft YaHei',sans-serif;flex-shrink:0}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">§4-3 自感和互感</div>
+    <div class="topbar-course">普通物理（卓越班）下册 · 电磁学 · 仿真实验</div>
+  </div>
+  <div class="topbar-sub">NUSEP26</div>
+</div>
+<div id="main">
+  <div id="sidebar">
+    <div>
+      <div class="section-title">实验选择</div>
+      <button class="exp-btn active" onclick="loadExp(0)">
+        <span class="exp-icon">⚡</span>
+        <div class="exp-info"><div class="exp-name">RL 充放电</div><div class="exp-desc">I(t) = (ε/R)(1−e^{−t/τ})</div></div>
+      </button>
+      <button class="exp-btn" onclick="loadExp(1)">
+        <span class="exp-icon">🔗</span>
+        <div class="exp-info"><div class="exp-name">互感演示</div><div class="exp-desc">线圈1变化 → 线圈2感应</div></div>
+      </button>
+      <button class="exp-btn" onclick="loadExp(2)">
+        <span class="exp-icon">🔌</span>
+        <div class="exp-info"><div class="exp-name">串联等效自感</div><div class="exp-desc">顺接 vs 反接</div></div>
+      </button>
+    </div>
+    <div id="ctrl-panel"></div>
+    <div class="readout-grid">
+      <div class="readout"><div class="readout-val" id="ro1">—</div><div class="readout-label" id="ro1l">I (A)</div></div>
+      <div class="readout"><div class="readout-val" id="ro2">—</div><div class="readout-label" id="ro2l">U_L (V)</div></div>
+      <div class="readout"><div class="readout-val" id="ro3">—</div><div class="readout-label" id="ro3l">τ (s)</div></div>
+      <div class="readout"><div class="readout-val" id="ro4">—</div><div class="readout-label" id="ro4l">t (s)</div></div>
+    </div>
+    <div style="margin-top:auto;padding-top:12px"><button onclick="openReport()" style="width:100%;padding:10px;border-radius:10px;border:1px solid rgba(52,211,153,0.4);background:rgba(52,211,153,0.1);color:#34d399;font-size:13px;font-family:'Microsoft YaHei',sans-serif;cursor:pointer;font-weight:700;">📄 生成实验报告</button></div>
+  </div>
+  <div id="canvas-area">
+    <div id="exp-title-bar">
+      <div id="exp-title">RL 电路充放电</div>
+      <div id="exp-subtitle">观察电流随时间的指数变化，理解自感的"电磁惯性"</div>
+    </div>
+    <div id="canvas-wrap"><canvas id="simCanvas"></canvas></div>
+    <div id="info-bar">提示：调节 L、R、ε 参数，点击"充电"或"放电"观察过程</div>
+  </div>
+</div>
+<script>
+const canvas=document.getElementById('simCanvas');
+const ctx=canvas.getContext('2d');
+let animId=null,simT=0,curExp=0,rlMode='charge';
+
+const EXPS=[
+  {title:'RL 电路充放电',subtitle:'观察电流随时间的指数变化，理解自感的"电磁惯性"',
+   ctrls:`<div class="ctrl-group"><div class="ctrl-label">参数控制</div>
+    <div class="slider-wrap"><label>L (H)</label><input type="range" id="p0_L" min="0.1" max="5" step="0.1" value="1" oninput="redraw()"><span id="p0_L_v">1.0 H</span></div>
+    <div class="slider-wrap"><label>R (Ω)</label><input type="range" id="p0_R" min="0.5" max="10" step="0.5" value="2" oninput="redraw()"><span id="p0_R_v">2.0 Ω</span></div>
+    <div class="slider-wrap"><label>ε (V)</label><input type="range" id="p0_E" min="1" max="20" step="1" value="10" oninput="redraw()"><span id="p0_E_v">10 V</span></div>
+    <button class="action-btn primary" onclick="startMode('charge')">充电（接通）</button>
+    <button class="action-btn" onclick="startMode('discharge')">放电（断开）</button>
+    <button class="action-btn" onclick="resetSim()">重置</button></div>`,
+   ro:['I (A)','U_L (V)','τ (s)','t (s)']},
+  {title:'互感演示',subtitle:'线圈1中电流变化，在线圈2中产生互感电动势',
+   ctrls:`<div class="ctrl-group"><div class="ctrl-label">参数控制</div>
+    <div class="slider-wrap"><label>dI₁/dt</label><input type="range" id="p1_dI" min="-5" max="5" step="0.5" value="2" oninput="redraw()"><span id="p1_dI_v">+2.0 A/s</span></div>
+    <div class="slider-wrap"><label>互感 M (H)</label><input type="range" id="p1_M" min="0.1" max="3" step="0.1" value="1" oninput="redraw()"><span id="p1_M_v">1.0 H</span></div>
+    <div class="slider-wrap"><label>耦合 k</label><input type="range" id="p1_k" min="0" max="1" step="0.05" value="0.8" oninput="redraw()"><span id="p1_k_v">0.80</span></div>
+    <button class="action-btn primary" onclick="toggleAnim()">▶ 动画</button></div>`,
+   ro:['dI₁/dt','M (H)','ε₂₁ (V)','k']},
+  {title:'串联等效自感',subtitle:'顺接 L=L₁+L₂+2M，反接 L=L₁+L₂−2M',
+   ctrls:`<div class="ctrl-group"><div class="ctrl-label">参数控制</div>
+    <div class="slider-wrap"><label>L₁ (H)</label><input type="range" id="p2_L1" min="0.1" max="3" step="0.1" value="1" oninput="redraw()"><span id="p2_L1_v">1.0 H</span></div>
+    <div class="slider-wrap"><label>L₂ (H)</label><input type="range" id="p2_L2" min="0.1" max="3" step="0.1" value="1" oninput="redraw()"><span id="p2_L2_v">1.0 H</span></div>
+    <div class="slider-wrap"><label>M (H)</label><input type="range" id="p2_M" min="0" max="2" step="0.05" value="0.5" oninput="redraw()"><span id="p2_M_v">0.50 H</span></div></div>`,
+   ro:['L₁+L₂','2M','顺接 L','反接 L']}
+];
+
+function loadExp(i){
+  curExp=i;simT=0;
+  if(animId){cancelAnimationFrame(animId);animId=null;}
+  document.querySelectorAll('.exp-btn').forEach((b,j)=>b.classList.toggle('active',j===i));
+  document.getElementById('exp-title').textContent=EXPS[i].title;
+  document.getElementById('exp-subtitle').textContent=EXPS[i].subtitle;
+  document.getElementById('ctrl-panel').innerHTML=EXPS[i].ctrls;
+  const ro=EXPS[i].ro;
+  ['ro1l','ro2l','ro3l','ro4l'].forEach((id,j)=>document.getElementById(id).textContent=ro[j]);
+  redraw();
+}
+function startMode(m){rlMode=m;simT=0;if(animId){cancelAnimationFrame(animId);animId=null;}toggleAnim();}
+function toggleAnim(){
+  if(animId){cancelAnimationFrame(animId);animId=null;return;}
+  function frame(){simT+=0.025;redraw();animId=requestAnimationFrame(frame);}
+  frame();
+}
+function resetSim(){simT=0;if(animId){cancelAnimationFrame(animId);animId=null;}redraw();}
+function gv(id){const el=document.getElementById(id);return el?parseFloat(el.value):0;}
+function sv(id,txt){const el=document.getElementById(id);if(el)el.textContent=txt;}
+function ro(i,v){const el=document.getElementById('ro'+(i+1));if(el)el.textContent=v;}
+
+function redraw(){
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  if(curExp===0)drawRL(W,H);
+  else if(curExp===1)drawMutual(W,H);
+  else drawSeries(W,H);
+}
+
+function drawRL(W,H){
+  const L=gv('p0_L'),R=gv('p0_R'),E=gv('p0_E');
+  sv('p0_L_v',L.toFixed(1)+' H');sv('p0_R_v',R.toFixed(1)+' Ω');sv('p0_E_v',E.toFixed(0)+' V');
+  const tau=L/R,I0=E/R;
+  const tMax=5*tau+0.2;
+  const pad={l:52,r:20,t:24,b:40};
+  const gW=W-pad.l-pad.r,gH=H-pad.t-pad.b;
+  // Grid
+  ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;
+  for(let i=0;i<=5;i++){const y=pad.t+gH*i/5;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+gW,y);ctx.stroke();}
+  for(let i=0;i<=5;i++){const x=pad.l+gW*i/5;ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,pad.t+gH);ctx.stroke();}
+  // Axes
+  ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,pad.t+gH);ctx.lineTo(pad.l+gW,pad.t+gH);ctx.stroke();
+  // Labels
+  ctx.fillStyle='rgba(255,255,255,0.35)';ctx.font='11px Times New Roman';ctx.textAlign='right';
+  for(let i=0;i<=5;i++){ctx.fillText((I0*i/5).toFixed(2),pad.l-4,pad.t+gH*(1-i/5)+4);}
+  ctx.textAlign='center';
+  for(let i=0;i<=5;i++){ctx.fillText((tMax*i/5).toFixed(2)+'s',pad.l+gW*i/5,pad.t+gH+14);}
+  // Steady line
+  ctx.strokeStyle='rgba(251,191,36,0.25)';ctx.lineWidth=1;ctx.setLineDash([5,4]);
+  ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l+gW,pad.t);ctx.stroke();ctx.setLineDash([]);
+  // I(t)
+  ctx.strokeStyle='rgba(56,189,248,0.9)';ctx.lineWidth=2.5;ctx.beginPath();
+  for(let px=0;px<=gW;px++){
+    const t=tMax*px/gW;
+    const I=rlMode==='charge'?I0*(1-Math.exp(-t/tau)):I0*Math.exp(-t/tau);
+    const y=pad.t+gH*(1-I/I0);
+    px===0?ctx.moveTo(pad.l+px,y):ctx.lineTo(pad.l+px,y);
+  }
+  ctx.stroke();
+  // U_L(t)
+  ctx.strokeStyle='rgba(251,191,36,0.8)';ctx.lineWidth=2;ctx.beginPath();
+  for(let px=0;px<=gW;px++){
+    const t=tMax*px/gW;
+    const UL=rlMode==='charge'?E*Math.exp(-t/tau):-E*Math.exp(-t/tau);
+    const y=pad.t+gH*(0.5-UL/E*0.45);
+    px===0?ctx.moveTo(pad.l+px,y):ctx.lineTo(pad.l+px,y);
+  }
+  ctx.stroke();
+  // Current dot
+  const tCur=Math.min(simT,tMax);
+  const ICur=rlMode==='charge'?I0*(1-Math.exp(-tCur/tau)):I0*Math.exp(-tCur/tau);
+  const ULCur=rlMode==='charge'?E*Math.exp(-tCur/tau):-E*Math.exp(-tCur/tau);
+  const xCur=pad.l+gW*tCur/tMax;
+  const yCur=pad.t+gH*(1-ICur/I0);
+  ctx.fillStyle='rgba(56,189,248,1)';ctx.beginPath();ctx.arc(xCur,yCur,5,0,Math.PI*2);ctx.fill();
+  // Legend
+  ctx.font='12px "Microsoft YaHei"';ctx.textAlign='left';
+  ctx.fillStyle='rgba(56,189,248,0.9)';ctx.fillText('I(t)',pad.l+8,pad.t+16);
+  ctx.fillStyle='rgba(251,191,36,0.8)';ctx.fillText('U_L(t)',pad.l+44,pad.t+16);
+  ctx.fillStyle='rgba(255,255,255,0.5)';ctx.fillText('τ='+tau.toFixed(2)+'s  I₀='+I0.toFixed(2)+'A',pad.l+8,pad.t+gH-8);
+  ro(0,ICur.toFixed(3));ro(1,ULCur.toFixed(3));ro(2,tau.toFixed(3));ro(3,tCur.toFixed(2));
+}
+
+function drawMutual(W,H){
+  const dI=gv('p1_dI'),M=gv('p1_M'),k=gv('p1_k');
+  sv('p1_dI_v',(dI>=0?'+':'')+dI.toFixed(1)+' A/s');sv('p1_M_v',M.toFixed(1)+' H');sv('p1_k_v',k.toFixed(2));
+  const eps21=-M*dI;
+  // Draw two coils
+  const c1x=W*0.28,c2x=W*0.72,cy=H/2,cW=80,cH=120;
+  // Coil 1
+  ctx.strokeStyle='rgba(56,189,248,0.8)';ctx.lineWidth=3;ctx.strokeRect(c1x-cW/2,cy-cH/2,cW,cH);
+  ctx.fillStyle='rgba(56,189,248,0.6)';ctx.font='13px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText('线圈 1',c1x,cy+cH/2+18);
+  ctx.fillText('I₁ 变化',c1x,cy-cH/2-8);
+  // Coil 2
+  ctx.strokeStyle='rgba(251,191,36,0.8)';ctx.lineWidth=3;ctx.strokeRect(c2x-cW/2,cy-cH/2,cW,cH);
+  ctx.fillStyle='rgba(251,191,36,0.6)';ctx.font='13px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText('线圈 2',c2x,cy+cH/2+18);
+  // Coupling arrows
+  const nArrows=3;
+  for(let i=0;i<nArrows;i++){
+    const ay=cy-30+i*30;
+    const alpha=k*0.8;
+    ctx.strokeStyle=`rgba(52,211,153,${alpha})`;ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(c1x+cW/2+5,ay);ctx.lineTo(c2x-cW/2-5,ay);ctx.stroke();
+    const mx=(c1x+cW/2+c2x-cW/2)/2;
+    ctx.fillStyle=`rgba(52,211,153,${alpha})`;
+    ctx.beginPath();ctx.moveTo(mx+5,ay);ctx.lineTo(mx-5,ay-5);ctx.lineTo(mx-5,ay+5);ctx.closePath();ctx.fill();
+  }
+  ctx.fillStyle='rgba(52,211,153,0.7)';ctx.font='11px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText('k = '+k.toFixed(2),(c1x+c2x)/2,cy-50);
+  // EMF label
+  if(Math.abs(eps21)>0.001){
+    ctx.fillStyle='rgba(248,113,113,0.9)';ctx.font='bold 14px "Microsoft YaHei"';ctx.textAlign='center';
+    ctx.fillText('ε₂₁ = −M·dI₁/dt = '+eps21.toFixed(3)+' V',c2x,cy-cH/2-28);
+    const dir=eps21>0?1:-1;
+    ctx.strokeStyle='rgba(248,113,113,0.8)';ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(c2x,cy,40,0,Math.PI*2*0.75*dir);ctx.stroke();
+  }
+  ro(0,(dI>=0?'+':'')+dI.toFixed(1));ro(1,M.toFixed(1));ro(2,eps21.toFixed(3));ro(3,k.toFixed(2));
+}
+
+function drawSeries(W,H){
+  const L1=gv('p2_L1'),L2=gv('p2_L2'),M=gv('p2_M');
+  sv('p2_L1_v',L1.toFixed(1)+' H');sv('p2_L2_v',L2.toFixed(1)+' H');sv('p2_M_v',M.toFixed(2)+' H');
+  const Lp=L1+L2+2*M,Lm=L1+L2-2*M;
+  // Bar chart
+  const bars=[{label:'L₁',val:L1,col:'rgba(56,189,248,0.7)'},{label:'L₂',val:L2,col:'rgba(52,211,153,0.7)'},{label:'2M',val:2*M,col:'rgba(251,191,36,0.7)'},{label:'顺接',val:Lp,col:'rgba(248,113,113,0.8)'},{label:'反接',val:Math.max(Lm,0),col:'rgba(192,132,252,0.8)'}];
+  const maxV=Math.max(Lp,0.1);
+  const bx=W*0.08,by=H*0.12,bW=W*0.84,bH=H*0.6;
+  bars.forEach((b,i)=>{
+    const x=bx+bW*(i+0.5)/bars.length;
+    const bw=bW/bars.length*0.55;
+    const bh=b.val/maxV*bH;
+    ctx.fillStyle=b.col;ctx.fillRect(x-bw/2,by+bH-bh,bw,bh);
+    ctx.fillStyle='rgba(255,255,255,0.7)';ctx.font='12px "Microsoft YaHei"';ctx.textAlign='center';
+    ctx.fillText(b.label,x,by+bH+16);
+    ctx.fillStyle=b.col;ctx.fillText(b.val.toFixed(2)+'H',x,by+bH-bh-6);
+  });
+  ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='13px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText('顺接：L = L₁+L₂+2M = '+Lp.toFixed(2)+' H',W/2,by+bH+40);
+  ctx.fillText('反接：L = L₁+L₂−2M = '+Math.max(Lm,0).toFixed(2)+' H',W/2,by+bH+60);
+  ctx.fillStyle='rgba(251,191,36,0.8)';ctx.font='bold 13px "Microsoft YaHei"';
+  ctx.fillText('测量互感：M = (L₊ − L₋) / 4 = '+M.toFixed(2)+' H',W/2,by-10);
+  ro(0,(L1+L2).toFixed(2));ro(1,(2*M).toFixed(2));ro(2,Lp.toFixed(2));ro(3,Math.max(Lm,0).toFixed(2));
+}
+
+function resizeCanvas(){const w=canvas.parentElement;canvas.width=w.clientWidth;canvas.height=w.clientHeight;redraw();}
+window.addEventListener('resize',resizeCanvas);
+window.addEventListener('DOMContentLoaded',()=>{loadExp(0);setTimeout(resizeCanvas,80);});
+</script>
+
+<!-- ── 实验报告生成器 ── -->
+<style>
+.report-overlay{position:fixed;inset:0;z-index:1200;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:20px}
+.report-overlay.open{display:flex}
+.report-modal{background:#0e0c24;border:1px solid rgba(255,255,255,0.1);border-radius:20px;width:min(760px,100%);max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,0.7);animation:slideUp 0.3s cubic-bezier(0.4,0,0.2,1) both}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.rm-header{padding:24px 28px 20px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;justify-content:space-between}
+.rm-title{font-size:17px;font-weight:700;color:#fff;font-family:"Microsoft YaHei",sans-serif}
+.rm-title span{color:#34d399}
+.rm-close{font-size:22px;color:rgba(255,255,255,0.4);cursor:pointer;line-height:1;transition:color 0.2s}
+.rm-close:hover{color:#fff}
+.rm-body{padding:24px 28px;display:flex;flex-direction:column;gap:16px}
+.rm-field{display:flex;flex-direction:column;gap:6px}
+.rm-label{font-size:12px;color:rgba(255,255,255,0.45);font-family:"Microsoft YaHei",sans-serif;letter-spacing:0.5px}
+.rm-label span{color:#f87171}
+.rm-input,.rm-textarea{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 14px;color:#fff;font-size:14px;font-family:"Microsoft YaHei",sans-serif;outline:none;transition:border-color 0.2s;width:100%}
+.rm-input:focus,.rm-textarea:focus{border-color:rgba(52,211,153,0.5)}
+.rm-textarea{resize:vertical;min-height:80px;line-height:1.8}
+.rm-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.rm-section-title{font-size:12px;font-weight:700;color:rgba(52,211,153,0.8);letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid rgba(52,211,153,0.15);padding-bottom:8px;margin-top:4px;font-family:"Microsoft YaHei",sans-serif}
+.rm-footer{padding:16px 28px 24px;display:flex;gap:12px;justify-content:flex-end}
+.rm-btn{padding:10px 28px;border-radius:12px;border:none;cursor:pointer;font-size:14px;font-weight:700;font-family:"Microsoft YaHei",sans-serif;transition:opacity 0.2s,transform 0.15s}
+.rm-btn:hover{opacity:0.88;transform:translateY(-1px)}
+.rm-btn-cancel{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.6)}
+.rm-btn-gen{background:linear-gradient(135deg,#10b981,#34d399);color:#fff}
+.rm-btn-copy{background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;display:none}
+.report-output{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:20px 24px;margin:0 28px 24px;font-family:"Microsoft YaHei","Times New Roman",serif;font-size:13.5px;color:rgba(255,255,255,0.85);line-height:2;white-space:pre-wrap;display:none;max-height:340px;overflow-y:auto}
+.report-output.show{display:block}
+</style>
+<div class="report-overlay" id="reportOverlay" onclick="overlayClick(event)">
+  <div class="report-modal">
+    <div class="rm-header">
+      <div class="rm-title">实验报告 · <span>自感和互感</span></div>
+      <div class="rm-close" onclick="closeReport()">×</div>
+    </div>
+    <div class="rm-body">
+      <div class="rm-section-title">基本信息</div>
+      <div class="rm-row">
+        <div class="rm-field"><div class="rm-label">姓名 <span>*</span></div><input class="rm-input" id="rName" placeholder="请输入姓名"></div>
+        <div class="rm-field"><div class="rm-label">学号 <span>*</span></div><input class="rm-input" id="rStuId" placeholder="请输入学号"></div>
+      </div>
+      <div class="rm-row">
+        <div class="rm-field"><div class="rm-label">实验日期</div><input class="rm-input" id="rDate" type="date"></div>
+        <div class="rm-field"><div class="rm-label">实验伙伴</div><input class="rm-input" id="rPartner" placeholder="可选"></div>
+      </div>
+      <div class="rm-section-title">实验内容</div>
+      <div class="rm-field"><div class="rm-label">实验目的</div><textarea class="rm-textarea" id="rPurpose" placeholder="描述本次实验的目的和预期目标……"></textarea></div>
+      <div class="rm-field"><div class="rm-label">实验步骤与观察</div><textarea class="rm-textarea" id="rProcess" placeholder="描述你进行的操作步骤和实验过程中的观察……" style="min-height:100px"></textarea></div>
+      <div class="rm-field"><div class="rm-label">实验数据记录</div><textarea class="rm-textarea" id="rData" placeholder="记录关键数据、参数和仿真结果……"></textarea></div>
+      <div class="rm-section-title">分析与总结</div>
+      <div class="rm-field"><div class="rm-label">结果分析</div><textarea class="rm-textarea" id="rAnalysis" placeholder="对实验现象和数据进行分析……"></textarea></div>
+      <div class="rm-field"><div class="rm-label">误差分析与思考</div><textarea class="rm-textarea" id="rError" placeholder="分析可能的误差来源，以及对物理规律的思考……"></textarea></div>
+      <div class="rm-field"><div class="rm-label">实验结论</div><textarea class="rm-textarea" id="rConclusion" placeholder="总结本次实验的结论……"></textarea></div>
+    </div>
+    <div class="report-output" id="reportOutput"></div>
+    <div class="rm-footer">
+      <button class="rm-btn rm-btn-cancel" onclick="closeReport()">取消</button>
+      <button class="rm-btn rm-btn-copy" id="rmCopyBtn" onclick="copyReport()">复制报告</button>
+      <button class="rm-btn rm-btn-gen" onclick="generateReport()">生成报告</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  const EXP_NAME='自感和互感';const EXP_SEC='§4-3';const STORE_KEY='phy26_report_'+EXP_SEC.replace(/[§\/]/g,'');
+  function loadSaved(){const d=JSON.parse(localStorage.getItem(STORE_KEY)||'{}');if(d.name)document.getElementById('rName').value=d.name;if(d.stuId)document.getElementById('rStuId').value=d.stuId;if(d.date)document.getElementById('rDate').value=d.date;if(d.partner)document.getElementById('rPartner').value=d.partner;if(d.purpose)document.getElementById('rPurpose').value=d.purpose;if(d.process)document.getElementById('rProcess').value=d.process;if(d.data)document.getElementById('rData').value=d.data;if(d.analysis)document.getElementById('rAnalysis').value=d.analysis;if(d.error)document.getElementById('rError').value=d.error;if(d.conclusion)document.getElementById('rConclusion').value=d.conclusion;}
+  function saveDraft(){const d={name:document.getElementById('rName').value,stuId:document.getElementById('rStuId').value,date:document.getElementById('rDate').value,partner:document.getElementById('rPartner').value,purpose:document.getElementById('rPurpose').value,process:document.getElementById('rProcess').value,data:document.getElementById('rData').value,analysis:document.getElementById('rAnalysis').value,error:document.getElementById('rError').value,conclusion:document.getElementById('rConclusion').value};localStorage.setItem(STORE_KEY,JSON.stringify(d));}
+  window.openReport=function(){document.getElementById('reportOverlay').classList.add('open');document.getElementById('reportOutput').classList.remove('show');document.getElementById('rmCopyBtn').style.display='none';const dateEl=document.getElementById('rDate');if(!dateEl.value)dateEl.value=new Date().toISOString().slice(0,10);loadSaved();const _d={rPurpose:'研究自感和互感现象，验证RL电路的充放电规律I(t)=（ε/R）(1−e^{−t/τ})，理解自感的"电磁惯性"，测量互感系数M，分析顺接和反接时的等效自感。',rProcess:'构建RL电路，改变L、R、ε，观察充放电时电流I(t)的指数变化；测量时间常数τ=L/R，验证τ∝L和τ∝1/R；设置两个耦合线圈，改变线圈1的电流，观察线圈2的感应电动势；测量顺接（L₊=L₁+L₂+2M）和反接（L₋=L₁+L₂−2M）时的等效自感，计算M=(L₊−L₋)/4。',rData:'RL电路（L=1H，R=2Ω，ε=10V）：τ=L/R=0.5s，I_max=ε/R=5A；t=τ时：I=5(1−e⁻¹)=3.16A；L增大2倍：τ=1s（τ∝L）；R增大2倍：τ=0.25s（τ∝1/R）；互感（L₁=L₂=1H，k=0.5）：M=k√(L₁L₂)=0.5H；L₊=3H，L₋=1H，M=(3−1)/4=0.5H（验证）。',rAnalysis:'自感电动势ε_L=−L·dI/dt，阻碍电流变化（电磁惯性）。RL电路充电时间常数τ=L/R，L越大惯性越大，R越大阻尼越强。互感M=k√(L₁L₂)，k为耦合系数（0≤k≤1）。顺接时磁通量叠加（L₊=L₁+L₂+2M），反接时磁通量抵消（L₋=L₁+L₂−2M），通过测量L₊和L₋可以确定M。',rError:'仿真中使用理想电感（无电阻），实际线圈有绕线电阻；互感系数随线圈相对位置变化，仿真使用固定k值；高频时需考虑分布电容和集肤效应。',rConclusion:'验证了RL电路充放电规律I(t)=(ε/R)(1−e^{−t/τ})，时间常数τ=L/R；自感具有电磁惯性，阻碍电流变化；互感系数M=(L₊−L₋)/4，可通过顺接反接实验测量；自感和互感是变压器、电动机等电磁装置的工作基础。'};Object.entries(_d).forEach(([id,val])=>{const el=document.getElementById(id);if(el&&!el.value)el.value=val;});};
+  window.closeReport=function(){saveDraft();document.getElementById('reportOverlay').classList.remove('open');};
+  window.overlayClick=function(e){if(e.target===document.getElementById('reportOverlay'))closeReport();};
+  window.generateReport=function(){const name=document.getElementById('rName').value.trim();const stuId=document.getElementById('rStuId').value.trim();const date=document.getElementById('rDate').value||'—';const partner=document.getElementById('rPartner').value.trim()||'—';const purpose=document.getElementById('rPurpose').value.trim()||'（未填写）';const process=document.getElementById('rProcess').value.trim()||'（未填写）';const data=document.getElementById('rData').value.trim()||'（未填写）';const analysis=document.getElementById('rAnalysis').value.trim()||'（未填写）';const error=document.getElementById('rError').value.trim()||'（未填写）';const conclusion=document.getElementById('rConclusion').value.trim()||'（未填写）';if(!name||!stuId){alert('请填写姓名和学号');return;}saveDraft();const divider='─'.repeat(40);const report=['普通物理（卓越班）下册 · 电磁学',`实验报告：${EXP_NAME}（${EXP_SEC}）`,divider,`姓　　名：${name}　　　学　　号：${stuId}`,`实验日期：${date}　　　实验伙伴：${partner}`,divider,'','一、实验目的',purpose,'','二、实验步骤与观察',process,'','三、实验数据记录',data,'','四、结果分析',analysis,'','五、误差分析与思考',error,'','六、实验结论',conclusion,'',divider,`生成时间：${new Date().toLocaleString('zh-CN')}`,'本报告由 NUSEP26 普通物理（卓越班）实验仿真平台生成'].join('\n');const out=document.getElementById('reportOutput');out.textContent=report;out.classList.add('show');document.getElementById('rmCopyBtn').style.display='inline-flex';out.scrollIntoView({behavior:'smooth',block:'nearest'});};
+  window.copyReport=function(){const text=document.getElementById('reportOutput').textContent;navigator.clipboard.writeText(text).then(()=>{const btn=document.getElementById('rmCopyBtn');const orig=btn.textContent;btn.textContent='✓ 已复制';setTimeout(()=>btn.textContent=orig,2000);}).catch(()=>{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);const btn=document.getElementById('rmCopyBtn');btn.textContent='✓ 已复制';setTimeout(()=>btn.textContent='复制报告',2000);});};
+  ['rName','rStuId','rDate','rPartner','rPurpose','rProcess','rData','rAnalysis','rError','rConclusion'].forEach(id=>document.getElementById(id).addEventListener('input',saveDraft));
+})();
+</script>
+</body>
+</html>

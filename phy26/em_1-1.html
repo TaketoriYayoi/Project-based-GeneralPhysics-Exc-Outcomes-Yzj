@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1-1 电荷 库仑定律 — 电磁学</title>
+  <!-- KaTeX -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* 普通英文用 Times New Roman */
+    body {
+      font-family: "Times New Roman", "Microsoft YaHei", "PingFang SC", serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh; color: #fff;
+    }
+    /* 中文回退到雅黑 */
+    :lang(zh), .zh { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; }
+
+    canvas#particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+
+    /* 顶栏 */
+    .topbar {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; gap: 14px;
+      padding: 18px 36px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      background: rgba(15,12,41,0.7); backdrop-filter: blur(12px);
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .back-btn { color: rgba(255,255,255,0.5); font-size: 14px; cursor: pointer; text-decoration: none; transition: color .2s; }
+    .back-btn:hover { color: #818cf8; }
+    .topbar-title-wrap { display: flex; flex-direction: column; gap: 2px; }
+    .topbar-title { font-size: 16px; font-weight: 700; letter-spacing: 1px; }
+    .topbar-course { font-size: 11px; color: rgba(255,255,255,0.38); letter-spacing: 1px; }
+    .topbar-sub { margin-left: auto; font-size: 12px; color: rgba(255,255,255,0.3); }
+
+    /* 主体 */
+    .page { position: relative; z-index: 10; max-width: 860px; margin: 0 auto; padding: 36px 24px 80px; }
+
+    /* 小节 tab */
+    .tabs { display: flex; gap: 10px; margin-bottom: 32px; font-family: "Microsoft YaHei", sans-serif; }
+    .tab {
+      padding: 9px 22px; border-radius: 10px; font-size: 14px; font-weight: 600;
+      cursor: pointer; border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.5);
+      transition: all .2s;
+    }
+    .tab.active {
+      background: linear-gradient(135deg,#6366f1,#818cf8);
+      border-color: transparent; color: #fff;
+      box-shadow: 0 4px 16px rgba(99,102,241,0.4);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* 知识卡片 */
+    .card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 16px; padding: 28px 32px; margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 16px; font-weight: 700; color: #818cf8;
+      margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .card-title::before {
+      content: ""; display: inline-block;
+      width: 4px; height: 18px; border-radius: 2px;
+      background: linear-gradient(#6366f1,#818cf8);
+    }
+    .card p { font-size: 15px; color: rgba(255,255,255,0.8); line-height: 2; }
+    .card p + p { margin-top: 10px; }
+    .hl  { color: #fbbf24; font-weight: 600; }
+    .hl-blue  { color: #38bdf8; font-weight: 600; }
+    .hl-green { color: #34d399; font-weight: 600; }
+    .hl-red   { color: #f87171; font-weight: 600; }
+
+    /* KaTeX 颜色适配深色背景 */
+    .katex { color: #e2e8f0; font-size: 1.05em; }
+    .katex-display { margin: 14px 0; }
+    .katex-display > .katex { color: #93c5fd; }
+
+    /* 性质列表 */
+    .prop-list { list-style: none; margin-top: 10px; display: flex; flex-direction: column; gap: 12px; }
+    .prop-item {
+      display: flex; gap: 14px; align-items: flex-start;
+      background: rgba(255,255,255,0.03); border-radius: 10px; padding: 14px 18px;
+      border-left: 3px solid #6366f1;
+    }
+    .prop-item:nth-child(2) { border-left-color: #38bdf8; }
+    .prop-item:nth-child(3) { border-left-color: #34d399; }
+    .prop-item:nth-child(4) { border-left-color: #f59e0b; }
+    .prop-num {
+      width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700;
+      background: linear-gradient(135deg,#6366f1,#818cf8); color: #fff;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .prop-item:nth-child(2) .prop-num { background: linear-gradient(135deg,#0ea5e9,#38bdf8); }
+    .prop-item:nth-child(3) .prop-num { background: linear-gradient(135deg,#10b981,#34d399); }
+    .prop-item:nth-child(4) .prop-num { background: linear-gradient(135deg,#f59e0b,#fbbf24); }
+    .prop-body { font-size: 14.5px; color: rgba(255,255,255,0.78); line-height: 1.9; }
+    .prop-body strong { color: #fff; font-family: "Microsoft YaHei", sans-serif; }
+
+    /* 演示框 */
+    .demo-box {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px; padding: 24px; margin-bottom: 20px;
+    }
+    .demo-title {
+      font-size: 15px; font-weight: 700; color: #c084fc; margin-bottom: 16px;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .rods { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
+    .rod-wrap { text-align: center; }
+    .rod-label { font-size: 12px; color: rgba(255,255,255,0.45); margin-bottom: 8px; font-family: "Microsoft YaHei", sans-serif; }
+    canvas.rod-canvas { border-radius: 8px; display: block; margin: 0 auto; }
+    .rod-charge { font-size: 13px; margin-top: 8px; font-weight: 600; font-family: "Microsoft YaHei", sans-serif; }
+
+    .quant-wrap { text-align: center; }
+    .quant-wrap p { font-size: 13px; color: rgba(255,255,255,0.45); margin-bottom: 12px; font-family: "Microsoft YaHei", sans-serif; }
+    #quantCanvas { border-radius: 10px; max-width: 100%; }
+
+    .conserve-wrap { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .conserve-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: center; }
+    .sphere {
+      width: 70px; height: 70px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; font-weight: 700; cursor: default;
+      transition: all .4s; box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      font-family: "Times New Roman", serif;
+    }
+    .arrow-label { font-size: 22px; color: rgba(255,255,255,0.4); }
+    .conserve-info { font-size: 13px; color: rgba(255,255,255,0.5); text-align: center; font-family: "Microsoft YaHei", sans-serif; }
+    #neutralizeBtn {
+      padding: 9px 24px; border-radius: 10px; border: none; cursor: pointer;
+      background: linear-gradient(135deg,#6366f1,#818cf8); color: #fff;
+      font-size: 14px; font-weight: 600; transition: opacity .2s;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    #neutralizeBtn:hover { opacity: 0.85; }
+    #neutralizeBtn:disabled { opacity: 0.4; cursor: default; }
+  </style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+
+<div class="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">§1-1 &nbsp;电荷 &nbsp;库仑定律</div>
+    <span class="topbar-course">普通物理（卓越班）下册 · 电磁学</span>
+  </div>
+  <div class="topbar-sub">NUSEP26 · 普通物理（卓）下</div>
+</div>
+
+<div class="page">
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(0)">1-1-1 &nbsp;电荷</div>
+    <div class="tab" onclick="switchTab(1)">1-1-2 &nbsp;库仑定律</div>
+    <div class="tab" onclick="switchTab(2)">1-1-3 &nbsp;叠加原理</div>
+  </div>
+
+  <!-- ══ 1-1-1 电荷 ══ -->
+  <div class="tab-panel active" id="panel-0">
+
+    <div class="card">
+      <div class="card-title">基本概念</div>
+      <p>被<span class="hl-red">毛皮摩擦过的硬橡胶棒</span>所带的电荷称为<span class="hl-red">负电荷</span>；被<span class="hl-blue">丝绸摩擦过的玻璃棒</span>所带的电荷称为<span class="hl-blue">正电荷</span>。自然界只有这两种电荷。</p>
+      <p>物体所带电荷的多少称为<span class="hl">电荷量</span>，用 $Q$ 或 $q$ 表示，单位为<span class="hl">库仑（C）</span>。</p>
+    </div>
+
+    <div class="demo-box">
+      <div class="demo-title">▶ 摩擦起电演示</div>
+      <div class="rods">
+        <div class="rod-wrap">
+          <div class="rod-label">毛皮摩擦硬橡胶棒</div>
+          <canvas class="rod-canvas" id="rodNeg" width="180" height="60"></canvas>
+          <div class="rod-charge hl-red">负电荷 (−)</div>
+        </div>
+        <div class="rod-wrap">
+          <div class="rod-label">丝绸摩擦玻璃棒</div>
+          <canvas class="rod-canvas" id="rodPos" width="180" height="60"></canvas>
+          <div class="rod-charge hl-blue">正电荷 (+)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">电荷的四个基本性质</div>
+      <ul class="prop-list">
+        <li class="prop-item">
+          <div class="prop-num">1</div>
+          <div class="prop-body"><strong>同种相斥，异种相吸</strong><br>同种电荷之间相互排斥，异种电荷之间相互吸引。</div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">2</div>
+          <div class="prop-body">
+            <strong>电荷量子化</strong><br>
+            电荷量总是以一个基本单元的整数倍出现，而非连续变化。这个基本单元是电子所带电荷量的绝对值：
+            $$e = 1.602 \times 10^{-19}\ \mathrm{C}$$
+          </div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">3</div>
+          <div class="prop-body">
+            <strong>电荷守恒原理</strong><br>
+            物体带电的本质是电荷的迁移与重新分配。在任何过程中，系统电荷的代数和守恒：
+            $$\sum q_i = \text{const}$$
+            特别地，两个带<span class="hl-green">等量异种电荷</span>的物体相互接触时，对外电效应相互抵消，即<span class="hl-green">电中和</span>。
+          </div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">4</div>
+          <div class="prop-body"><strong>电荷量与参照系无关</strong><br>系统的电荷量不随参照系的选择而改变，是一个相对论不变量。</div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="demo-box">
+      <div class="demo-title">▶ 电荷量子化可视化</div>
+      <div class="quant-wrap">
+        <p>每个格子代表一个基本电荷 $e = 1.602\times10^{-19}\ \mathrm{C}$，电荷量只能取整数倍</p>
+        <canvas id="quantCanvas" width="600" height="120"></canvas>
+      </div>
+    </div>
+
+    <div class="demo-box">
+      <div class="demo-title">▶ 电中和演示</div>
+      <div class="conserve-wrap">
+        <div class="conserve-row">
+          <div class="sphere" id="sphA" style="background:linear-gradient(135deg,#ef4444,#f87171);">$+4e$</div>
+          <div class="arrow-label">+</div>
+          <div class="sphere" id="sphB" style="background:linear-gradient(135deg,#3b82f6,#60a5fa);">$-4e$</div>
+          <div class="arrow-label">→</div>
+          <div class="sphere" id="sphC" style="background:rgba(255,255,255,0.08);border:2px dashed rgba(255,255,255,0.2);">?</div>
+        </div>
+        <div class="conserve-info" id="conserveInfo">两个带等量异种电荷的导体球接触后……</div>
+        <button id="neutralizeBtn" onclick="doNeutralize()">接触 → 电中和</button>
+      </div>
+    </div>
+
+  </div><!-- /panel-0 -->
+
+  <!-- ══ 1-1-2 库仑定律 ══ -->
+  <div class="tab-panel" id="panel-1">
+
+    <div class="card">
+      <div class="card-title">库仑定律</div>
+      <p>真空中两个静止<span class="hl">点电荷</span>之间的相互作用力 $F$ 的大小，与两电荷量 $q_1$、$q_2$ 的乘积成正比，与它们之间距离 $r$ 的平方成反比；作用力方向沿连线方向，<span class="hl-red">同种相斥，异种相吸</span>。</p>
+      <p>矢量形式：</p>
+      $$\vec{F} = k\,\frac{q_1 q_2}{r^2}\,\hat{e}_r$$
+      <p>其中 $\hat{e}_r$ 为由施力电荷指向受力电荷的单位矢量，$k$ 为库仑常量。</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">库仑常量与真空介电常量</div>
+      <p>库仑常量 $k$ 可用<span class="hl">真空介电常量</span>（真空电容率）$\varepsilon_0$ 表示：</p>
+      $$k = \frac{1}{4\pi\varepsilon_0}$$
+      <p>其中</p>
+      $$\varepsilon_0 = 8.854\times10^{-12}\ \mathrm{C^2\cdot N^{-1}\cdot m^{-2}}$$
+      <p>因此库仑定律的完整矢量形式为：</p>
+      $$\vec{F} = \frac{q_1 q_2}{4\pi\varepsilon_0 r^2}\,\hat{e}_r = \frac{q_1 q_2}{4\pi\varepsilon_0 r^3}\,\vec{r}$$
+      <p>其中 $\vec{r}$ 为由施力电荷指向受力电荷的位移矢量，$r = |\vec{r}|$。</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">符号约定与力的方向</div>
+      <ul class="prop-list">
+        <li class="prop-item">
+          <div class="prop-num">1</div>
+          <div class="prop-body"><strong>$q_1 q_2 > 0$（同种电荷）</strong><br>$\vec{F}$ 与 $\hat{e}_r$ 同向，即<span class="hl-red">斥力</span>，受力电荷被推离施力电荷。</div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">2</div>
+          <div class="prop-body"><strong>$q_1 q_2 < 0$（异种电荷）</strong><br>$\vec{F}$ 与 $\hat{e}_r$ 反向，即<span class="hl-blue">引力</span>，受力电荷被拉向施力电荷。</div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">3</div>
+          <div class="prop-body"><strong>牛顿第三定律</strong><br>两电荷间的作用力大小相等、方向相反：$\vec{F}_{12} = -\vec{F}_{21}$。</div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="demo-box">
+      <div class="demo-title">▶ 库仑力交互演示</div>
+      <canvas id="coulombCanvas" width="700" height="220" style="border-radius:10px;max-width:100%;display:block;margin:0 auto;"></canvas>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;justify-content:center;margin-top:16px;font-family:'Microsoft YaHei',sans-serif;font-size:13px;color:rgba(255,255,255,0.6);">
+        <label>$q_1$：<input id="slQ1" type="range" min="-5" max="5" step="1" value="3" style="vertical-align:middle;"> <span id="lblQ1">+3</span></label>
+        <label>$q_2$：<input id="slQ2" type="range" min="-5" max="5" step="1" value="-2" style="vertical-align:middle;"> <span id="lblQ2">−2</span></label>
+        <label>$r$：<input id="slR" type="range" min="1" max="9" step="0.5" value="4" style="vertical-align:middle;"> <span id="lblR">4</span> (单位距离)</label>
+      </div>
+      <div id="coulombResult" style="text-align:center;margin-top:12px;font-size:14px;color:#93c5fd;font-family:'Times New Roman',serif;"></div>
+    </div>
+
+    <div class="card" style="border-color:rgba(251,191,36,0.25);background:rgba(251,191,36,0.04);">
+      <div class="card-title" style="color:#fbbf24;">例 1-1</div>
+      <p><span class="hl">题目：</span>$\alpha$ 粒子（氦核）的质量 $m = 6.64\times10^{-27}\ \mathrm{kg}$，所带电荷量 $q = 2e = 3.2\times10^{-19}\ \mathrm{C}$，试比较两个 $\alpha$ 粒子间的静电斥力和万有引力。</p>
+      <p><span class="hl-green">解：</span>静电斥力为</p>
+      $$F_e = \frac{1}{4\pi\varepsilon_0}\frac{q^2}{r^2}$$
+      <p>万有引力为</p>
+      $$F_g = G\frac{m^2}{r^2}$$
+      <p>式中 $G = 6.67\times10^{-11}\ \mathrm{N\cdot m^2\cdot kg^{-2}}$ 为引力常量。二力之比为</p>
+      $$\frac{F_e}{F_g} = \frac{1}{4\pi\varepsilon_0 G}\cdot\frac{q^2}{m^2} = 3.1\times10^{35}$$
+      <p>由计算结果可以看出，$\alpha$ 粒子之间的静电斥力远比它们之间的万有引力大得多。这表明在<span class="hl-red">微观粒子</span>的相互作用中，与静电力相比较，万有引力完全可以忽略。但是在宏观领域内，尤其是<span class="hl-blue">大质量天体</span>之间的作用，万有引力则起主导作用。</p>
+    </div>
+
+  </div><!-- /panel-1 -->
+
+  <!-- ══ 1-1-3 静电力叠加原理 ══ -->
+  <div class="tab-panel" id="panel-2">
+
+    <div class="card">
+      <div class="card-title">叠加原理</div>
+      <p>两点电荷之间的相互作用力<span class="hl">不因其它电荷的存在而改变</span>。点电荷系对某一点电荷 $q_0$ 的总作用力，等于系内各点电荷单独存在时对 $q_0$ 作用力的<span class="hl-blue">矢量和</span>。</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">离散点电荷系</div>
+      <p>设点电荷系由 $n$ 个点电荷 $q_1, q_2, \ldots, q_n$ 组成，第 $i$ 个电荷到 $q_0$ 的位移矢量为 $\vec{r}_i$，则：</p>
+      $$\vec{F} = \sum_{i=1}^{n} \vec{F}_i = \sum_{i=1}^{n} \frac{q_0 q_i}{4\pi\varepsilon_0 r_i^3}\,\vec{r}_i$$
+    </div>
+
+    <div class="card">
+      <div class="card-title">连续带电体</div>
+      <p>对于连续分布的带电体 $Q$，将其分割为无穷多个电荷元 $\mathrm{d}q$，每个电荷元到 $q_0$ 的单位矢量为 $\hat{e}_r$，距离为 $r$，则总力为：</p>
+      $$\vec{F} = \frac{1}{4\pi\varepsilon_0}\int_Q \frac{q_0\,\mathrm{d}q}{r^2}\,\hat{e}_r$$
+      <p>电荷元 $\mathrm{d}q$ 根据带电体的几何形态取不同形式：</p>
+      <ul class="prop-list">
+        <li class="prop-item">
+          <div class="prop-num">线</div>
+          <div class="prop-body"><strong>线电荷分布</strong>（线电荷密度 $\lambda$）：$\mathrm{d}q = \lambda\,\mathrm{d}l$</div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">面</div>
+          <div class="prop-body"><strong>面电荷分布</strong>（面电荷密度 $\sigma$）：$\mathrm{d}q = \sigma\,\mathrm{d}S$</div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">体</div>
+          <div class="prop-body"><strong>体电荷分布</strong>（体电荷密度 $\rho$）：$\mathrm{d}q = \rho\,\mathrm{d}V$</div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="demo-box">
+      <div class="demo-title">▶ 叠加原理交互演示</div>
+      <canvas id="superCanvas" width="700" height="280" style="border-radius:10px;max-width:100%;display:block;margin:0 auto;"></canvas>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:14px;font-family:'Microsoft YaHei',sans-serif;font-size:13px;color:rgba(255,255,255,0.6);">
+        <label>$q_1$：<input id="spQ1" type="range" min="-4" max="4" step="1" value="3" style="vertical-align:middle;"> <span id="spLbl1">+3</span></label>
+        <label>$q_2$：<input id="spQ2" type="range" min="-4" max="4" step="1" value="2" style="vertical-align:middle;"> <span id="spLbl2">+2</span></label>
+        <label>$q_3$：<input id="spQ3" type="range" min="-4" max="4" step="1" value="-3" style="vertical-align:middle;"> <span id="spLbl3">−3</span></label>
+      </div>
+      <div id="superResult" style="text-align:center;margin-top:10px;font-size:13px;color:#a5b4fc;font-family:'Microsoft YaHei',sans-serif;"></div>
+    </div>
+
+  </div><!-- /panel-2 -->
+
+</div>
+
+<script>
+// 全局函数（供内联 onclick 调用）
+function switchTab(idx){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
+  document.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',i===idx));
+}
+
+let neutralized=false;
+function doNeutralize(){
+  if(neutralized)return;
+  neutralized=true;
+  document.getElementById('neutralizeBtn').disabled=true;
+  setTimeout(()=>{
+    const sphC=document.getElementById('sphC');
+    sphC.style.background='linear-gradient(135deg,#374151,#6b7280)';
+    sphC.style.border='none';
+    sphC.textContent='0';
+    const info=document.getElementById('conserveInfo');
+    info.innerHTML='接触后总电荷 = +4e + (−4e) = 0，电效应相互抵消，实现电中和 ✓';
+    info.style.color='#34d399';
+  },300);
+}
+
+// 粒子背景
+(function(){
+  const c=document.getElementById('particles'),ctx=c.getContext('2d');
+  let W,H,pts=[];
+  function resize(){W=c.width=innerWidth;H=c.height=innerHeight;}
+  window.addEventListener('resize',resize);resize();
+  const COLS=['#818cf8','#38bdf8','#c084fc','#34d399'];
+  function sp(){return{x:Math.random()*W,y:H+10,r:Math.random()*2+0.5,s:Math.random()*0.4+0.1,col:COLS[Math.random()*4|0],op:Math.random()*0.12+0.03};}
+  for(let i=0;i<50;i++){const p=sp();p.y=Math.random()*H;pts.push(p);}
+  function draw(){ctx.clearRect(0,0,W,H);pts.forEach((p,i)=>{p.y-=p.s;if(p.y<-10)pts[i]=sp();ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.col;ctx.globalAlpha=p.op;ctx.fill();});ctx.globalAlpha=1;requestAnimationFrame(draw);}
+  draw();
+})();
+
+function rrect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.lineTo(x+w-r,y); ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w,y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r,y+h); ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x,y+r); ctx.arcTo(x,y,x+r,y,r);
+  ctx.closePath();
+}
+
+function drawRod(id, color, chargeColor, sign) {
+  const canvas=document.getElementById(id),ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height;
+  const grad=ctx.createLinearGradient(20,0,W-20,0);
+  grad.addColorStop(0,color[0]);grad.addColorStop(1,color[1]);
+  rrect(ctx,20,H/2-12,W-40,24,8);ctx.fillStyle=grad;ctx.fill();
+  ctx.fillStyle=chargeColor;ctx.font='bold 14px Times New Roman';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  const step=(W-60)/5;
+  for(let i=0;i<6;i++) ctx.fillText(sign,30+i*step,H/2);
+}
+drawRod('rodNeg',['#7f1d1d','#ef4444'],'#fca5a5','−');
+drawRod('rodPos',['#1e3a5f','#3b82f6'],'#93c5fd','+');
+
+(function(){
+  const canvas=document.getElementById('quantCanvas'),ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height,n=10,cellW=W/n;
+  const filled=[3,7],colors=[['#6366f1','#818cf8'],['#0ea5e9','#38bdf8']];
+  ctx.clearRect(0,0,W,H);
+  for(let i=0;i<n;i++){ctx.strokeStyle='rgba(255,255,255,0.12)';ctx.lineWidth=1;ctx.strokeRect(i*cellW+2,10,cellW-4,H-20);}
+  for(let i=0;i<filled[0];i++){
+    const g=ctx.createLinearGradient(i*cellW+4,12,(i+1)*cellW-4,H/2-4);
+    g.addColorStop(0,colors[0][0]);g.addColorStop(1,colors[0][1]);
+    ctx.fillStyle=g;rrect(ctx,i*cellW+4,12,cellW-8,H/2-16,4);ctx.fill();
+    ctx.fillStyle='#fff';ctx.font='bold 11px Times New Roman';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('e',i*cellW+cellW/2,H/4);
+  }
+  for(let i=0;i<filled[1];i++){
+    const g=ctx.createLinearGradient(i*cellW+4,H/2+4,(i+1)*cellW-4,H-12);
+    g.addColorStop(0,colors[1][0]);g.addColorStop(1,colors[1][1]);
+    ctx.fillStyle=g;rrect(ctx,i*cellW+4,H/2+4,cellW-8,H/2-16,4);ctx.fill();
+    ctx.fillStyle='#fff';ctx.font='bold 11px Times New Roman';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('e',i*cellW+cellW/2,H*3/4);
+  }
+  ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='12px Microsoft YaHei';ctx.textAlign='left';
+  ctx.fillText('物体A: Q = 3e',filled[0]*cellW+8,H/4);
+  ctx.fillText('物体B: Q = 7e',filled[1]*cellW+8,H*3/4);
+})();
+
+// 库仑演示
+(function(){
+  const canvas = document.getElementById('coulombCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const k = 8.99e9;
+
+  function getVals(){
+    const q1 = parseFloat(document.getElementById('slQ1').value);
+    const q2 = parseFloat(document.getElementById('slQ2').value);
+    const r  = parseFloat(document.getElementById('slR').value);
+    return {q1, q2, r};
+  }
+
+  function draw(){
+    const {q1, q2, r} = getVals();
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0,0,W,H);
+
+    // background
+    ctx.fillStyle='rgba(255,255,255,0.02)';
+    rrect(ctx,0,0,W,H,10); ctx.fill();
+
+    const cx = W/2, cy = H/2;
+    const spacing = r * 28;
+    const x1 = cx - spacing/2, x2 = cx + spacing/2;
+
+    // draw force arrows
+    const F = k * Math.abs(q1) * Math.abs(q2) / (r*r);
+    const arrowLen = Math.min(120, 45 + F/1e9 * 2);
+    const attract = q1*q2 < 0;
+    const col1 = q1 >= 0 ? '#f87171' : '#60a5fa';
+    const col2 = q2 >= 0 ? '#f87171' : '#60a5fa';
+
+    // arrow for q1
+    if(q1 !== 0 && q2 !== 0){
+      const dir1 = attract ? 1 : -1;
+      drawArrow(ctx, x1, cy, x1 + dir1*arrowLen, cy, '#fbbf24', 2.5);
+      // arrow for q2
+      const dir2 = attract ? -1 : 1;
+      drawArrow(ctx, x2, cy, x2 + dir2*arrowLen, cy, '#fbbf24', 2.5);
+    }
+
+    // distance line
+    ctx.setLineDash([4,4]);
+    ctx.strokeStyle='rgba(255,255,255,0.15)';
+    ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(x1,cy+46); ctx.lineTo(x2,cy+46); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='rgba(255,255,255,0.4)';
+    ctx.font='12px Times New Roman';
+    ctx.textAlign='center';
+    ctx.fillText('r = '+r, cx, cy+60);
+
+    // charge circles
+    drawCharge(ctx, x1, cy, q1, col1);
+    drawCharge(ctx, x2, cy, q2, col2);
+
+    // result text
+    const sign = q1*q2 > 0 ? '斥力' : q1*q2 < 0 ? '引力' : '—';
+    const Fval = (k * q1 * 1e-6 * q2 * 1e-6 / (r*r)).toExponential(3);
+    const el = document.getElementById('coulombResult');
+    if(q1===0||q2===0){
+      el.textContent = 'F = 0（有一个电荷为零）';
+    } else {
+      el.innerHTML = sign + '　|F| = k·|q₁q₂|/r² （示意，取 q 单位 μC）　≈ ' + Fval + ' N';
+    }
+  }
+
+  function drawCharge(ctx, x, y, q, col){
+    const r = 28;
+    const grad = ctx.createRadialGradient(x-6,y-6,2,x,y,r);
+    grad.addColorStop(0,'rgba(255,255,255,0.3)');
+    grad.addColorStop(1,col);
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fillStyle=grad; ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.fillStyle='#fff';
+    ctx.font='bold 15px Times New Roman';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    const label = (q>0?'+':q<0?'−':'0') + (Math.abs(q)||'');
+    ctx.fillText(label, x, y);
+    ctx.textBaseline='alphabetic';
+  }
+
+  function drawArrow(ctx, x1, y1, x2, y2, color, lw){
+    const angle = Math.atan2(y2-y1, x2-x1);
+    const headLen = 10;
+    ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=lw;
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2,y2);
+    ctx.lineTo(x2-headLen*Math.cos(angle-0.4), y2-headLen*Math.sin(angle-0.4));
+    ctx.lineTo(x2-headLen*Math.cos(angle+0.4), y2-headLen*Math.sin(angle+0.4));
+    ctx.closePath(); ctx.fill();
+  }
+
+  ['slQ1','slQ2','slR'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener('input', ()=>{
+      const v = parseFloat(el.value);
+      const lbl = document.getElementById('lbl'+id.slice(2));
+      if(lbl) lbl.textContent = v > 0 ? '+'+v : v;
+      draw();
+    });
+  });
+
+  draw();
+})();
+
+// 叠加原理演示
+(function(){
+  const canvas = document.getElementById('superCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  // q0 固定在中心，q1/q2/q3 固定在三角形顶点
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2;
+  const positions = [
+    {x: cx - 200, y: cy - 90},
+    {x: cx + 200, y: cy - 90},
+    {x: cx,       y: cy + 110}
+  ];
+  const ids = ['spQ1','spQ2','spQ3'];
+  const lbls = ['spLbl1','spLbl2','spLbl3'];
+  const cols = ['#f87171','#60a5fa','#34d399'];
+
+  function getQs(){
+    return ids.map(id => parseFloat(document.getElementById(id).value));
+  }
+
+  function draw(){
+    const qs = getQs();
+    ctx.clearRect(0,0,W,H);
+
+    // compute forces on q0 (unit: arbitrary, scale for display)
+    const baseLen = 20;
+    let fx = 0, fy = 0;
+    const forces = positions.map((p,i) => {
+      const dx = cx - p.x, dy = cy - p.y;
+      const r = Math.sqrt(dx*dx + dy*dy);
+      const mag = qs[i] * baseLen; // direction + magnitude, fixed base scale
+      return {fx: mag*dx/r, fy: mag*dy/r};
+    });
+    forces.forEach(f => { fx += f.fx; fy += f.fy; });
+
+    // draw dashed lines from sources to q0
+    positions.forEach((p,i) => {
+      ctx.setLineDash([4,4]);
+      ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(cx, cy); ctx.stroke();
+      ctx.setLineDash([]);
+    });
+
+    // draw individual force arrows
+    forces.forEach((f,i) => {
+      if(qs[i] !== 0) drawArrow(ctx, cx, cy, cx+f.fx, cy+f.fy, cols[i], 2, 'F'+String.fromCharCode(0x2081+i));
+    });
+
+    // draw resultant
+    const rlen = Math.sqrt(fx*fx+fy*fy);
+    if(rlen > 2) drawArrow(ctx, cx, cy, cx+fx, cy+fy, '#fbbf24', 3, 'F');
+
+    // draw source charges
+    positions.forEach((p,i) => drawCharge(ctx, p.x, p.y, qs[i], cols[i], 'q'+(i+1)));
+
+    // draw q0
+    drawCharge(ctx, cx, cy, 1, '#c084fc', 'q₀');
+
+    // result
+    const el = document.getElementById('superResult');
+    el.textContent = '合力方向如黄色箭头所示，各分力（彩色箭头）矢量叠加';
+  }
+
+  function drawCharge(ctx, x, y, q, col, label){
+    const r = 24;
+    const grad = ctx.createRadialGradient(x-5,y-5,2,x,y,r);
+    grad.addColorStop(0,'rgba(255,255,255,0.25)'); grad.addColorStop(1,col);
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fillStyle=grad; ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.fillStyle='#fff'; ctx.font='bold 12px Times New Roman';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(label, x, y);
+    ctx.textBaseline='alphabetic';
+  }
+
+  function drawArrow(ctx, x1, y1, x2, y2, color, lw, label){
+    const angle = Math.atan2(y2-y1, x2-x1);
+    const headLen = 10;
+    ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=lw;
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2,y2);
+    ctx.lineTo(x2-headLen*Math.cos(angle-0.4), y2-headLen*Math.sin(angle-0.4));
+    ctx.lineTo(x2-headLen*Math.cos(angle+0.4), y2-headLen*Math.sin(angle+0.4));
+    ctx.closePath(); ctx.fill();
+    if(label){
+      ctx.font='italic 12px Times New Roman';
+      ctx.fillStyle=color;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      const mx=(x1+x2)/2, my=(y1+y2)/2;
+      ctx.fillText(label, mx+10*Math.sin(angle), my-10*Math.cos(angle));
+      ctx.textBaseline='alphabetic';
+    }
+  }
+
+  ids.forEach((id,i) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener('input', () => {
+      const v = parseFloat(el.value);
+      const lbl = document.getElementById(lbls[i]);
+      if(lbl) lbl.textContent = v > 0 ? '+'+v : v;
+      draw();
+    });
+  });
+
+  draw();
+})();
+</script>
+
+<!-- ── 笔记工具栏 ── -->
+<style>
+.note-fab {
+  position: fixed; bottom: 28px; right: 28px; z-index: 1000;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+}
+.fab-main {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 22px; box-shadow: 0 4px 20px rgba(99,102,241,0.5);
+  transition: transform 0.2s, box-shadow 0.2s;
+  color: #fff;
+}
+.fab-main:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(99,102,241,0.65); }
+.fab-main.active { background: linear-gradient(135deg, #7c3aed, #a78bfa); transform: rotate(45deg); }
+.fab-menu {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+  opacity: 0; pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.fab-menu.open { opacity: 1; pointer-events: all; transform: translateY(0); }
+.fab-item {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(15,12,41,0.92); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px; padding: 9px 16px 9px 12px;
+  cursor: pointer; white-space: nowrap;
+  backdrop-filter: blur(12px);
+  transition: border-color 0.2s, background 0.2s;
+  font-family: "Microsoft YaHei", sans-serif;
+}
+.fab-item:hover { border-color: rgba(129,140,248,0.4); background: rgba(99,102,241,0.15); }
+.fab-item .fi-icon { font-size: 17px; }
+.fab-item .fi-label { font-size: 13px; color: rgba(255,255,255,0.8); }
+.fab-item.starred .fi-label { color: #fbbf24; }
+.fab-item.starred { border-color: rgba(251,191,36,0.35); }
+.fab-item.read-done .fi-label { color: #34d399; }
+.fab-item.read-done { border-color: rgba(52,211,153,0.35); }
+
+/* 备注抽屉 */
+.note-drawer {
+  position: fixed; bottom: 0; right: 0; left: 0; z-index: 999;
+  background: rgba(10,8,30,0.96);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(20px);
+  padding: 20px 28px 28px;
+  transform: translateY(100%);
+  transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
+}
+.note-drawer.open { transform: translateY(0); }
+.drawer-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.drawer-title { font-size: 14px; font-weight: 700; color: #a5b4fc; font-family: "Microsoft YaHei",sans-serif; letter-spacing: 1px; }
+.drawer-close { font-size: 20px; color: rgba(255,255,255,0.4); cursor: pointer; transition: color 0.2s; line-height: 1; }
+.drawer-close:hover { color: #fff; }
+.drawer-textarea {
+  width: 100%; height: 120px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; padding: 12px 16px;
+  color: #fff; font-size: 14px; font-family: "Microsoft YaHei",sans-serif;
+  resize: vertical; outline: none; line-height: 1.8;
+  transition: border-color 0.2s;
+}
+.drawer-textarea:focus { border-color: rgba(129,140,248,0.5); }
+.drawer-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+.drawer-hint { font-size: 11px; color: rgba(255,255,255,0.25); font-family: "Microsoft YaHei",sans-serif; }
+.drawer-save {
+  background: linear-gradient(135deg, #6366f1, #818cf8); border: none;
+  color: #fff; font-size: 13px; font-weight: 600; padding: 8px 22px; border-radius: 10px;
+  cursor: pointer; font-family: "Microsoft YaHei",sans-serif; transition: opacity 0.2s;
+}
+.drawer-save:hover { opacity: 0.85; }
+
+/* toast */
+.phy-toast {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: rgba(15,12,41,0.95); border: 1px solid rgba(129,140,248,0.3);
+  border-radius: 24px; padding: 10px 22px;
+  font-size: 13px; color: rgba(255,255,255,0.85); font-family: "Microsoft YaHei",sans-serif;
+  z-index: 1100; opacity: 0;
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none; white-space: nowrap;
+}
+.phy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+
+<div class="note-fab">
+  <div class="fab-menu" id="fabMenu">
+    <div class="fab-item" id="fabStar" onclick="toggleStar()">
+      <span class="fi-icon">☆</span>
+      <span class="fi-label">收藏此节</span>
+    </div>
+    <div class="fab-item" id="fabRead" onclick="toggleRead()">
+      <span class="fi-icon">○</span>
+      <span class="fi-label">标记已读</span>
+    </div>
+    <div class="fab-item" onclick="openDrawer()">
+      <span class="fi-icon">📝</span>
+      <span class="fi-label">我的笔记</span>
+    </div>
+  </div>
+  <button class="fab-main" id="fabBtn" onclick="toggleFab()" title="工具">✦</button>
+</div>
+
+<div class="note-drawer" id="noteDrawer">
+  <div class="drawer-header">
+    <div class="drawer-title">📝 我的笔记 · §1-1</div>
+    <div class="drawer-close" onclick="closeDrawer()">×</div>
+  </div>
+  <textarea class="drawer-textarea" id="drawerTA" placeholder="在此记录你的理解、疑问或总结……"></textarea>
+  <div class="drawer-footer">
+    <span class="drawer-hint">自动保存到本地，刷新不丢失</span>
+    <button class="drawer-save" onclick="saveNote()">保存</button>
+  </div>
+</div>
+
+<div class="phy-toast" id="phyToast"></div>
+
+<script>
+(function(){
+  const PID = '1-1';
+  const SK  = 'phy26_note_' + PID;
+  const STK = 'phy26_star_' + PID;
+  const RDK = 'phy26_read_' + PID;
+  let fabOpen = false;
+
+  function showToast(msg) {
+    const t = document.getElementById('phyToast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  window.toggleFab = function() {
+    fabOpen = !fabOpen;
+    document.getElementById('fabMenu').classList.toggle('open', fabOpen);
+    document.getElementById('fabBtn').classList.toggle('active', fabOpen);
+  };
+
+  window.toggleStar = function() {
+    const starred = localStorage.getItem(STK) === '1';
+    if (starred) { localStorage.removeItem(STK); showToast('已取消收藏'); }
+    else { localStorage.setItem(STK, '1'); showToast('⭐ 已收藏此节'); }
+    refreshStarUI();
+  };
+
+  window.toggleRead = function() {
+    const read = localStorage.getItem(RDK) === '1';
+    if (read) { localStorage.removeItem(RDK); showToast('已取消已读标记'); }
+    else { localStorage.setItem(RDK, '1'); showToast('✓ 已标记为已读'); }
+    refreshReadUI();
+  };
+
+  function refreshStarUI() {
+    const starred = localStorage.getItem(STK) === '1';
+    const el = document.getElementById('fabStar');
+    el.querySelector('.fi-icon').textContent = starred ? '★' : '☆';
+    el.querySelector('.fi-label').textContent = starred ? '已收藏' : '收藏此节';
+    el.classList.toggle('starred', starred);
+  }
+
+  function refreshReadUI() {
+    const read = localStorage.getItem(RDK) === '1';
+    const el = document.getElementById('fabRead');
+    el.querySelector('.fi-icon').textContent = read ? '✓' : '○';
+    el.querySelector('.fi-label').textContent = read ? '已读' : '标记已读';
+    el.classList.toggle('read-done', read);
+  }
+
+  window.openDrawer = function() {
+    document.getElementById('drawerTA').value = localStorage.getItem(SK) || '';
+    document.getElementById('noteDrawer').classList.add('open');
+    document.getElementById('fabMenu').classList.remove('open');
+    document.getElementById('fabBtn').classList.remove('active');
+    fabOpen = false;
+    setTimeout(() => document.getElementById('drawerTA').focus(), 350);
+  };
+
+  window.closeDrawer = function() {
+    document.getElementById('noteDrawer').classList.remove('open');
+  };
+
+  window.saveNote = function() {
+    const val = document.getElementById('drawerTA').value.trim();
+    if (val) { localStorage.setItem(SK, val); showToast('✓ 笔记已保存'); }
+    else { localStorage.removeItem(SK); showToast('笔记已清空'); }
+    closeDrawer();
+  };
+
+  // 自动保存（防抖）
+  let saveTimer;
+  document.getElementById('drawerTA').addEventListener('input', function() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      const val = this.value.trim();
+      if (val) localStorage.setItem(SK, val);
+    }, 1500);
+  });
+
+  // 初始化状态
+  refreshStarUI(); refreshReadUI();
+
+  // 如果有已存笔记，在工具栏上加小圆点提示
+  if (localStorage.getItem(SK)) {
+    const noteItem = document.querySelector('.fab-item:last-of-type .fi-icon');
+    if (noteItem) noteItem.textContent = '📋';
+  }
+})();
+</script>
+</body>
+</html>

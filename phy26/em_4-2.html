@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>4-2 动生电动势·感生电动势 — 电磁学</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Times New Roman","Microsoft YaHei","PingFang SC",serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;color:#fff}
+    canvas#particles{position:fixed;inset:0;pointer-events:none;z-index:0}
+    .topbar{position:relative;z-index:10;display:flex;align-items:center;gap:14px;padding:18px 36px;border-bottom:1px solid rgba(255,255,255,0.07);background:rgba(15,12,41,0.7);backdrop-filter:blur(12px);font-family:"Microsoft YaHei",sans-serif}
+    .back-btn{color:rgba(255,255,255,0.5);font-size:14px;cursor:pointer;text-decoration:none;transition:color .2s}.back-btn:hover{color:#fbbf24}
+    .topbar-title{font-size:16px;font-weight:700;letter-spacing:1px}
+    .topbar-sub{margin-left:auto;font-size:12px;color:rgba(255,255,255,0.3)}
+    .tabs{display:flex;gap:10px;margin-bottom:32px;font-family:"Microsoft YaHei",sans-serif;flex-wrap:wrap}
+    .tab{padding:9px 22px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.5);transition:all .2s}
+    .tab.active{background:linear-gradient(135deg,#f59e0b,#fbbf24);border-color:transparent;color:#1a1200;box-shadow:0 4px 16px rgba(251,191,36,0.4)}
+    .tab-panel{display:none}.tab-panel.active{display:block}
+    .page{position:relative;z-index:10;max-width:860px;margin:0 auto;padding:36px 24px 80px}
+    .card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:16px;padding:28px 32px;margin-bottom:20px}
+    .card-title{font-size:16px;font-weight:700;color:#fbbf24;margin-bottom:14px;display:flex;align-items:center;gap:8px;font-family:"Microsoft YaHei",sans-serif}
+    .card-title::before{content:"";display:inline-block;width:4px;height:18px;border-radius:2px;background:linear-gradient(#f59e0b,#fbbf24);flex-shrink:0}
+    .card p{font-size:15px;color:rgba(255,255,255,0.8);line-height:2}.card p+p{margin-top:10px}
+    .hl{color:#fbbf24;font-weight:600}.hl-blue{color:#38bdf8;font-weight:600}.hl-green{color:#34d399;font-weight:600}.hl-red{color:#f87171;font-weight:600}.hl-purple{color:#c084fc;font-weight:600}
+    .katex{color:#e2e8f0;font-size:1.05em}.katex-display{margin:14px 0}.katex-display>.katex{color:#fde68a}
+    .prop-list{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:12px}
+    .prop-item{display:flex;gap:14px;align-items:flex-start;background:rgba(255,255,255,0.03);border-radius:10px;padding:14px 18px;border-left:3px solid #f59e0b}
+    .prop-item:nth-child(2){border-left-color:#38bdf8}.prop-item:nth-child(3){border-left-color:#34d399}.prop-item:nth-child(4){border-left-color:#f87171}.prop-item:nth-child(5){border-left-color:#c084fc}
+    .prop-num{min-width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#1a1200;font-family:"Microsoft YaHei",sans-serif}
+    .prop-item:nth-child(2) .prop-num{background:linear-gradient(135deg,#0ea5e9,#38bdf8);color:#fff}.prop-item:nth-child(3) .prop-num{background:linear-gradient(135deg,#10b981,#34d399);color:#fff}.prop-item:nth-child(4) .prop-num{background:linear-gradient(135deg,#ef4444,#f87171);color:#fff}.prop-item:nth-child(5) .prop-num{background:linear-gradient(135deg,#7c3aed,#c084fc);color:#fff}
+    .prop-body{font-size:14.5px;color:rgba(255,255,255,0.78);line-height:1.9}.prop-body strong{color:#fff;font-family:"Microsoft YaHei",sans-serif}
+    .note-box{background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);border-radius:12px;padding:16px 20px;margin-top:14px;font-size:14px;color:rgba(255,255,255,0.7);line-height:1.9;font-family:"Microsoft YaHei",sans-serif}
+    .note-box .note-label{font-weight:700;color:#fbbf24;margin-bottom:4px;display:block}
+    .green-box{background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.2);border-radius:12px;padding:16px 20px;margin-top:14px;font-size:14px;color:rgba(255,255,255,0.75);line-height:1.9;font-family:"Microsoft YaHei",sans-serif}
+    .green-box .note-label{font-weight:700;color:#34d399;margin-bottom:4px;display:block}
+    .blue-box{background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.2);border-radius:12px;padding:16px 20px;margin-top:14px;font-size:14px;color:rgba(255,255,255,0.75);line-height:1.9;font-family:"Microsoft YaHei",sans-serif}
+    .blue-box .note-label{font-weight:700;color:#38bdf8;margin-bottom:4px;display:block}
+    .eg-block{background:rgba(251,191,36,0.04);border:1px solid rgba(251,191,36,0.15);border-radius:14px;padding:24px 28px;margin-bottom:20px}
+    .eg-title{font-size:15px;font-weight:700;color:#fbbf24;margin-bottom:14px;font-family:"Microsoft YaHei",sans-serif;display:flex;align-items:center;gap:8px}
+    .eg-title::before{content:"";display:inline-block;width:4px;height:16px;background:linear-gradient(#f59e0b,#fbbf24);border-radius:2px;flex-shrink:0}
+    .eg-block p{font-size:14.5px;color:rgba(255,255,255,0.8);line-height:2}.eg-block p+p{margin-top:8px}
+    .sol-steps{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+    .sol-step{background:rgba(255,255,255,0.025);border-left:3px solid #f59e0b;border-radius:0 8px 8px 0;padding:12px 16px;font-size:14.5px;color:rgba(255,255,255,0.78);line-height:2}
+    .sol-step:nth-child(2){border-left-color:#38bdf8}.sol-step:nth-child(3){border-left-color:#34d399}.sol-step:nth-child(4){border-left-color:#f87171}.sol-step:nth-child(5){border-left-color:#c084fc}.sol-step:nth-child(6){border-left-color:#fbbf24}
+    .sol-step strong{color:#fff;font-family:"Microsoft YaHei",sans-serif}
+    .ans-box{background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:10px;padding:12px 18px;margin-top:12px;font-size:14.5px;color:rgba(255,255,255,0.85);line-height:2}
+    .ans-box .ans-label{color:#fbbf24;font-weight:700;font-family:"Microsoft YaHei",sans-serif}
+    canvas.demo-canvas{display:block;margin:18px auto 0;background:rgba(0,0,0,0.25);border-radius:12px;border:1px solid rgba(255,255,255,0.07)}
+    .demo-label{text-align:center;font-size:12.5px;color:rgba(255,255,255,0.35);font-family:"Microsoft YaHei",sans-serif;margin-top:8px}
+    .sim-ctrl{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+    .sim-btn{padding:7px 20px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:13px;font-family:"Microsoft YaHei",sans-serif;cursor:pointer;transition:all .2s}
+    .sim-btn:hover{background:rgba(245,158,11,0.25);border-color:rgba(251,191,36,0.5);color:#fff}
+    .sim-btn.active{background:linear-gradient(135deg,#f59e0b,#fbbf24);border-color:transparent;color:#1a1200;box-shadow:0 2px 10px rgba(251,191,36,0.4)}
+    .slider-row{display:flex;align-items:center;gap:14px;margin-top:14px;font-family:"Microsoft YaHei",sans-serif;font-size:13px;color:rgba(255,255,255,0.65)}
+    .slider-row input[type=range]{flex:1;accent-color:#fbbf24}
+    .slider-val{min-width:60px;text-align:right;color:#fbbf24;font-weight:600}
+    .cmp-table{width:100%;border-collapse:collapse;margin-top:14px;font-family:"Microsoft YaHei",sans-serif;font-size:13.5px}
+    .cmp-table th{background:rgba(245,158,11,0.18);color:#fbbf24;padding:10px 14px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.1)}
+    .cmp-table td{padding:9px 14px;border-bottom:1px solid rgba(255,255,255,0.05);color:rgba(255,255,255,0.78)}
+    .cmp-table tr:hover td{background:rgba(255,255,255,0.03)}
+  </style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">§4-2 &nbsp;动生电动势 · 感生电动势</div>
+    <span class="topbar-course">普通物理（卓越班）下册 · 电磁学</span>
+  </div>
+  <div class="topbar-sub">NUSEP26 · 普通物理（卓）下</div>
+</div>
+
+<div class="page">
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(0)">动生电动势原理</div>
+    <div class="tab" onclick="switchTab(1)">感生电动势 &amp; 仿真</div>
+    <div class="tab" onclick="switchTab(2)">例题</div>
+  </div>
+
+  <!-- ══ Tab 0：动生电动势原理 ══ -->
+  <div class="tab-panel active" id="panel-0">
+    <div class="card">
+      <div class="card-title">动生电动势的物理起源</div>
+      <p>当导体在磁场中运动时，导体内的自由电荷随导体一起运动，受到<span class="hl">洛伦兹力</span> $\vec{F} = q\vec{v}\times\vec{B}$。</p>
+      <p>这个力驱使正电荷沿导体定向移动，等效于一个<span class="hl">非静电力</span>（非保守力），从而在导体两端建立电动势。</p>
+      <p>对于从 $a$ 到 $b$ 的导体段，单位正电荷受到的非静电力为 $\vec{v}\times\vec{B}$，沿路径积分即得<span class="hl">动生电动势</span>：</p>
+      $$\varepsilon_i = \int_a^b (\vec{v}\times\vec{B})\cdot d\vec{l}$$
+      <div class="note-box">
+        <span class="note-label">物理本质</span>
+        动生电动势的非静电力是<strong>磁场对运动电荷的洛伦兹力</strong>。注意洛伦兹力本身不做功（$\vec{F}\perp\vec{v}_{总}$），但其分量 $q\vec{v}_{导}\times\vec{B}$ 沿导体方向的分量可以做功，驱动电荷定向移动。能量来源是使导体运动的外力。
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">与法拉第定律的关系</div>
+      <p>对于闭合回路，动生电动势也可以用法拉第电磁感应定律计算：</p>
+      $$\varepsilon = -N\frac{d\Phi_m}{dt}$$
+      <p>两种方法等价，但适用场景不同：</p>
+      <table class="cmp-table">
+        <thead><tr><th>方法</th><th>适用场景</th><th>优点</th></tr></thead>
+        <tbody>
+          <tr><td><span class="hl">$\vec{v}\times\vec{B}$ 积分法</span></td><td>导体段（不一定闭合），需知道 $\vec{v}$、$\vec{B}$ 分布</td><td>物理图像清晰，可求开路电动势</td></tr>
+          <tr><td><span class="hl-blue">法拉第定律</span></td><td>闭合回路，磁通量变化明确</td><td>计算简便，适合对称情形</td></tr>
+        </tbody>
+      </table>
+      <div class="blue-box">
+        <span class="note-label">重要提示</span>
+        当 $\vec{v}$ 与 $\vec{B}$ 平行，或 $\vec{v}\times\vec{B}$ 垂直于 $d\vec{l}$ 时，该段对电动势无贡献。例如导体沿自身方向运动，或运动方向与磁场平行时，$\varepsilon = 0$。
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">动生电动势的方向判断</div>
+      <ul class="prop-list">
+        <li class="prop-item"><span class="prop-num">①</span><div class="prop-body"><strong>右手定则（$\vec{v}\times\vec{B}$）</strong>：四指从 $\vec{v}$ 转向 $\vec{B}$，拇指方向即 $\vec{v}\times\vec{B}$ 方向，也是正电荷受力方向（电动势方向）</div></li>
+        <li class="prop-item"><span class="prop-num">②</span><div class="prop-body"><strong>楞次定律</strong>：对闭合回路，感应电流方向使其产生的磁通量阻碍原磁通量的变化</div></li>
+        <li class="prop-item"><span class="prop-num">③</span><div class="prop-body"><strong>积分符号</strong>：$\varepsilon_i = \int_a^b (\vec{v}\times\vec{B})\cdot d\vec{l}$，若结果为正，则 $b$ 端为高电位（电动势从 $a$ 到 $b$）</div></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ══ Tab 1：感生电动势 & 仿真 ══ -->
+  <div class="tab-panel" id="panel-1">
+    <div class="card">
+      <div class="card-title">动生 vs 感生：两类电磁感应</div>
+      <p>法拉第定律 $\varepsilon = -d\Phi_m/dt$ 统一描述了两种情形，但物理机制不同：</p>
+      <table class="cmp-table">
+        <thead><tr><th>类型</th><th>条件</th><th>非静电力来源</th><th>本节重点</th></tr></thead>
+        <tbody>
+          <tr><td><span class="hl">动生电动势</span></td><td>导体运动，$\vec{B}$ 不变</td><td>洛伦兹力 $q\vec{v}\times\vec{B}$</td><td>§4-2（本节）</td></tr>
+          <tr><td><span class="hl-blue">感生电动势</span></td><td>导体静止，$\vec{B}$ 变化</td><td>感生电场 $\vec{E}_感$（涡旋电场）</td><td>§4-1 已讨论</td></tr>
+        </tbody>
+      </table>
+      <div class="green-box">
+        <span class="note-label">麦克斯韦的观点</span>
+        感生电动势的本质是变化磁场激发的<strong>涡旋电场</strong>（感生电场）：$\oint_L \vec{E}_感\cdot d\vec{l} = -\dfrac{d\Phi_B}{dt}$。涡旋电场是非保守场，其环流不为零，这与静电场根本不同。
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">交互仿真：导体棒在匀强磁场中运动</div>
+      <p>水平导体棒向右运动，磁场 $\vec{B}$ 垂直纸面向里（×）。观察 $\vec{v}\times\vec{B}$ 力对正电荷的作用方向（向上），以及电动势的建立过程。</p>
+      <div class="slider-row">
+        <span>速度 $v$ =</span>
+        <input type="range" id="velSlider" min="0" max="10" step="0.5" value="4" oninput="updateRodSim()">
+        <span class="slider-val" id="velVal">4.0 m/s</span>
+      </div>
+      <div class="sim-ctrl">
+        <button class="sim-btn active" id="btnForce" onclick="toggleForceArrows()">v×B 力箭头</button>
+        <button class="sim-btn active" id="btnBField" onclick="toggleBSymbols()">B 场符号</button>
+        <button class="sim-btn" id="btnPause" onclick="toggleRodPause()">暂停</button>
+      </div>
+      <canvas id="rodCanvas" class="demo-canvas" width="620" height="280"></canvas>
+      <div class="demo-label">导体棒向右运动 → 正电荷受 v×B 向上 → 上端积累正电荷 → 建立电动势</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">感生电场的性质（§4-1 回顾）</div>
+      <ul class="prop-list">
+        <li class="prop-item"><span class="prop-num">①</span><div class="prop-body"><strong>涡旋性</strong>：感生电场的电场线是闭合曲线，$\oint \vec{E}_感\cdot d\vec{l} \neq 0$，是非保守场</div></li>
+        <li class="prop-item"><span class="prop-num">②</span><div class="prop-body"><strong>无源性</strong>：$\nabla\cdot\vec{E}_感 = 0$，感生电场无散度，不存在"电荷源"</div></li>
+        <li class="prop-item"><span class="prop-num">③</span><div class="prop-body"><strong>方向</strong>：由楞次定律确定，感生电场方向与 $-d\vec{B}/dt$ 的方向满足右手螺旋关系</div></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ══ Tab 2：例题 ══ -->
+  <div class="tab-panel" id="panel-2">
+    <div class="eg-block">
+      <div class="eg-title">例题 1：矩形线框在载流导线旁向右运动</div>
+      <p><strong>题目：</strong>一矩形导线框，水平方向宽 $a$，竖直方向高 $b$，框左边界距无限长载流导线（电流 $I$ 竖直向上）的距离为 $x$，线框以速度 $v$ 向右运动，求动生电动势 $\varepsilon$。</p>
+      <div class="sol-steps">
+        <div class="sol-step"><strong>建立坐标</strong>：取顺时针方向为积分回路正方向。载流导线在距离 $r$ 处产生的磁场大小为 $B(r) = \dfrac{\mu_0 I}{2\pi r}$，方向垂直纸面向里（右侧区域）。</div>
+        <div class="sol-step"><strong>分析各边贡献</strong>：上下两边运动方向 $\vec{v}$ 水平向右，$\vec{B}$ 垂直纸面，$\vec{v}\times\vec{B}$ 竖直，而 $d\vec{l}$ 水平，故 $(\vec{v}\times\vec{B})\cdot d\vec{l} = 0$，上下边无贡献。</div>
+        <div class="sol-step"><strong>左边（距导线 $x$）</strong>：$\vec{v}\times\vec{B}$ 向上，$d\vec{l}$ 向上（顺时针），两者同向，贡献为正：$\varepsilon_左 = \dfrac{\mu_0 I v}{2\pi x}\cdot b$</div>
+        <div class="sol-step"><strong>右边（距导线 $x+a$）</strong>：$\vec{v}\times\vec{B}$ 向上，$d\vec{l}$ 向下（顺时针），两者反向，贡献为负：$\varepsilon_右 = -\dfrac{\mu_0 I v}{2\pi(x+a)}\cdot b$</div>
+        <div class="sol-step"><strong>合电动势</strong>：$$\varepsilon = \varepsilon_左 + \varepsilon_右 = \frac{\mu_0 I v b}{2\pi x} - \frac{\mu_0 I v b}{2\pi(x+a)} = \frac{\mu_0 I v a b}{2\pi x(x+a)}$$</div>
+        <div class="sol-step"><strong>讨论</strong>：若 $v$ 竖直向上（线框向上运动），则 $\vec{v}\times\vec{B}$ 水平，而左右两边 $d\vec{l}$ 竖直，$(\vec{v}\times\vec{B})\cdot d\vec{l} = 0$；上下两边虽有贡献，但大小相等、方向相反，故 $\varepsilon = 0$。</div>
+      </div>
+      <div class="ans-box"><span class="ans-label">结果：</span>$\varepsilon = \dfrac{\mu_0 I v a b}{2\pi x(x+a)}$，方向为顺时针（左边为高电位端）。</div>
+    </div>
+
+    <div class="eg-block">
+      <div class="eg-title">例题 2：铜棒绕端点在匀强磁场中旋转</div>
+      <p><strong>题目：</strong>长为 $L$ 的铜棒 $OA$，固定端 $O$ 在均匀磁场 $\vec{B}$ 中以角速度 $\omega$ 逆时针旋转，铜棒与 $\vec{B}$ 垂直，求动生电动势 $\varepsilon_{动}$。</p>
+      <div class="sol-steps">
+        <div class="sol-step"><strong>方法一（法拉第定律）</strong>：$t$ 时刻铜棒扫过的扇形面积 $S = \dfrac{1}{2}r^2\theta = \dfrac{1}{2}L^2\omega t$，磁通量 $\Phi = BS = \dfrac{1}{2}BL^2\omega t$，故：$$\varepsilon = -\frac{d\Phi}{dt} = -\frac{1}{2}B\omega L^2$$取绝对值，$|\varepsilon| = \dfrac{1}{2}B\omega L^2$。</div>
+        <div class="sol-step"><strong>方法二（$\vec{v}\times\vec{B}$ 积分法）</strong>：距 $O$ 点 $r$ 处的线元速度 $v = \omega r$，$\vec{v}\times\vec{B}$ 沿棒向外（从 $O$ 到 $A$），故：$$\varepsilon = \int_0^L (\vec{v}\times\vec{B})\cdot d\vec{r} = \int_0^L \omega r B\,dr = B\omega\cdot\frac{L^2}{2} = \frac{1}{2}B\omega L^2$$</div>
+        <div class="sol-step"><strong>方向</strong>：$\vec{v}\times\vec{B}$ 从 $O$ 指向 $A$，正电荷向 $A$ 端积累，$A$ 端为高电位，$O$ 端为低电位。</div>
+      </div>
+      <div class="ans-box"><span class="ans-label">结果：</span>$\varepsilon = \dfrac{1}{2}B\omega L^2$，$A$ 端（外端）为高电位。两种方法结果一致。</div>
+    </div>
+  </div>
+</div>
+
+<!-- Particle BG -->
+<script>
+(function(){
+  const cv=document.getElementById('particles'),cx=cv.getContext('2d');
+  let W,H,pts=[];
+  function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  for(let i=0;i<90;i++)pts.push({x:Math.random()*2000,y:Math.random()*1200,vx:(Math.random()-.5)*0.3,vy:(Math.random()-.5)*0.3,r:Math.random()*1.6+0.4,a:Math.random()*0.5+0.1});
+  (function frame(){cx.clearRect(0,0,W,H);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle=`rgba(251,191,36,${p.a*0.5})`;cx.fill();});requestAnimationFrame(frame);})();
+})();
+</script>
+
+<script>
+function switchTab(i){
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',j===i));
+  document.querySelectorAll('.tab-panel').forEach((p,j)=>p.classList.toggle('active',j===i));
+  if(i===1) startRodSim();
+}
+function drawArrow(ctx,x1,y1,x2,y2,col,w){
+  w=w||2.5;
+  const dx=x2-x1,dy=y2-y1,l=Math.sqrt(dx*dx+dy*dy);if(l<1)return;
+  ctx.save();ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=w;
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  const a=Math.atan2(dy,dx);ctx.translate(x2,y2);ctx.rotate(a);
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-10,-5);ctx.lineTo(-10,5);ctx.closePath();ctx.fill();
+  ctx.restore();
+}
+</script>
+
+<!-- Tab 1: Rod simulation -->
+<script>
+let rodX=80, rodVel=4, rodPaused=false, rodRAF=null;
+let showForceArrows=true, showBSymbols=true;
+
+function updateRodSim(){
+  rodVel=parseFloat(document.getElementById('velSlider').value);
+  document.getElementById('velVal').textContent=rodVel.toFixed(1)+' m/s';
+}
+function toggleForceArrows(){
+  showForceArrows=!showForceArrows;
+  document.getElementById('btnForce').classList.toggle('active',showForceArrows);
+}
+function toggleBSymbols(){
+  showBSymbols=!showBSymbols;
+  document.getElementById('btnBField').classList.toggle('active',showBSymbols);
+}
+function toggleRodPause(){
+  rodPaused=!rodPaused;
+  document.getElementById('btnPause').textContent=rodPaused?'继续':'暂停';
+  document.getElementById('btnPause').classList.toggle('active',rodPaused);
+  if(!rodPaused) animateRod();
+}
+
+function startRodSim(){
+  if(rodRAF) cancelAnimationFrame(rodRAF);
+  rodX=80;
+  animateRod();
+}
+
+function animateRod(){
+  if(rodPaused) return;
+  rodX += rodVel*0.4;
+  const cv=document.getElementById('rodCanvas');
+  if(!cv) return;
+  if(rodX>cv.width-60) rodX=80;
+  drawRod();
+  rodRAF=requestAnimationFrame(animateRod);
+}
+
+function drawRod(){
+  const cv=document.getElementById('rodCanvas');if(!cv)return;
+  const ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+
+  // B field symbols (× into page)
+  if(showBSymbols){
+    const cols=8,rows=5;
+    const dx=W/(cols+1), dy=H/(rows+1);
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        const px=(c+1)*dx, py=(r+1)*dy;
+        ctx.strokeStyle='rgba(56,189,248,0.25)';ctx.lineWidth=1.5;
+        const s=5;
+        ctx.beginPath();ctx.moveTo(px-s,py-s);ctx.lineTo(px+s,py+s);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(px+s,py-s);ctx.lineTo(px-s,py+s);ctx.stroke();
+      }
+    }
+    ctx.fillStyle='rgba(56,189,248,0.35)';ctx.font='11px "Microsoft YaHei"';ctx.textAlign='left';
+    ctx.fillText('B（×，垂直纸面向里）',8,14);
+  }
+
+  // Rod
+  const rodTop=H*0.15, rodBot=H*0.85;
+  const rodMid=(rodTop+rodBot)/2;
+  ctx.strokeStyle='#fbbf24';ctx.lineWidth=5;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(rodX,rodTop);ctx.lineTo(rodX,rodBot);ctx.stroke();
+
+  // Velocity arrow
+  drawArrow(ctx,rodX+10,rodMid,rodX+10+rodVel*8,rodMid,'rgba(52,211,153,0.9)',2.5);
+  ctx.fillStyle='rgba(52,211,153,0.8)';ctx.font='12px Times New Roman';ctx.textAlign='left';
+  ctx.fillText('v',rodX+14+rodVel*8,rodMid-6);
+
+  // v×B force arrows on charges (upward)
+  if(showForceArrows && rodVel>0){
+    const nCharges=5;
+    for(let i=0;i<nCharges;i++){
+      const cy=rodTop+20+(rodBot-rodTop-40)*i/(nCharges-1);
+      const fLen=rodVel*6+10;
+      drawArrow(ctx,rodX-18,cy,rodX-18,cy-fLen,'rgba(248,113,113,0.85)',2);
+      // positive charge dot
+      ctx.beginPath();ctx.arc(rodX,cy,5,0,Math.PI*2);
+      ctx.fillStyle='rgba(248,113,113,0.7)';ctx.fill();
+      ctx.strokeStyle='rgba(248,113,113,0.9)';ctx.lineWidth=1;ctx.stroke();
+      ctx.fillStyle='rgba(255,255,255,0.8)';ctx.font='bold 9px sans-serif';ctx.textAlign='center';
+      ctx.fillText('+',rodX,cy+3.5);
+    }
+    ctx.fillStyle='rgba(248,113,113,0.7)';ctx.font='12px Times New Roman';ctx.textAlign='right';
+    ctx.fillText('v×B',rodX-22,rodTop+10);
+  }
+
+  // Charge accumulation labels
+  ctx.fillStyle='rgba(248,113,113,0.8)';ctx.font='bold 13px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText('+ (高电位)',rodX,rodTop-6);
+  ctx.fillStyle='rgba(56,189,248,0.8)';
+  ctx.fillText('− (低电位)',rodX,rodBot+16);
+
+  // EMF label
+  const emf=(rodVel*1.5).toFixed(1);
+  ctx.fillStyle='rgba(251,191,36,0.85)';ctx.font='bold 13px "Microsoft YaHei"';ctx.textAlign='right';
+  ctx.fillText('ε ∝ vBL = '+emf+' (任意单位)',W-10,H-10);
+}
+
+window.addEventListener('DOMContentLoaded',function(){
+  drawRod();
+});
+</script>
+
+<!-- ── 笔记工具栏 ── -->
+<style>
+.note-fab{position:fixed;bottom:28px;right:28px;z-index:1000;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.fab-main{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#fbbf24);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 20px rgba(251,191,36,0.5);transition:transform .2s,box-shadow .2s;color:#1a1200}
+.fab-main:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(251,191,36,0.65)}
+.fab-main.active{background:linear-gradient(135deg,#d97706,#f59e0b);transform:rotate(45deg)}
+.fab-menu{display:flex;flex-direction:column;align-items:flex-end;gap:8px;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .2s,transform .2s}
+.fab-menu.open{opacity:1;pointer-events:all;transform:translateY(0)}
+.fab-item{display:flex;align-items:center;gap:10px;background:rgba(15,12,41,0.92);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:9px 16px 9px 12px;cursor:pointer;white-space:nowrap;backdrop-filter:blur(12px);transition:border-color .2s,background .2s;font-family:"Microsoft YaHei",sans-serif}
+.fab-item:hover{border-color:rgba(251,191,36,0.4);background:rgba(245,158,11,0.15)}
+.fab-item .fi-icon{font-size:17px}.fab-item .fi-label{font-size:13px;color:rgba(255,255,255,0.8)}
+.fab-item.starred .fi-label{color:#fbbf24}.fab-item.starred{border-color:rgba(251,191,36,0.35)}
+.fab-item.read-done .fi-label{color:#34d399}.fab-item.read-done{border-color:rgba(52,211,153,0.35)}
+.note-drawer{position:fixed;bottom:0;right:0;left:0;z-index:999;background:rgba(10,8,30,0.96);border-top:1px solid rgba(255,255,255,0.1);backdrop-filter:blur(20px);padding:20px 28px 28px;transform:translateY(100%);transition:transform .32s cubic-bezier(0.4,0,0.2,1)}
+.note-drawer.open{transform:translateY(0)}
+.drawer-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.drawer-title{font-size:14px;font-weight:700;color:#fbbf24;font-family:"Microsoft YaHei",sans-serif;letter-spacing:1px}
+.drawer-close{font-size:20px;color:rgba(255,255,255,0.4);cursor:pointer;transition:color .2s;line-height:1}
+.drawer-close:hover{color:#fff}
+.drawer-textarea{width:100%;height:120px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 16px;color:#fff;font-size:14px;font-family:"Microsoft YaHei",sans-serif;resize:vertical;outline:none;line-height:1.8;transition:border-color .2s}
+.drawer-textarea:focus{border-color:rgba(251,191,36,0.5)}
+.drawer-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.drawer-hint{font-size:11px;color:rgba(255,255,255,0.25);font-family:"Microsoft YaHei",sans-serif}
+.drawer-save{background:linear-gradient(135deg,#f59e0b,#fbbf24);border:none;color:#1a1200;font-size:13px;font-weight:700;padding:8px 22px;border-radius:10px;cursor:pointer;font-family:"Microsoft YaHei",sans-serif;transition:opacity .2s}
+.drawer-save:hover{opacity:0.85}
+.phy-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(15,12,41,0.95);border:1px solid rgba(251,191,36,0.3);border-radius:24px;padding:10px 22px;font-size:13px;color:rgba(255,255,255,0.85);font-family:"Microsoft YaHei",sans-serif;z-index:1100;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap}
+.phy-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+
+<div class="note-fab">
+  <div class="fab-menu" id="fabMenu">
+    <div class="fab-item" id="fabStar" onclick="toggleStar()">
+      <span class="fi-icon">☆</span>
+      <span class="fi-label">收藏此节</span>
+    </div>
+    <div class="fab-item" id="fabRead" onclick="toggleRead()">
+      <span class="fi-icon">○</span>
+      <span class="fi-label">标记已读</span>
+    </div>
+    <div class="fab-item" onclick="openDrawer()">
+      <span class="fi-icon">📝</span>
+      <span class="fi-label">我的笔记</span>
+    </div>
+  </div>
+  <button class="fab-main" id="fabBtn" onclick="toggleFab()" title="工具">✦</button>
+</div>
+
+<div class="note-drawer" id="noteDrawer">
+  <div class="drawer-header">
+    <div class="drawer-title">📝 我的笔记 · §4-2</div>
+    <div class="drawer-close" onclick="closeDrawer()">×</div>
+  </div>
+  <textarea class="drawer-textarea" id="drawerTA" placeholder="在此记录你的理解、疑问或总结……"></textarea>
+  <div class="drawer-footer">
+    <span class="drawer-hint">自动保存到本地，刷新不丢失</span>
+    <button class="drawer-save" onclick="saveNote()">保存</button>
+  </div>
+</div>
+
+<div class="phy-toast" id="phyToast"></div>
+
+<script>
+(function(){
+  const PID='4-2';
+  const SK='phy26_note_'+PID;
+  const STK='phy26_star_'+PID;
+  const RDK='phy26_read_'+PID;
+  let fabOpen=false;
+
+  function showToast(msg){
+    const t=document.getElementById('phyToast');
+    t.textContent=msg;t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),2000);
+  }
+
+  window.toggleFab=function(){
+    fabOpen=!fabOpen;
+    document.getElementById('fabMenu').classList.toggle('open',fabOpen);
+    document.getElementById('fabBtn').classList.toggle('active',fabOpen);
+  };
+
+  window.toggleStar=function(){
+    const starred=localStorage.getItem(STK)==='1';
+    if(starred){localStorage.removeItem(STK);showToast('已取消收藏');}
+    else{localStorage.setItem(STK,'1');showToast('已收藏此节');}
+    refreshStarUI();
+  };
+
+  window.toggleRead=function(){
+    const read=localStorage.getItem(RDK)==='1';
+    if(read){localStorage.removeItem(RDK);showToast('已取消已读标记');}
+    else{localStorage.setItem(RDK,'1');showToast('已标记为已读');}
+    refreshReadUI();
+  };
+
+  function refreshStarUI(){
+    const starred=localStorage.getItem(STK)==='1';
+    const el=document.getElementById('fabStar');
+    el.querySelector('.fi-icon').textContent=starred?'★':'☆';
+    el.querySelector('.fi-label').textContent=starred?'已收藏':'收藏此节';
+    el.classList.toggle('starred',starred);
+  }
+
+  function refreshReadUI(){
+    const read=localStorage.getItem(RDK)==='1';
+    const el=document.getElementById('fabRead');
+    el.querySelector('.fi-icon').textContent=read?'✓':'○';
+    el.querySelector('.fi-label').textContent=read?'已读':'标记已读';
+    el.classList.toggle('read-done',read);
+  }
+
+  window.openDrawer=function(){
+    document.getElementById('drawerTA').value=localStorage.getItem(SK)||'';
+    document.getElementById('noteDrawer').classList.add('open');
+    document.getElementById('fabMenu').classList.remove('open');
+    document.getElementById('fabBtn').classList.remove('active');
+    fabOpen=false;
+    setTimeout(()=>document.getElementById('drawerTA').focus(),350);
+  };
+
+  window.closeDrawer=function(){
+    document.getElementById('noteDrawer').classList.remove('open');
+  };
+
+  window.saveNote=function(){
+    const val=document.getElementById('drawerTA').value.trim();
+    if(val){localStorage.setItem(SK,val);showToast('笔记已保存');}
+    else{localStorage.removeItem(SK);showToast('笔记已清空');}
+    closeDrawer();
+  };
+
+  let saveTimer;
+  document.getElementById('drawerTA').addEventListener('input',function(){
+    clearTimeout(saveTimer);
+    saveTimer=setTimeout(()=>{
+      const val=this.value.trim();
+      if(val) localStorage.setItem(SK,val);
+    },1500);
+  });
+
+  refreshStarUI();refreshReadUI();
+
+  if(localStorage.getItem(SK)){
+    const noteItem=document.querySelector('.fab-item:last-of-type .fi-icon');
+    if(noteItem) noteItem.textContent='📋';
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>§3-4 磁场的高斯定理</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    min-height: 100vh;
+    color: #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── Topbar ── */
+  #topbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 20px;
+    background: rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(8px);
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  #topbar a.back-btn {
+    text-decoration: none;
+    color: #34d399;
+    background: rgba(52,211,153,0.12);
+    border: 1px solid rgba(52,211,153,0.35);
+    border-radius: 8px;
+    padding: 5px 13px;
+    font-size: 13px;
+    transition: background 0.2s;
+  }
+  #topbar a.back-btn:hover { background: rgba(52,211,153,0.25); }
+  .topbar-title-wrap { display: flex; flex-direction: column; gap: 2px; }
+  .topbar-title { font-size: 16px; font-weight: 700; color: #fff; }
+  .topbar-course { font-size: 11px; color: rgba(255,255,255,0.38); letter-spacing: 1px; }
+  .topbar-sub { margin-left: auto; font-size: 12px; color: rgba(255,255,255,0.3); }
+
+  /* ── Main layout ── */
+  #main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── Sidebar ── */
+  #sidebar {
+    width: 250px;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.04);
+    border-right: 1px solid rgba(255,255,255,0.08);
+    overflow-y: auto;
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  #sidebar::-webkit-scrollbar { width: 4px; }
+  #sidebar::-webkit-scrollbar-thumb { background: rgba(52,211,153,0.3); border-radius: 2px; }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #10b981;
+    margin-bottom: 6px;
+    border-bottom: 1px solid rgba(16,185,129,0.2);
+    padding-bottom: 4px;
+  }
+
+  /* Surface shape buttons */
+  .shape-btns { display: flex; gap: 5px; flex-wrap: wrap; }
+  .shape-btn {
+    flex: 1; min-width: 60px;
+    padding: 6px 4px;
+    font-size: 11px;
+    border: 1px solid rgba(52,211,153,0.3);
+    border-radius: 7px;
+    background: rgba(52,211,153,0.07);
+    color: #a7f3d0;
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: center;
+  }
+  .shape-btn:hover  { background: rgba(52,211,153,0.18); }
+  .shape-btn.active { background: rgba(52,211,153,0.32); border-color: #10b981; color: #fff; font-weight: 600; }
+
+  /* Sliders */
+  .ctrl-row {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .ctrl-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11.5px;
+    color: #cbd5e1;
+  }
+  .ctrl-label span { color: #34d399; font-weight: 600; }
+  input[type=range] {
+    width: 100%;
+    accent-color: #10b981;
+    height: 4px;
+    cursor: pointer;
+  }
+
+  /* Toggles */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #cbd5e1;
+  }
+  .toggle {
+    position: relative; width: 36px; height: 20px;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle .slider {
+    position: absolute; inset: 0;
+    background: rgba(255,255,255,0.1);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .toggle .slider::before {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    left: 3px; top: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.2s;
+  }
+  .toggle input:checked + .slider { background: #10b981; }
+  .toggle input:checked + .slider::before { transform: translateX(16px); }
+
+  /* Drawing hint */
+  #draw-hint {
+    font-size: 11px;
+    color: #64748b;
+    line-height: 1.5;
+    padding: 6px 8px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 6px;
+    border-left: 2px solid #10b981;
+  }
+
+  /* Results panel */
+  #results {
+    background: rgba(16,185,129,0.06);
+    border: 1px solid rgba(16,185,129,0.2);
+    border-radius: 10px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+  }
+  .result-label { color: #94a3b8; }
+  .result-value { color: #34d399; font-weight: 700; font-family: monospace; font-size: 13px; }
+  .result-verify {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #10b981;
+    padding: 5px;
+    border-top: 1px solid rgba(16,185,129,0.2);
+    margin-top: 2px;
+  }
+
+  /* Formula bar */
+  #formula-bar {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 12px;
+    color: #94a3b8;
+    line-height: 1.6;
+  }
+  #formula-bar .formula {
+    font-size: 14px;
+    color: #34d399;
+    font-style: italic;
+    text-align: center;
+    margin-bottom: 4px;
+  }
+
+  /* ── Canvas area ── */
+  #canvas-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 10px;
+    overflow: hidden;
+  }
+
+  #panels-row {
+    display: flex;
+    flex: 1;
+    gap: 10px;
+    overflow: hidden;
+  }
+
+  .panel {
+    flex: 1;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #10b981;
+    background: rgba(16,185,129,0.07);
+    border-bottom: 1px solid rgba(16,185,129,0.15);
+    flex-shrink: 0;
+  }
+  .panel-header .sub {
+    font-size: 10px;
+    color: #64748b;
+    font-weight: 400;
+    margin-left: 8px;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    flex: 1;
+    cursor: crosshair;
+  }
+  #chart-canvas { cursor: default; }
+
+  /* insight bar at bottom */
+  #insight {
+    flex-shrink: 0;
+    margin-top: 8px;
+    padding: 8px 14px;
+    background: rgba(16,185,129,0.07);
+    border: 1px solid rgba(16,185,129,0.18);
+    border-radius: 10px;
+    font-size: 12px;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  #insight .badge {
+    background: #10b981;
+    color: #000;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div id="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">⚡ 实验：磁场的高斯定理</div>
+    <span class="topbar-course">普通物理（卓越班）下册 · 电磁学</span>
+  </div>
+  <div class="topbar-sub">§3-4 磁通量 · 磁场高斯定理</div>
+</div>
+
+<!-- Main -->
+<div id="main">
+
+  <!-- Sidebar -->
+  <div id="sidebar">
+
+    <div>
+      <div class="section-title">封闭曲面形状</div>
+      <div class="shape-btns">
+        <button class="shape-btn active" data-shape="sphere" onclick="setShape('sphere',this)">⭕ 球面</button>
+        <button class="shape-btn"        data-shape="cube"   onclick="setShape('cube',this)">⬜ 正方体</button>
+        <button class="shape-btn"        data-shape="poly"   onclick="setShape('poly',this)">✏️ 任意形</button>
+      </div>
+    </div>
+
+    <div id="draw-hint" style="display:none">
+      点击左侧画布添加顶点，右键或点击起始点附近闭合多边形。<br>最少3个顶点。
+    </div>
+
+    <div>
+      <div class="section-title">曲面参数</div>
+      <div class="ctrl-row">
+        <div class="ctrl-label">曲面大小 (r/a) <span id="lbl-size">80</span> px</div>
+        <input type="range" id="sl-size" min="30" max="180" value="80" oninput="onSlider()">
+      </div>
+      <div class="ctrl-row" style="margin-top:8px">
+        <div class="ctrl-label">X 偏移 <span id="lbl-offx">0</span> px</div>
+        <input type="range" id="sl-offx" min="-200" max="200" value="0" oninput="onSlider()">
+      </div>
+      <div class="ctrl-row" style="margin-top:8px">
+        <div class="ctrl-label">Y 偏移 <span id="lbl-offy">0</span> px</div>
+        <input type="range" id="sl-offy" min="-150" max="150" value="0" oninput="onSlider()">
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">磁铁参数</div>
+      <div class="ctrl-row">
+        <div class="ctrl-label">磁极强度 <span id="lbl-str">1.0</span></div>
+        <input type="range" id="sl-str" min="0.2" max="3.0" step="0.1" value="1.0" oninput="onSlider()">
+      </div>
+    </div>
+
+    <div>
+      <div class="section-title">显示选项</div>
+      <div class="toggle-row">
+        <span>显示磁感线</span>
+        <label class="toggle"><input type="checkbox" id="tog-field" checked onchange="render()"><span class="slider"></span></label>
+      </div>
+      <div class="toggle-row" style="margin-top:8px">
+        <span>显示通量箭头</span>
+        <label class="toggle"><input type="checkbox" id="tog-arrows" checked onchange="render()"><span class="slider"></span></label>
+      </div>
+      <div class="toggle-row" style="margin-top:8px">
+        <span>显示色彩图</span>
+        <label class="toggle"><input type="checkbox" id="tog-cmap" checked onchange="render()"><span class="slider"></span></label>
+      </div>
+      <div class="toggle-row" style="margin-top:8px">
+        <span>积分采样点</span>
+        <label class="toggle"><input type="checkbox" id="tog-samp" onchange="render()"><span class="slider"></span></label>
+      </div>
+    </div>
+
+    <div id="results">
+      <div class="section-title" style="margin-bottom:2px">计算结果</div>
+      <div class="result-row">
+        <span class="result-label">Φ_total</span>
+        <span class="result-value" id="res-flux">0.000</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">max |B|</span>
+        <span class="result-value" id="res-maxB">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">面积 A</span>
+        <span class="result-value" id="res-area">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">采样点 N</span>
+        <span class="result-value" id="res-npts">—</span>
+      </div>
+      <div class="result-verify" id="res-verify">∯ B·dA ≈ 0 ✓</div>
+    </div>
+
+    <div id="formula-bar">
+      <div class="formula">∯<sub>S</sub> B·dA = 0</div>
+      磁场无单极子，磁感线是闭合曲线。<br>
+      穿入任意封闭曲面的磁通量等于穿出的磁通量，净通量恒为零。
+    </div>
+
+    <div class="report-fab" style="margin-top:auto;padding-top:12px"><button class="report-fab-btn" onclick="openReport()"><span class="rfb-icon">📄</span> 生成实验报告</button></div>
+  </div><!-- /sidebar -->
+
+  <!-- Canvas area -->
+  <div id="canvas-area">
+    <div id="panels-row">
+
+      <!-- Left: field view -->
+      <div class="panel">
+        <div class="panel-header">
+          🧲 磁场视图
+          <span class="sub">拖动磁铁 · 观察封闭曲面</span>
+        </div>
+        <canvas id="field-canvas"></canvas>
+      </div>
+
+      <!-- Right: flux chart -->
+      <div class="panel">
+        <div class="panel-header">
+          📊 通量分布
+          <span class="sub">各面元 B·n̂ dA 实时图</span>
+        </div>
+        <canvas id="chart-canvas"></canvas>
+      </div>
+
+    </div>
+
+    <div id="insight">
+      <span class="badge">物理洞察</span>
+      <span id="insight-text">
+        即使磁铁位于封闭曲面<strong>内部</strong>，总磁通量仍为零——因为磁感线是<strong>闭合曲线</strong>，穿入必穿出，不存在磁单极子。
+      </span>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ─────────────────────────────────────────────
+// State
+// ─────────────────────────────────────────────
+const fCanvas = document.getElementById('field-canvas');
+const fCtx    = fCanvas.getContext('2d');
+const cCanvas = document.getElementById('chart-canvas');
+const cCtx    = cCanvas.getContext('2d');
+
+let shape = 'sphere';    // 'sphere' | 'cube' | 'poly'
+let surfR = 80;          // radius or half-side
+let offX  = 0;
+let offY  = 0;
+let polePower = 1.0;
+
+// Magnet position (canvas coords, set after first resize)
+let magnetX = 0, magnetY = 0;
+let dragging = false, dragOX = 0, dragOY = 0;
+
+// Polygon drawing
+let polyPoints = [];
+let polyClosed = false;
+let polyDrawing = false;
+
+// ─────────────────────────────────────────────
+// Dipole field (2D approximation)
+// Returns {Bx, By} at point (px, py)
+// Magnet at (mx, my), poles at ±halfLen along x
+// ─────────────────────────────────────────────
+function dipoleField(px, py) {
+  const halfLen = 30 * polePower;
+  // North pole at (mx+halfLen, my), South at (mx-halfLen, my)
+  const poles = [
+    { x: magnetX + halfLen, y: magnetY, q: +1 },
+    { x: magnetX - halfLen, y: magnetY, q: -1 }
+  ];
+  let Bx = 0, By = 0;
+  for (const p of poles) {
+    const dx = px - p.x;
+    const dy = py - p.y;
+    const r2 = dx*dx + dy*dy;
+    const r  = Math.sqrt(r2);
+    if (r < 4) continue;
+    const k = polePower * 3000 / (r2 * r);   // ~1/r^2 field strength
+    Bx += k * dx * p.q;
+    By += k * dy * p.q;
+  }
+  return { Bx, By };
+}
+
+// ─────────────────────────────────────────────
+// Closed surface geometry helpers
+// ─────────────────────────────────────────────
+// Surface center
+function surfCX() { return magnetX + offX; }
+function surfCY() { return magnetY + offY; }
+
+// Sample points on the boundary with outward normals and arc-lengths
+// Returns array of { x, y, nx, ny, ds }
+function sampleSurface(N) {
+  const cx = surfCX(), cy = surfCY();
+  const pts = [];
+
+  if (shape === 'sphere') {
+    const dTheta = 2*Math.PI / N;
+    for (let i = 0; i < N; i++) {
+      const theta = i * dTheta;
+      const x = cx + surfR * Math.cos(theta);
+      const y = cy + surfR * Math.sin(theta);
+      pts.push({ x, y, nx: Math.cos(theta), ny: Math.sin(theta), ds: surfR * dTheta });
+    }
+  } else if (shape === 'cube') {
+    // Rectangle perimeter, outward normal per side
+    const a = surfR;   // half-side
+    const sides = [
+      // top (y = cy-a), normal up (0,-1)
+      { x0: cx-a, y0: cy-a, x1: cx+a, y1: cy-a, nx: 0, ny: -1 },
+      // right (x = cx+a), normal right (+1,0)
+      { x0: cx+a, y0: cy-a, x1: cx+a, y1: cy+a, nx: 1, ny: 0  },
+      // bottom (y = cy+a), normal down (0,+1)
+      { x0: cx+a, y0: cy+a, x1: cx-a, y1: cy+a, nx: 0, ny: 1  },
+      // left (x = cx-a), normal left (-1,0)
+      { x0: cx-a, y0: cy+a, x1: cx-a, y1: cy-a, nx: -1, ny: 0 },
+    ];
+    const perPer = Math.ceil(N / 4);
+    for (const s of sides) {
+      for (let i = 0; i < perPer; i++) {
+        const t = (i + 0.5) / perPer;
+        const x = s.x0 + t * (s.x1 - s.x0);
+        const y = s.y0 + t * (s.y1 - s.y0);
+        const len = Math.hypot(s.x1 - s.x0, s.y1 - s.y0);
+        pts.push({ x, y, nx: s.nx, ny: s.ny, ds: len / perPer });
+      }
+    }
+  } else if (shape === 'poly') {
+    if (!polyClosed || polyPoints.length < 3) return pts;
+    const verts = polyPoints;
+    const n = verts.length;
+    for (let i = 0; i < n; i++) {
+      const a = verts[i], b = verts[(i+1) % n];
+      const len = Math.hypot(b.x-a.x, b.y-a.y);
+      if (len < 1) continue;
+      const segN = Math.max(1, Math.ceil(len / (surfR / 8)));
+      const edgeDx = b.x - a.x, edgeDy = b.y - a.y;
+      // Outward normal: rotate edge 90° and check winding
+      let nx = edgeDy / len, ny = -edgeDx / len;
+      // Ensure outward using centroid test
+      const midX = (a.x+b.x)/2, midY = (a.y+b.y)/2;
+      const toCX = midX - cx, toCY = midY - cy;
+      if (nx*toCX + ny*toCY < 0) { nx = -nx; ny = -ny; }
+      for (let j = 0; j < segN; j++) {
+        const t = (j + 0.5) / segN;
+        pts.push({
+          x: a.x + t * edgeDx,
+          y: a.y + t * edgeDy,
+          nx, ny,
+          ds: len / segN
+        });
+      }
+    }
+  }
+  return pts;
+}
+
+// Centroid of polygon (for 'poly' shape)
+function polyCenter() {
+  if (polyPoints.length < 1) return { x: magnetX, y: magnetY };
+  let sx = 0, sy = 0;
+  for (const p of polyPoints) { sx += p.x; sy += p.y; }
+  return { x: sx / polyPoints.length, y: sy / polyPoints.length };
+}
+
+// ─────────────────────────────────────────────
+// Compute flux integral
+// ─────────────────────────────────────────────
+const N_SAMPLE = 200;
+
+function computeFlux() {
+  const pts = sampleSurface(N_SAMPLE);
+  let phi = 0, maxB = 0, area = 0;
+  const contributions = [];
+  for (const p of pts) {
+    const { Bx, By } = dipoleField(p.x, p.y);
+    const Bmag = Math.hypot(Bx, By);
+    const contrib = (Bx * p.nx + By * p.ny) * p.ds;
+    phi += contrib;
+    area += p.ds;
+    if (Bmag > maxB) maxB = Bmag;
+    contributions.push({ x: p.x, y: p.y, nx: p.nx, ny: p.ny, val: contrib, Bx, By });
+  }
+  return { phi, maxB, area, pts: contributions, N: pts.length };
+}
+
+// ─────────────────────────────────────────────
+// Field line tracing
+// ─────────────────────────────────────────────
+function traceFieldLine(sx, sy, maxSteps, stepSize) {
+  const path = [{ x: sx, y: sy }];
+  let x = sx, y = sy;
+  const W = fCanvas.width, H = fCanvas.height;
+  for (let i = 0; i < maxSteps; i++) {
+    const { Bx, By } = dipoleField(x, y);
+    const Bmag = Math.hypot(Bx, By);
+    if (Bmag < 0.001) break;
+    x += stepSize * Bx / Bmag;
+    y += stepSize * By / Bmag;
+    if (x < -20 || x > W+20 || y < -20 || y > H+20) break;
+    path.push({ x, y });
+    // Stop near south pole
+    const dx = x - (magnetX - 30*polePower);
+    const dy = y - magnetY;
+    if (dx*dx+dy*dy < 64) break;
+  }
+  return path;
+}
+
+// ─────────────────────────────────────────────
+// Draw routines
+// ─────────────────────────────────────────────
+function drawFieldLines(ctx) {
+  const halfLen = 30 * polePower;
+  const nLines  = 16;
+  ctx.lineWidth = 1.2;
+  for (let i = 0; i < nLines; i++) {
+    const angle = (i / nLines) * 2 * Math.PI;
+    const r0 = 8;
+    const sx = magnetX + halfLen + r0 * Math.cos(angle);
+    const sy = magnetY            + r0 * Math.sin(angle);
+    const path = traceFieldLine(sx, sy, 800, 3);
+    if (path.length < 2) continue;
+
+    const grad = ctx.createLinearGradient(path[0].x, path[0].y,
+                                          path[path.length-1].x, path[path.length-1].y);
+    grad.addColorStop(0,   'rgba(239,68,68,0.7)');
+    grad.addColorStop(0.5, 'rgba(251,191,36,0.5)');
+    grad.addColorStop(1,   'rgba(59,130,246,0.7)');
+
+    ctx.beginPath();
+    ctx.moveTo(path[0].x, path[0].y);
+    for (let j = 1; j < path.length; j++) ctx.lineTo(path[j].x, path[j].y);
+    ctx.strokeStyle = grad;
+    ctx.stroke();
+
+    // Arrow on midpoint
+    if (path.length > 10) {
+      const mi = Math.floor(path.length * 0.45);
+      const p0 = path[mi], p1 = path[mi+1];
+      if (!p1) continue;
+      const ang = Math.atan2(p1.y-p0.y, p1.x-p0.x);
+      ctx.save();
+      ctx.translate(p0.x, p0.y);
+      ctx.rotate(ang);
+      ctx.fillStyle = 'rgba(251,191,36,0.85)';
+      ctx.beginPath();
+      ctx.moveTo(6, 0); ctx.lineTo(-3, 4); ctx.lineTo(-3, -4);
+      ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+  }
+}
+
+function drawMagnet(ctx) {
+  const halfLen = 30 * polePower;
+  const w = halfLen, h = 14;
+  // South (blue)
+  ctx.fillStyle = '#3b82f6';
+  ctx.beginPath();
+  ctx.roundRect(magnetX - w - 4, magnetY - h, w, h*2, [6, 0, 0, 6]);
+  ctx.fill();
+  ctx.fillStyle = '#93c5fd';
+  ctx.font = 'bold 12px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('S', magnetX - w/2 - 4, magnetY);
+
+  // North (red)
+  ctx.fillStyle = '#ef4444';
+  ctx.beginPath();
+  ctx.roundRect(magnetX, magnetY - h, w, h*2, [0, 6, 6, 0]);
+  ctx.fill();
+  ctx.fillStyle = '#fca5a5';
+  ctx.fillText('N', magnetX + w/2, magnetY);
+}
+
+function drawSurface(ctx) {
+  const cx = surfCX(), cy = surfCY();
+  ctx.save();
+  ctx.setLineDash([7, 5]);
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = '#10b981';
+  ctx.shadowColor = '#10b981';
+  ctx.shadowBlur = 8;
+
+  if (shape === 'sphere') {
+    ctx.beginPath();
+    ctx.arc(cx, cy, surfR, 0, 2*Math.PI);
+    ctx.stroke();
+  } else if (shape === 'cube') {
+    ctx.strokeRect(cx - surfR, cy - surfR, 2*surfR, 2*surfR);
+  } else if (shape === 'poly') {
+    if (polyPoints.length >= 2) {
+      ctx.beginPath();
+      ctx.moveTo(polyPoints[0].x, polyPoints[0].y);
+      for (let i = 1; i < polyPoints.length; i++) ctx.lineTo(polyPoints[i].x, polyPoints[i].y);
+      if (polyClosed) ctx.closePath();
+      ctx.stroke();
+    }
+    // Draw vertex dots
+    ctx.setLineDash([]);
+    ctx.shadowBlur = 0;
+    polyPoints.forEach((p, i) => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, i === 0 ? 6 : 4, 0, 2*Math.PI);
+      ctx.fillStyle = i === 0 ? '#fbbf24' : '#10b981';
+      ctx.fill();
+    });
+  }
+  ctx.restore();
+}
+
+function drawColorMap(ctx, result) {
+  if (!result || result.pts.length === 0) return;
+  const vals = result.pts.map(p => p.val);
+  const maxAbs = Math.max(1e-9, ...vals.map(v => Math.abs(v)));
+
+  result.pts.forEach(p => {
+    const t = p.val / maxAbs;   // -1 … +1
+    const r = t > 0 ? Math.round(255 * t)  : 0;
+    const b = t < 0 ? Math.round(255 * -t) : 0;
+    const g = Math.round(60 * (1 - Math.abs(t)));
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 4, 0, 2*Math.PI);
+    ctx.fillStyle = `rgba(${r},${g},${b},0.7)`;
+    ctx.fill();
+  });
+}
+
+function drawFluxArrows(ctx, result) {
+  if (!result || result.pts.length === 0) return;
+  const vals = result.pts.map(p => p.val);
+  const maxAbs = Math.max(1e-9, ...vals.map(v => Math.abs(v)));
+  // Only draw every k-th point to avoid clutter
+  const step = Math.max(1, Math.floor(result.pts.length / 40));
+
+  result.pts.forEach((p, idx) => {
+    if (idx % step !== 0) return;
+    const t = p.val / maxAbs;
+    const arrowLen = 14 * Math.abs(t) + 4;
+    const color = p.val >= 0 ? `rgba(239,68,68,${0.4 + 0.6*Math.abs(t)})`
+                              : `rgba(59,130,246,${0.4 + 0.6*Math.abs(t)})`;
+    const dir  = p.val >= 0 ? 1 : -1;
+    const ex   = p.x + dir * p.nx * arrowLen;
+    const ey   = p.y + dir * p.ny * arrowLen;
+    const ang  = Math.atan2(dir * p.ny, dir * p.nx);
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth   = 1.8;
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.lineTo(ex, ey);
+    ctx.stroke();
+
+    // Arrowhead
+    ctx.fillStyle = color;
+    ctx.save();
+    ctx.translate(ex, ey);
+    ctx.rotate(ang);
+    ctx.beginPath();
+    ctx.moveTo(5, 0); ctx.lineTo(-4, 3); ctx.lineTo(-4, -3);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+  });
+}
+
+// ─────────────────────────────────────────────
+// Chart: bar chart of contributions per segment
+// ─────────────────────────────────────────────
+function drawChart(result) {
+  const w = cCanvas.width, h = cCanvas.height;
+  cCtx.clearRect(0, 0, w, h);
+
+  // Dark background
+  cCtx.fillStyle = 'rgba(0,0,0,0.3)';
+  cCtx.fillRect(0, 0, w, h);
+
+  if (!result || result.pts.length === 0) {
+    cCtx.fillStyle = '#64748b';
+    cCtx.font = '14px sans-serif';
+    cCtx.textAlign = 'center';
+    cCtx.fillText('（请先绘制多边形）', w/2, h/2);
+    return;
+  }
+
+  const pts = result.pts;
+
+  // Group into bins for display
+  const nBins = Math.min(50, pts.length);
+  const binSize = pts.length / nBins;
+  const binned = [];
+  for (let i = 0; i < nBins; i++) {
+    let sum = 0;
+    const start = Math.floor(i * binSize);
+    const end   = Math.floor((i+1) * binSize);
+    for (let j = start; j < end; j++) sum += pts[j].val;
+    binned.push(sum);
+  }
+
+  const maxAbs = Math.max(1e-9, ...binned.map(v => Math.abs(v)));
+  const margin = { top: 36, right: 16, bottom: 56, left: 56 };
+  const plotW  = w - margin.left - margin.right;
+  const plotH  = h - margin.top  - margin.bottom;
+
+  // Grid lines
+  cCtx.strokeStyle = 'rgba(255,255,255,0.07)';
+  cCtx.lineWidth = 1;
+  for (let i = -2; i <= 2; i++) {
+    const yy = margin.top + plotH/2 - (i/2) * plotH/2;
+    cCtx.beginPath();
+    cCtx.moveTo(margin.left, yy); cCtx.lineTo(margin.left + plotW, yy);
+    cCtx.stroke();
+  }
+
+  // Zero line
+  const y0 = margin.top + plotH / 2;
+  cCtx.strokeStyle = 'rgba(255,255,255,0.3)';
+  cCtx.lineWidth = 1.5;
+  cCtx.beginPath();
+  cCtx.moveTo(margin.left, y0); cCtx.lineTo(margin.left + plotW, y0);
+  cCtx.stroke();
+
+  // Bars
+  const barW = plotW / nBins;
+  binned.forEach((v, i) => {
+    const t   = v / maxAbs;
+    const barH = Math.abs(t) * (plotH / 2);
+    const bx  = margin.left + i * barW;
+    const by  = t >= 0 ? y0 - barH : y0;
+    const color = t >= 0 ? `rgba(239,68,68,0.85)` : `rgba(59,130,246,0.85)`;
+    cCtx.fillStyle = color;
+    cCtx.fillRect(bx + 1, by, barW - 2, barH);
+  });
+
+  // Running sum line
+  let cumSum = 0;
+  const cumPts = [];
+  binned.forEach((v, i) => {
+    cumSum += v;
+    const x = margin.left + (i + 0.5) * barW;
+    const y = y0 - (cumSum / maxAbs / nBins * 4) * (plotH / 2);
+    cumPts.push({ x, y: Math.max(margin.top, Math.min(margin.top + plotH, y)) });
+  });
+  if (cumPts.length >= 2) {
+    cCtx.strokeStyle = '#fbbf24';
+    cCtx.lineWidth = 2;
+    cCtx.beginPath();
+    cumPts.forEach((p, i) => i === 0 ? cCtx.moveTo(p.x, p.y) : cCtx.lineTo(p.x, p.y));
+    cCtx.stroke();
+  }
+
+  // Axes labels
+  cCtx.fillStyle = '#94a3b8';
+  cCtx.font = '11px sans-serif';
+  cCtx.textAlign = 'center';
+  cCtx.fillText('面元编号 (surface segments)', margin.left + plotW/2, h - 10);
+  cCtx.save();
+  cCtx.translate(14, margin.top + plotH/2);
+  cCtx.rotate(-Math.PI/2);
+  cCtx.fillText('B·n̂ dA (贡献通量)', 0, 0);
+  cCtx.restore();
+
+  // Title
+  const phi = result.phi;
+  const sign = phi >= 0 ? '+' : '';
+  cCtx.fillStyle = '#e2e8f0';
+  cCtx.font = 'bold 13px sans-serif';
+  cCtx.textAlign = 'center';
+  cCtx.fillText(`总磁通量 Φ = ${sign}${phi.toFixed(4)}`, w/2, 22);
+
+  // Legend
+  cCtx.fillStyle = 'rgba(239,68,68,0.85)'; cCtx.fillRect(margin.left, h-44, 12, 12);
+  cCtx.fillStyle = '#94a3b8'; cCtx.font='11px sans-serif'; cCtx.textAlign='left';
+  cCtx.fillText('穿出 (Φ>0)', margin.left+15, h-34);
+  cCtx.fillStyle = 'rgba(59,130,246,0.85)'; cCtx.fillRect(margin.left+90, h-44, 12, 12);
+  cCtx.fillText('穿入 (Φ<0)', margin.left+105, h-34);
+  cCtx.fillStyle = '#fbbf24'; cCtx.fillRect(margin.left+180, h-44, 22, 2);
+  cCtx.fillText('累积通量', margin.left+205, h-34);
+
+  // Y-axis tick labels
+  cCtx.fillStyle = '#64748b'; cCtx.font = '10px monospace'; cCtx.textAlign = 'right';
+  ['+max', '0', '-max'].forEach((lbl, i) => {
+    const yy = margin.top + [0, plotH/2, plotH][i];
+    cCtx.fillText(lbl, margin.left - 4, yy + 4);
+    cCtx.strokeStyle = 'rgba(255,255,255,0.1)';
+    cCtx.beginPath(); cCtx.moveTo(margin.left-3, yy); cCtx.lineTo(margin.left, yy); cCtx.stroke();
+  });
+}
+
+// ─────────────────────────────────────────────
+// Main render loop
+// ─────────────────────────────────────────────
+function render() {
+  const w = fCanvas.width, h = fCanvas.height;
+  fCtx.clearRect(0, 0, w, h);
+
+  // Background
+  const grad = fCtx.createRadialGradient(w/2, h/2, 0, w/2, h/2, Math.max(w,h)/1.5);
+  grad.addColorStop(0, 'rgba(30,20,60,0.95)');
+  grad.addColorStop(1, 'rgba(10,8,25,0.98)');
+  fCtx.fillStyle = grad;
+  fCtx.fillRect(0, 0, w, h);
+
+  // Field lines
+  if (document.getElementById('tog-field').checked) drawFieldLines(fCtx);
+
+  // Compute flux
+  const result = computeFlux();
+
+  // Color map
+  if (document.getElementById('tog-cmap').checked) drawColorMap(fCtx, result);
+
+  // Draw surface
+  drawSurface(fCtx);
+
+  // Sample point dots
+  if (document.getElementById('tog-samp').checked && result.pts.length) {
+    result.pts.forEach((p, i) => {
+      if (i % 4 !== 0) return;
+      fCtx.beginPath();
+      fCtx.arc(p.x, p.y, 2, 0, 2*Math.PI);
+      fCtx.fillStyle = 'rgba(52,211,153,0.5)';
+      fCtx.fill();
+    });
+  }
+
+  // Flux arrows on surface
+  if (document.getElementById('tog-arrows').checked) drawFluxArrows(fCtx, result);
+
+  // Magnet
+  drawMagnet(fCtx);
+
+  // Update results panel
+  const phi = result.phi;
+  document.getElementById('res-flux').textContent = phi.toFixed(4);
+  document.getElementById('res-maxB').textContent  = result.maxB.toFixed(3);
+  document.getElementById('res-area').textContent  = result.area.toFixed(1) + ' px';
+  document.getElementById('res-npts').textContent  = result.N;
+
+  const isZero = Math.abs(phi) < result.maxB * result.area * 0.05 + 0.5;
+  document.getElementById('res-verify').textContent =
+    isZero ? '∯ B·dA ≈ 0 ✓' : `∯ B·dA ≈ ${phi.toFixed(3)} (积分进行中…)`;
+  document.getElementById('res-verify').style.color = isZero ? '#10b981' : '#f59e0b';
+
+  // Chart
+  drawChart(result);
+}
+
+// ─────────────────────────────────────────────
+// Controls
+// ─────────────────────────────────────────────
+function setShape(s, btn) {
+  shape = s;
+  document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('draw-hint').style.display = s === 'poly' ? 'block' : 'none';
+  if (s !== 'poly') { polyPoints = []; polyClosed = false; polyDrawing = false; }
+  render();
+}
+
+function onSlider() {
+  surfR = +document.getElementById('sl-size').value;
+  offX  = +document.getElementById('sl-offx').value;
+  offY  = +document.getElementById('sl-offy').value;
+  polePower = +document.getElementById('sl-str').value;
+  document.getElementById('lbl-size').textContent = surfR;
+  document.getElementById('lbl-offx').textContent = offX;
+  document.getElementById('lbl-offy').textContent = offY;
+  document.getElementById('lbl-str').textContent  = polePower.toFixed(1);
+  render();
+}
+
+// ─────────────────────────────────────────────
+// Mouse interaction on field canvas
+// ─────────────────────────────────────────────
+function canvasXY(e) {
+  const rect = fCanvas.getBoundingClientRect();
+  const scaleX = fCanvas.width  / rect.width;
+  const scaleY = fCanvas.height / rect.height;
+  return {
+    x: (e.clientX - rect.left) * scaleX,
+    y: (e.clientY - rect.top)  * scaleY
+  };
+}
+
+function nearMagnet(x, y) {
+  const halfLen = 30 * polePower;
+  return Math.abs(x - magnetX) <= halfLen + 10 && Math.abs(y - magnetY) <= 20;
+}
+
+fCanvas.addEventListener('mousedown', e => {
+  const { x, y } = canvasXY(e);
+  if (e.button === 2) {
+    // Right click: close polygon
+    if (shape === 'poly' && polyPoints.length >= 3) {
+      polyClosed = true; polyDrawing = false; render();
+    }
+    return;
+  }
+  if (shape === 'poly' && !polyClosed) {
+    // Polygon drawing
+    if (polyPoints.length > 2) {
+      const p0 = polyPoints[0];
+      if (Math.hypot(x - p0.x, y - p0.y) < 12) {
+        polyClosed = true; polyDrawing = false; render(); return;
+      }
+    }
+    polyPoints.push({ x, y });
+    polyDrawing = true;
+    render();
+    return;
+  }
+  if (nearMagnet(x, y)) {
+    dragging = true;
+    dragOX = x - magnetX;
+    dragOY = y - magnetY;
+    fCanvas.style.cursor = 'grabbing';
+  }
+});
+
+fCanvas.addEventListener('mousemove', e => {
+  const { x, y } = canvasXY(e);
+  if (dragging) {
+    magnetX = x - dragOX;
+    magnetY = y - dragOY;
+    render();
+  } else {
+    fCanvas.style.cursor = nearMagnet(x,y) ? 'grab' : (shape === 'poly' && !polyClosed ? 'crosshair' : 'default');
+  }
+});
+
+fCanvas.addEventListener('mouseup', () => { dragging = false; fCanvas.style.cursor = 'default'; });
+fCanvas.addEventListener('mouseleave', () => { dragging = false; });
+fCanvas.addEventListener('contextmenu', e => e.preventDefault());
+
+// Double-click reset polygon
+fCanvas.addEventListener('dblclick', () => {
+  if (shape === 'poly') { polyPoints = []; polyClosed = false; polyDrawing = false; render(); }
+});
+
+// ─────────────────────────────────────────────
+// Resize handling
+// ─────────────────────────────────────────────
+function resize() {
+  const fRect = fCanvas.parentElement.getBoundingClientRect();
+  const headerH = fCanvas.parentElement.querySelector('.panel-header').offsetHeight;
+  fCanvas.width  = Math.floor(fRect.width)  - 2;
+  fCanvas.height = Math.floor(fRect.height) - headerH - 2;
+
+  const cRect = cCanvas.parentElement.getBoundingClientRect();
+  cCanvas.width  = Math.floor(cRect.width)  - 2;
+  cCanvas.height = Math.floor(fCanvas.height);
+
+  // Init magnet position to center of field canvas on first load
+  if (magnetX === 0 && magnetY === 0) {
+    magnetX = fCanvas.width  / 2;
+    magnetY = fCanvas.height / 2;
+  }
+  render();
+}
+
+window.addEventListener('resize', resize);
+
+// ─────────────────────────────────────────────
+// Touch support (basic)
+// ─────────────────────────────────────────────
+fCanvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const t = e.touches[0];
+  const me = new MouseEvent('mousedown', { clientX: t.clientX, clientY: t.clientY, button: 0 });
+  fCanvas.dispatchEvent(me);
+}, { passive: false });
+fCanvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  const t = e.touches[0];
+  const me = new MouseEvent('mousemove', { clientX: t.clientX, clientY: t.clientY });
+  fCanvas.dispatchEvent(me);
+}, { passive: false });
+fCanvas.addEventListener('touchend', e => {
+  e.preventDefault();
+  fCanvas.dispatchEvent(new MouseEvent('mouseup'));
+}, { passive: false });
+
+// ─────────────────────────────────────────────
+// Init
+// ─────────────────────────────────────────────
+// Need a small delay so layout is settled
+setTimeout(() => {
+  resize();
+}, 80);
+</script>
+<!-- ── 实验报告生成器 ── -->
+<style>
+.report-fab {
+  position: fixed; bottom: 28px; right: 28px; z-index: 1000;
+}
+.report-fab-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  border: none; border-radius: 28px; padding: 12px 20px;
+  color: #fff; font-size: 13px; font-weight: 700;
+  font-family: "Microsoft YaHei", sans-serif;
+  cursor: pointer; letter-spacing: 0.5px;
+  box-shadow: 0 4px 20px rgba(52,211,153,0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.report-fab-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(52,211,153,0.55); }
+.report-fab-btn .rfb-icon { font-size: 17px; }
+
+.report-overlay {
+  position: fixed; inset: 0; z-index: 1200;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.report-overlay.open { display: flex; }
+.report-modal {
+  background: #0e0c24;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  width: min(760px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+  animation: slideUp 0.3s cubic-bezier(0.4,0,0.2,1) both;
+}
+@keyframes slideUp {
+  from { opacity:0; transform: translateY(30px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.rm-header {
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.rm-title { font-size: 17px; font-weight: 700; color: #fff; font-family: "Microsoft YaHei",sans-serif; }
+.rm-title span { color: #34d399; }
+.rm-close { font-size: 22px; color: rgba(255,255,255,0.4); cursor: pointer; line-height:1; transition: color 0.2s; }
+.rm-close:hover { color: #fff; }
+.rm-body { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; }
+.rm-field { display: flex; flex-direction: column; gap: 6px; }
+.rm-label { font-size: 12px; color: rgba(255,255,255,0.45); font-family: "Microsoft YaHei",sans-serif; letter-spacing: 0.5px; }
+.rm-label span { color: #f87171; }
+.rm-input, .rm-textarea {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 10px 14px;
+  color: #fff; font-size: 14px; font-family: "Microsoft YaHei",sans-serif;
+  outline: none; transition: border-color 0.2s; width: 100%;
+}
+.rm-input:focus, .rm-textarea:focus { border-color: rgba(52,211,153,0.5); }
+.rm-textarea { resize: vertical; min-height: 80px; line-height: 1.8; }
+.rm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.rm-section-title {
+  font-size: 12px; font-weight: 700; color: rgba(52,211,153,0.8);
+  letter-spacing: 1px; text-transform: uppercase;
+  border-bottom: 1px solid rgba(52,211,153,0.15);
+  padding-bottom: 8px; margin-top: 4px;
+  font-family: "Microsoft YaHei",sans-serif;
+}
+.rm-footer { padding: 16px 28px 24px; display: flex; gap: 12px; justify-content: flex-end; }
+.rm-btn {
+  padding: 10px 28px; border-radius: 12px; border: none; cursor: pointer;
+  font-size: 14px; font-weight: 700; font-family: "Microsoft YaHei",sans-serif;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.rm-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.rm-btn-cancel { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6); }
+.rm-btn-gen { background: linear-gradient(135deg,#10b981,#34d399); color: #fff; }
+.rm-btn-copy { background: linear-gradient(135deg,#6366f1,#818cf8); color: #fff; display:none; }
+
+.report-output {
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px; padding: 20px 24px; margin: 0 28px 24px;
+  font-family: "Microsoft YaHei", "Times New Roman", serif;
+  font-size: 13.5px; color: rgba(255,255,255,0.85);
+  line-height: 2; white-space: pre-wrap; display: none;
+  max-height: 340px; overflow-y: auto;
+}
+.report-output.show { display: block; }
+</style>
+
+
+<div class="report-overlay" id="reportOverlay" onclick="overlayClick(event)">
+  <div class="report-modal">
+    <div class="rm-header">
+      <div class="rm-title">实验报告 · <span>磁场高斯定理</span></div>
+      <div class="rm-close" onclick="closeReport()">×</div>
+    </div>
+    <div class="rm-body">
+      <div class="rm-section-title">基本信息</div>
+      <div class="rm-row">
+        <div class="rm-field">
+          <div class="rm-label">姓名 <span>*</span></div>
+          <input class="rm-input" id="rName" placeholder="请输入姓名">
+        </div>
+        <div class="rm-field">
+          <div class="rm-label">学号 <span>*</span></div>
+          <input class="rm-input" id="rStuId" placeholder="请输入学号">
+        </div>
+      </div>
+      <div class="rm-row">
+        <div class="rm-field">
+          <div class="rm-label">实验日期</div>
+          <input class="rm-input" id="rDate" type="date">
+        </div>
+        <div class="rm-field">
+          <div class="rm-label">实验伙伴</div>
+          <input class="rm-input" id="rPartner" placeholder="可选">
+        </div>
+      </div>
+      <div class="rm-section-title">实验内容</div>
+      <div class="rm-field">
+        <div class="rm-label">实验目的</div>
+        <textarea class="rm-textarea" id="rPurpose" placeholder="描述本次实验的目的和预期目标……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验步骤与观察</div>
+        <textarea class="rm-textarea" id="rProcess" placeholder="描述你进行的操作步骤和实验过程中的观察……" style="min-height:100px"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验数据记录</div>
+        <textarea class="rm-textarea" id="rData" placeholder="记录关键数据、参数和仿真结果……"></textarea>
+      </div>
+      <div class="rm-section-title">分析与总结</div>
+      <div class="rm-field">
+        <div class="rm-label">结果分析</div>
+        <textarea class="rm-textarea" id="rAnalysis" placeholder="对实验现象和数据进行分析……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">误差分析与思考</div>
+        <textarea class="rm-textarea" id="rError" placeholder="分析可能的误差来源，以及对物理规律的思考……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验结论</div>
+        <textarea class="rm-textarea" id="rConclusion" placeholder="总结本次实验的结论……"></textarea>
+      </div>
+    </div>
+    <div class="report-output" id="reportOutput"></div>
+    <div class="rm-footer">
+      <button class="rm-btn rm-btn-cancel" onclick="closeReport()">取消</button>
+      <button class="rm-btn rm-btn-copy" id="rmCopyBtn" onclick="copyReport()">复制报告</button>
+      <button class="rm-btn rm-btn-gen" onclick="generateReport()">生成报告</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const EXP_NAME = '磁场高斯定理';
+  const EXP_SEC  = '§3-4';
+  const STORE_KEY = 'phy26_report_' + EXP_SEC.replace(/[§\/]/g,'');
+
+  function loadSaved() {
+    const d = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+    if (d.name)       document.getElementById('rName').value      = d.name;
+    if (d.stuId)      document.getElementById('rStuId').value     = d.stuId;
+    if (d.date)       document.getElementById('rDate').value      = d.date;
+    if (d.partner)    document.getElementById('rPartner').value   = d.partner;
+    if (d.purpose)    document.getElementById('rPurpose').value   = d.purpose;
+    if (d.process)    document.getElementById('rProcess').value   = d.process;
+    if (d.data)       document.getElementById('rData').value      = d.data;
+    if (d.analysis)   document.getElementById('rAnalysis').value  = d.analysis;
+    if (d.error)      document.getElementById('rError').value     = d.error;
+    if (d.conclusion) document.getElementById('rConclusion').value= d.conclusion;
+  }
+
+  function saveDraft() {
+    const d = {
+      name:       document.getElementById('rName').value,
+      stuId:      document.getElementById('rStuId').value,
+      date:       document.getElementById('rDate').value,
+      partner:    document.getElementById('rPartner').value,
+      purpose:    document.getElementById('rPurpose').value,
+      process:    document.getElementById('rProcess').value,
+      data:       document.getElementById('rData').value,
+      analysis:   document.getElementById('rAnalysis').value,
+      error:      document.getElementById('rError').value,
+      conclusion: document.getElementById('rConclusion').value,
+    };
+    localStorage.setItem(STORE_KEY, JSON.stringify(d));
+  }
+
+  window.openReport = function() {
+    document.getElementById('reportOverlay').classList.add('open');
+    document.getElementById('reportOutput').classList.remove('show');
+    document.getElementById('rmCopyBtn').style.display = 'none';
+    const dateEl = document.getElementById('rDate');
+    if (!dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
+    loadSaved();
+    const _d = {
+      rPurpose:    '验证磁场的高斯定理（∮B·dA=0），理解磁场无源性的物理意义，与电场高斯定理进行对比，理解磁单极子不存在的实验依据。',
+      rProcess:    '选取不同形状的闭合曲面，计算穿过曲面的磁通量Φ_B=∮B·dA；改变曲面大小和形状，观察磁通量是否始终为零；将闭合曲面包围载流导线，验证穿出和穿入的磁通量相等；对比电场高斯定理（Φ_E=Q/ε₀）与磁场高斯定理（Φ_B=0）的区别。',
+      rData:       '载流直导线（I=1A），球形高斯面（r=5cm）：穿入磁通量=穿出磁通量，Φ_B=0；圆形线圈（R=5cm，I=1A），包围线圈的球形曲面：Φ_B=0；条形磁铁，包围N极的闭合曲面：穿出磁通量=穿入磁通量，Φ_B=0。',
+      rAnalysis:   '磁场的高斯定理∮B·dA=0表明磁场是无源场，磁场线是闭合曲线，不存在磁荷（磁单极子）。这与电场高斯定理形成对比：电场线起始于正电荷，终止于负电荷（有源场）。磁场的无源性是麦克斯韦方程组的基本方程之一。',
+      rError:      '仿真中数值积分存在离散化误差，但理论上Φ_B严格为零；实际测量中磁通量计的精度和曲面的封闭性会引入误差；磁场的测量受到周围铁磁性材料的干扰。',
+      rConclusion: '验证了磁场的高斯定理：穿过任意闭合曲面的磁通量恒为零（∮B·dA=0），磁场是无源场，磁场线是闭合曲线，自然界中不存在磁单极子。',
+    };
+    Object.entries(_d).forEach(([id, val]) => { const el = document.getElementById(id); if (el && !el.value) el.value = val; });
+  };
+
+  window.closeReport = function() {
+    saveDraft();
+    document.getElementById('reportOverlay').classList.remove('open');
+  };
+
+  window.overlayClick = function(e) {
+    if (e.target === document.getElementById('reportOverlay')) closeReport();
+  };
+
+  window.generateReport = function() {
+    const name       = document.getElementById('rName').value.trim();
+    const stuId      = document.getElementById('rStuId').value.trim();
+    const date       = document.getElementById('rDate').value || '—';
+    const partner    = document.getElementById('rPartner').value.trim() || '—';
+    const purpose    = document.getElementById('rPurpose').value.trim() || '（未填写）';
+    const process    = document.getElementById('rProcess').value.trim() || '（未填写）';
+    const data       = document.getElementById('rData').value.trim() || '（未填写）';
+    const analysis   = document.getElementById('rAnalysis').value.trim() || '（未填写）';
+    const error      = document.getElementById('rError').value.trim() || '（未填写）';
+    const conclusion = document.getElementById('rConclusion').value.trim() || '（未填写）';
+
+    if (!name || !stuId) { alert('请填写姓名和学号'); return; }
+    saveDraft();
+
+    const divider = '─'.repeat(40);
+    const report = [
+      '普通物理（卓越班）下册 · 电磁学',
+      `实验报告：${EXP_NAME}（${EXP_SEC}）`,
+      divider,
+      `姓　　名：${name}　　　学　　号：${stuId}`,
+      `实验日期：${date}　　　实验伙伴：${partner}`,
+      divider,
+      '',
+      '一、实验目的',
+      purpose,
+      '',
+      '二、实验步骤与观察',
+      process,
+      '',
+      '三、实验数据记录',
+      data,
+      '',
+      '四、结果分析',
+      analysis,
+      '',
+      '五、误差分析与思考',
+      error,
+      '',
+      '六、实验结论',
+      conclusion,
+      '',
+      divider,
+      `生成时间：${new Date().toLocaleString('zh-CN')}`,
+      '本报告由 NUSEP26 普通物理（卓越班）实验仿真平台生成',
+    ].join('\n');
+
+    const out = document.getElementById('reportOutput');
+    out.textContent = report;
+    out.classList.add('show');
+    document.getElementById('rmCopyBtn').style.display = 'inline-flex';
+    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+
+  window.copyReport = function() {
+    const text = document.getElementById('reportOutput').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('rmCopyBtn');
+      const orig = btn.textContent;
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => btn.textContent = orig, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      const btn = document.getElementById('rmCopyBtn');
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => btn.textContent = '复制报告', 2000);
+    });
+  };
+
+  ['rName','rStuId','rDate','rPartner','rPurpose','rProcess','rData','rAnalysis','rError','rConclusion']
+    .forEach(id => document.getElementById(id).addEventListener('input', saveDraft));
+})();
+</script>
+
+</body>
+</html>

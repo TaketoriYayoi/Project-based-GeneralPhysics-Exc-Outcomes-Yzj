@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>实验：库仑定律 — 1-1</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh; color: #fff; overflow-x: hidden;
+    }
+    .topbar {
+      display: flex; align-items: center; gap: 14px;
+      padding: 16px 28px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      background: rgba(15,12,41,0.7); backdrop-filter: blur(12px);
+    }
+    .back-btn { color: rgba(255,255,255,0.55); font-size: 14px; cursor: pointer; text-decoration: none; transition: color .2s; }
+    .back-btn:hover { color: #818cf8; }
+    .topbar-title-wrap { display:flex; flex-direction:column; gap:2px; }
+    .topbar-title { font-size: 16px; font-weight: 700; }
+    .topbar-course { font-size:11px; color:rgba(255,255,255,0.38); letter-spacing:1px; }
+    .topbar-sub { margin-left: auto; font-size: 12px; color: rgba(255,255,255,0.3); }
+
+    .layout { display: flex; height: calc(100vh - 57px); }
+
+    .sidebar {
+      width: 250px; flex-shrink: 0;
+      background: rgba(255,255,255,0.03);
+      border-right: 1px solid rgba(255,255,255,0.07);
+      padding: 20px 16px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto;
+    }
+    .ctrl-group h3 { font-size: 11px; color: rgba(255,255,255,0.38); letter-spacing: 1px; margin-bottom: 10px; text-transform: uppercase; }
+    .slider-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+    .slider-row label { font-size: 12.5px; color: rgba(255,255,255,0.6); display: flex; justify-content: space-between; }
+    .slider-row label span { color: #818cf8; font-weight: 600; }
+    input[type=range] { width: 100%; accent-color: #818cf8; }
+    .divider { height: 1px; background: rgba(255,255,255,0.07); }
+
+    .charge-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .charge-row label { font-size: 12.5px; color: rgba(255,255,255,0.6); width: 32px; flex-shrink: 0; }
+    .sign-btn {
+      width: 28px; height: 28px; border-radius: 7px; border: 1.5px solid;
+      font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all .18s; flex-shrink: 0; background: transparent;
+    }
+    .sign-btn.pos { border-color: rgba(239,68,68,0.4); color: #f87171; }
+    .sign-btn.pos.active { background: rgba(239,68,68,0.2); border-color: #f87171; }
+    .sign-btn.neg { border-color: rgba(56,189,248,0.4); color: #38bdf8; }
+    .sign-btn.neg.active { background: rgba(56,189,248,0.2); border-color: #38bdf8; }
+
+    .result-panel {
+      background: rgba(99,102,241,0.06); border: 1px solid rgba(99,102,241,0.2);
+      border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 10px;
+    }
+    .result-panel h3 { font-size: 11px; color: rgba(99,102,241,0.7); letter-spacing: 1px; }
+    .result-row { display: flex; justify-content: space-between; align-items: baseline; }
+    .result-label { font-size: 12px; color: rgba(255,255,255,0.45); }
+    .result-value { font-size: 15px; font-weight: 700; color: #818cf8; }
+    .result-unit { font-size: 11px; color: rgba(255,255,255,0.3); margin-left: 3px; }
+
+    .info-box {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 10px; padding: 12px; font-size: 12px; color: rgba(255,255,255,0.4); line-height: 1.8;
+    }
+
+    .canvas-wrap { flex: 1; overflow: hidden; display: flex; flex-direction: column; padding: 10px; gap: 8px; }
+    canvas { background: rgba(0,0,0,0.3); display: block; flex: 1; width: 100%; }
+    .formula-bar {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 12px 20px; font-size: 13px; color: rgba(255,255,255,0.55);
+      text-align: center; width: 100%; flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">⚡ 实验：库仑定律</div>
+    <span class="topbar-course">普通物理（卓越班）下册 · 电磁学</span>
+  </div>
+  <div class="topbar-sub">§1-1 电荷 · 库仑定律</div>
+</div>
+<div class="layout">
+  <div class="sidebar">
+    <div class="ctrl-group">
+      <h3>电荷 q₁</h3>
+      <div class="charge-row">
+        <label>符号</label>
+        <div class="sign-btn pos active" id="s1p" onclick="setSign(1,'pos')">+</div>
+        <div class="sign-btn neg" id="s1n" onclick="setSign(1,'neg')">−</div>
+      </div>
+      <div class="slider-row">
+        <label>大小 |q₁| = <span id="q1Val">2.0</span> μC</label>
+        <input type="range" id="q1Slider" min="0.5" max="5" step="0.5" value="2" oninput="update()">
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="ctrl-group">
+      <h3>电荷 q₂</h3>
+      <div class="charge-row">
+        <label>符号</label>
+        <div class="sign-btn pos active" id="s2p" onclick="setSign(2,'pos')">+</div>
+        <div class="sign-btn neg" id="s2n" onclick="setSign(2,'neg')">−</div>
+      </div>
+      <div class="slider-row">
+        <label>大小 |q₂| = <span id="q2Val">2.0</span> μC</label>
+        <input type="range" id="q2Slider" min="0.5" max="5" step="0.5" value="2" oninput="update()">
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="ctrl-group">
+      <h3>介质</h3>
+      <div class="slider-row">
+        <label>相对介电常数 εᵣ = <span id="erVal">1.0</span></label>
+        <input type="range" id="erSlider" min="1" max="80" step="1" value="1" oninput="update()">
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="result-panel">
+      <h3>计算结果</h3>
+      <div class="result-row">
+        <span class="result-label">距离 r</span>
+        <span><span class="result-value" id="resR">—</span><span class="result-unit">cm</span></span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">库仑力 |F|</span>
+        <span><span class="result-value" id="resF">—</span><span class="result-unit">mN</span></span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">类型</span>
+        <span><span class="result-value" id="resType">—</span></span>
+      </div>
+    </div>
+    <div class="info-box">
+      拖动两个电荷改变间距<br>
+      红色 = 正电荷 &nbsp;蓝色 = 负电荷<br>
+      箭头方向 = 受力方向
+    </div>
+    <div class="report-fab" style="margin-top:auto;padding-top:12px">
+      <button class="report-fab-btn" onclick="openReport()">
+        <span class="rfb-icon">📄</span> 生成实验报告
+      </button>
+    </div>
+  </div>
+
+  <div class="canvas-wrap">
+    <canvas id="coulombCanvas"></canvas>
+    <div class="formula-bar">
+      F = k·q₁q₂ / (εᵣ·r²) &nbsp;|&nbsp; k = 9×10⁹ N·m²/C²
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('coulombCanvas');
+const ctx = canvas.getContext('2d');
+const k = 9e9;
+
+let signs = [1, 1];
+let dragging = null;
+const charges = [
+  { x: 180, y: 180 },
+  { x: 420, y: 180 }
+];
+
+function setSign(idx, s) {
+  signs[idx-1] = s==='pos' ? 1 : -1;
+  document.getElementById(`s${idx}p`).classList.toggle('active', s==='pos');
+  document.getElementById(`s${idx}n`).classList.toggle('active', s==='neg');
+  update();
+}
+
+function update() {
+  const q1 = parseFloat(document.getElementById('q1Slider').value)*1e-6 * signs[0];
+  const q2 = parseFloat(document.getElementById('q2Slider').value)*1e-6 * signs[1];
+  const er = parseFloat(document.getElementById('erSlider').value);
+  document.getElementById('q1Val').textContent = Math.abs(q1*1e6).toFixed(1);
+  document.getElementById('q2Val').textContent = Math.abs(q2*1e6).toFixed(1);
+  document.getElementById('erVal').textContent = er.toFixed(1);
+
+  const pxPerM = 600; // 1m = 600px — scale: canvas px / pxPerM = meters
+  const dx = charges[1].x - charges[0].x;
+  const dy = charges[1].y - charges[0].y;
+  const rPx = Math.sqrt(dx*dx+dy*dy);
+  const rM = rPx / pxPerM;
+
+  const F = k * Math.abs(q1) * Math.abs(q2) / (er * rM * rM);
+  const attract = q1*q2 < 0;
+
+  document.getElementById('resR').textContent = (rM*100).toFixed(1);
+  document.getElementById('resF').textContent = (F*1000).toFixed(2);
+  document.getElementById('resType').textContent = attract ? '吸引力' : '排斥力';
+
+  draw(q1, q2, F, attract, er);
+}
+
+function draw(q1, q2, F, attract, er) {
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  const c1 = charges[0], c2 = charges[1];
+  const dx = c2.x-c1.x, dy = c2.y-c1.y;
+  const dist = Math.sqrt(dx*dx+dy*dy);
+  const ux = dx/dist, uy = dy/dist;
+
+  // distance line
+  ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+  ctx.lineWidth = 1; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(c1.x,c1.y); ctx.lineTo(c2.x,c2.y); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // r label
+  ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.font='12px "Microsoft YaHei"';
+  ctx.textAlign='center'; ctx.textBaseline='bottom';
+  ctx.fillText(`r = ${(dist/600*100).toFixed(1)} cm`, (c1.x+c2.x)/2, (c1.y+c2.y)/2 - 6);
+
+  // force arrows
+  const arrowScale = Math.min(F*1e4, 80);
+  const col = attract ? '#a78bfa' : '#fb923c';
+
+  function drawArrow(fx, fy, tx, ty, color) {
+    ctx.strokeStyle = color; ctx.fillStyle = color;
+    ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(fx,fy); ctx.lineTo(tx,ty); ctx.stroke();
+    const ang = Math.atan2(ty-fy, tx-fx);
+    const as = 9;
+    ctx.beginPath();
+    ctx.moveTo(tx, ty);
+    ctx.lineTo(tx - as*Math.cos(ang-0.4), ty - as*Math.sin(ang-0.4));
+    ctx.lineTo(tx - as*Math.cos(ang+0.4), ty - as*Math.sin(ang+0.4));
+    ctx.closePath(); ctx.fill();
+  }
+
+  const r = 22;
+  if (attract) {
+    // arrows point toward each other
+    drawArrow(c1.x - ux*r*0.5, c1.y - uy*r*0.5, c1.x + ux*arrowScale, c1.y + uy*arrowScale, col);
+    drawArrow(c2.x + ux*r*0.5, c2.y + uy*r*0.5, c2.x - ux*arrowScale, c2.y - uy*arrowScale, col);
+  } else {
+    // arrows point away from each other
+    drawArrow(c1.x + ux*r*0.5, c1.y + uy*r*0.5, c1.x - ux*arrowScale, c1.y - uy*arrowScale, col);
+    drawArrow(c2.x - ux*r*0.5, c2.y - uy*r*0.5, c2.x + ux*arrowScale, c2.y + uy*arrowScale, col);
+  }
+
+  // F label
+  ctx.fillStyle = col; ctx.font = 'bold 13px "Microsoft YaHei"';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  ctx.fillText(`F = ${(F*1000).toFixed(2)} mN`, (c1.x+c2.x)/2, Math.max(c1.y,c2.y)+16);
+
+  // draw charges
+  for (let i=0; i<2; i++) {
+    const c = charges[i];
+    const q = [q1,q2][i];
+    const color = q>0 ? '#f87171' : '#38bdf8';
+    const qLabel = q>0 ? '＋' : '－';
+    // glow
+    const grd = ctx.createRadialGradient(c.x,c.y,0,c.x,c.y,r*2);
+    grd.addColorStop(0, color+'44');
+    grd.addColorStop(1, 'transparent');
+    ctx.fillStyle=grd; ctx.beginPath(); ctx.arc(c.x,c.y,r*2,0,Math.PI*2); ctx.fill();
+    // circle
+    ctx.beginPath(); ctx.arc(c.x,c.y,r,0,Math.PI*2);
+    ctx.fillStyle=color+'33'; ctx.fill();
+    ctx.strokeStyle=color; ctx.lineWidth=2; ctx.stroke();
+    // symbol
+    ctx.fillStyle='#fff'; ctx.font='bold 18px sans-serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(qLabel, c.x, c.y+1);
+    // label
+    ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.font='12px "Microsoft YaHei"';
+    ctx.textAlign='center'; ctx.textBaseline='top';
+    ctx.fillText(`q${i+1} = ${(Math.abs([q1,q2][i])*1e6).toFixed(1)} μC`, c.x, c.y+r+6);
+  }
+
+  // εᵣ label if not vacuum
+  if (er > 1) {
+    ctx.fillStyle='rgba(52,211,153,0.5)'; ctx.font='12px "Microsoft YaHei"';
+    ctx.textAlign='right'; ctx.textBaseline='bottom';
+    ctx.fillText(`εᵣ = ${er}`, W-16, H-12);
+  }
+}
+
+// drag
+function getPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  return [(e.clientX-rect.left)*canvas.width/rect.width, (e.clientY-rect.top)*canvas.height/rect.height];
+}
+canvas.addEventListener('mousedown', e => {
+  const [mx,my]=getPos(e);
+  for(let i=0;i<2;i++){
+    const d2=(mx-charges[i].x)**2+(my-charges[i].y)**2;
+    if(d2<30*30){dragging=i;break;}
+  }
+});
+canvas.addEventListener('mousemove', e => {
+  if(dragging===null)return;
+  const [mx,my]=getPos(e);
+  charges[dragging].x=Math.max(30,Math.min(canvas.width-30,mx));
+  charges[dragging].y=Math.max(30,Math.min(canvas.height-60,my));
+  update();
+});
+canvas.addEventListener('mouseup',()=>dragging=null);
+canvas.addEventListener('mouseleave',()=>dragging=null);
+
+function resizeCanvas(){
+  const nw=canvas.offsetWidth,nh=canvas.offsetHeight;
+  if(canvas.width&&canvas.height){const sx=nw/canvas.width,sy=nh/canvas.height;charges.forEach(c=>{c.x*=sx;c.y*=sy;});}
+  else{charges[0]={x:nw*0.3,y:nh*0.5};charges[1]={x:nw*0.7,y:nh*0.5};}
+  canvas.width=nw;canvas.height=nh;update();
+}
+window.addEventListener('resize',resizeCanvas);
+setTimeout(resizeCanvas,80);
+</script>
+<!-- ── 实验报告生成器 ── -->
+<style>
+.report-fab { }
+.report-fab-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  border: none; border-radius: 12px; padding: 10px 14px; width: 100%;
+  color: #fff; font-size: 13px; font-weight: 700;
+  font-family: "Microsoft YaHei", sans-serif;
+  cursor: pointer; letter-spacing: 0.5px;
+  box-shadow: 0 4px 20px rgba(52,211,153,0.4);
+  transition: box-shadow 0.2s;
+}
+.report-fab-btn:hover { box-shadow: 0 8px 28px rgba(52,211,153,0.55); }
+.report-fab-btn .rfb-icon { font-size: 17px; }
+
+.report-overlay {
+  position: fixed; inset: 0; z-index: 1200;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.report-overlay.open { display: flex; }
+.report-modal {
+  background: #0e0c24;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  width: min(760px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+  animation: slideUp 0.3s cubic-bezier(0.4,0,0.2,1) both;
+}
+@keyframes slideUp {
+  from { opacity:0; transform: translateY(30px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.rm-header {
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.rm-title { font-size: 17px; font-weight: 700; color: #fff; font-family: "Microsoft YaHei",sans-serif; }
+.rm-title span { color: #34d399; }
+.rm-close { font-size: 22px; color: rgba(255,255,255,0.4); cursor: pointer; line-height:1; transition: color 0.2s; }
+.rm-close:hover { color: #fff; }
+.rm-body { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; }
+.rm-field { display: flex; flex-direction: column; gap: 6px; }
+.rm-label { font-size: 12px; color: rgba(255,255,255,0.45); font-family: "Microsoft YaHei",sans-serif; letter-spacing: 0.5px; }
+.rm-label span { color: #f87171; }
+.rm-input, .rm-textarea {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 10px 14px;
+  color: #fff; font-size: 14px; font-family: "Microsoft YaHei",sans-serif;
+  outline: none; transition: border-color 0.2s; width: 100%;
+}
+.rm-input:focus, .rm-textarea:focus { border-color: rgba(52,211,153,0.5); }
+.rm-textarea { resize: vertical; min-height: 80px; line-height: 1.8; }
+.rm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.rm-section-title {
+  font-size: 12px; font-weight: 700; color: rgba(52,211,153,0.8);
+  letter-spacing: 1px; text-transform: uppercase;
+  border-bottom: 1px solid rgba(52,211,153,0.15);
+  padding-bottom: 8px; margin-top: 4px;
+  font-family: "Microsoft YaHei",sans-serif;
+}
+.rm-footer { padding: 16px 28px 24px; display: flex; gap: 12px; justify-content: flex-end; }
+.rm-btn {
+  padding: 10px 28px; border-radius: 12px; border: none; cursor: pointer;
+  font-size: 14px; font-weight: 700; font-family: "Microsoft YaHei",sans-serif;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.rm-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.rm-btn-cancel { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6); }
+.rm-btn-gen { background: linear-gradient(135deg,#10b981,#34d399); color: #fff; }
+.rm-btn-copy { background: linear-gradient(135deg,#6366f1,#818cf8); color: #fff; display:none; }
+
+.report-output {
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px; padding: 20px 24px; margin: 0 28px 24px;
+  font-family: "Microsoft YaHei", "Times New Roman", serif;
+  font-size: 13.5px; color: rgba(255,255,255,0.85);
+  line-height: 2; white-space: pre-wrap; display: none;
+  max-height: 340px; overflow-y: auto;
+}
+.report-output.show { display: block; }
+</style>
+
+
+<div class="report-overlay" id="reportOverlay" onclick="overlayClick(event)">
+  <div class="report-modal">
+    <div class="rm-header">
+      <div class="rm-title">实验报告 · <span>库仑定律</span></div>
+      <div class="rm-close" onclick="closeReport()">×</div>
+    </div>
+    <div class="rm-body">
+      <div class="rm-section-title">基本信息</div>
+      <div class="rm-row">
+        <div class="rm-field">
+          <div class="rm-label">姓名 <span>*</span></div>
+          <input class="rm-input" id="rName" placeholder="请输入姓名">
+        </div>
+        <div class="rm-field">
+          <div class="rm-label">学号 <span>*</span></div>
+          <input class="rm-input" id="rStuId" placeholder="请输入学号">
+        </div>
+      </div>
+      <div class="rm-row">
+        <div class="rm-field">
+          <div class="rm-label">实验日期</div>
+          <input class="rm-input" id="rDate" type="date">
+        </div>
+        <div class="rm-field">
+          <div class="rm-label">实验伙伴</div>
+          <input class="rm-input" id="rPartner" placeholder="可选">
+        </div>
+      </div>
+      <div class="rm-section-title">实验内容</div>
+      <div class="rm-field">
+        <div class="rm-label">实验目的</div>
+        <textarea class="rm-textarea" id="rPurpose" placeholder="描述本次实验的目的和预期目标……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验步骤与观察</div>
+        <textarea class="rm-textarea" id="rProcess" placeholder="描述你进行的操作步骤和实验过程中的观察……" style="min-height:100px"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验数据记录</div>
+        <textarea class="rm-textarea" id="rData" placeholder="记录关键数据、参数和仿真结果……"></textarea>
+      </div>
+      <div class="rm-section-title">分析与总结</div>
+      <div class="rm-field">
+        <div class="rm-label">结果分析</div>
+        <textarea class="rm-textarea" id="rAnalysis" placeholder="对实验现象和数据进行分析……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">误差分析与思考</div>
+        <textarea class="rm-textarea" id="rError" placeholder="分析可能的误差来源，以及对物理规律的思考……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验结论</div>
+        <textarea class="rm-textarea" id="rConclusion" placeholder="总结本次实验的结论……"></textarea>
+      </div>
+    </div>
+    <div class="report-output" id="reportOutput"></div>
+    <div class="rm-footer">
+      <button class="rm-btn rm-btn-cancel" onclick="closeReport()">取消</button>
+      <button class="rm-btn rm-btn-copy" id="rmCopyBtn" onclick="copyReport()">复制报告</button>
+      <button class="rm-btn rm-btn-gen" onclick="generateReport()">生成报告</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const EXP_NAME = '库仑定律';
+  const EXP_SEC  = '§1-1';
+  const STORE_KEY = 'phy26_report_' + EXP_SEC.replace(/[§\/]/g,'');
+
+  function loadSaved() {
+    const d = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+    if (d.name)       document.getElementById('rName').value      = d.name;
+    if (d.stuId)      document.getElementById('rStuId').value     = d.stuId;
+    if (d.date)       document.getElementById('rDate').value      = d.date;
+    if (d.partner)    document.getElementById('rPartner').value   = d.partner;
+    if (d.purpose)    document.getElementById('rPurpose').value   = d.purpose;
+    if (d.process)    document.getElementById('rProcess').value   = d.process;
+    if (d.data)       document.getElementById('rData').value      = d.data;
+    if (d.analysis)   document.getElementById('rAnalysis').value  = d.analysis;
+    if (d.error)      document.getElementById('rError').value     = d.error;
+    if (d.conclusion) document.getElementById('rConclusion').value= d.conclusion;
+  }
+
+  function saveDraft() {
+    const d = {
+      name:       document.getElementById('rName').value,
+      stuId:      document.getElementById('rStuId').value,
+      date:       document.getElementById('rDate').value,
+      partner:    document.getElementById('rPartner').value,
+      purpose:    document.getElementById('rPurpose').value,
+      process:    document.getElementById('rProcess').value,
+      data:       document.getElementById('rData').value,
+      analysis:   document.getElementById('rAnalysis').value,
+      error:      document.getElementById('rError').value,
+      conclusion: document.getElementById('rConclusion').value,
+    };
+    localStorage.setItem(STORE_KEY, JSON.stringify(d));
+  }
+
+  window.openReport = function() {
+    document.getElementById('reportOverlay').classList.add('open');
+    document.getElementById('reportOutput').classList.remove('show');
+    document.getElementById('rmCopyBtn').style.display = 'none';
+    const dateEl = document.getElementById('rDate');
+    if (!dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
+    loadSaved();
+    const _d = {
+      rPurpose:    '验证库仑定律，研究两点电荷间静电力与电荷量、距离的定量关系，理解叠加原理在多电荷系统中的应用。',
+      rProcess:    '设置两个点电荷，分别改变电荷量（q₁、q₂）和间距r，记录对应的静电力F；保持一个变量不变改变另一个，验证F∝q₁q₂/r²；观察力的方向随电荷符号的变化；设置多电荷系统，验证叠加原理。',
+      rData:       '固定r=1.0m，q₁=1μC：q₂=1μC时F=8.99N，q₂=2μC时F=17.98N，q₂=4μC时F=35.96N（F∝q₂）；固定q₁=q₂=1μC：r=1m时F=8.99N，r=2m时F=2.25N，r=3m时F=1.00N（F∝1/r²）。',
+      rAnalysis:   '数据表明F与q₁q₂成正比，与r²成反比，与库仑定律F=kq₁q₂/r²完全吻合，比例系数k≈8.99×10⁹N·m²/C²。多电荷系统中合力等于各库仑力的矢量叠加，验证了叠加原理。',
+      rError:      '仿真实验无测量误差，与理论值完全一致。实际实验中需考虑感应电荷对测量的干扰、悬线扭转角读数误差、电荷泄漏等因素，可能导致2%~5%的系统误差。',
+      rConclusion: '验证了库仑定律：两点电荷间静电力大小与两电荷量之积成正比，与距离平方成反比，方向沿连线；多电荷系统满足叠加原理，合力等于各库仑力的矢量和。',
+    };
+    Object.entries(_d).forEach(([id, val]) => { const el = document.getElementById(id); if (el && !el.value) el.value = val; });
+  };
+
+  window.closeReport = function() {
+    saveDraft();
+    document.getElementById('reportOverlay').classList.remove('open');
+  };
+
+  window.overlayClick = function(e) {
+    if (e.target === document.getElementById('reportOverlay')) closeReport();
+  };
+
+  window.generateReport = function() {
+    const name       = document.getElementById('rName').value.trim();
+    const stuId      = document.getElementById('rStuId').value.trim();
+    const date       = document.getElementById('rDate').value || '—';
+    const partner    = document.getElementById('rPartner').value.trim() || '—';
+    const purpose    = document.getElementById('rPurpose').value.trim() || '（未填写）';
+    const process    = document.getElementById('rProcess').value.trim() || '（未填写）';
+    const data       = document.getElementById('rData').value.trim() || '（未填写）';
+    const analysis   = document.getElementById('rAnalysis').value.trim() || '（未填写）';
+    const error      = document.getElementById('rError').value.trim() || '（未填写）';
+    const conclusion = document.getElementById('rConclusion').value.trim() || '（未填写）';
+
+    if (!name || !stuId) { alert('请填写姓名和学号'); return; }
+    saveDraft();
+
+    const divider = '─'.repeat(40);
+    const report = [
+      '普通物理（卓越班）下册 · 电磁学',
+      `实验报告：${EXP_NAME}（${EXP_SEC}）`,
+      divider,
+      `姓　　名：${name}　　　学　　号：${stuId}`,
+      `实验日期：${date}　　　实验伙伴：${partner}`,
+      divider,
+      '',
+      '一、实验目的',
+      purpose,
+      '',
+      '二、实验步骤与观察',
+      process,
+      '',
+      '三、实验数据记录',
+      data,
+      '',
+      '四、结果分析',
+      analysis,
+      '',
+      '五、误差分析与思考',
+      error,
+      '',
+      '六、实验结论',
+      conclusion,
+      '',
+      divider,
+      `生成时间：${new Date().toLocaleString('zh-CN')}`,
+      '本报告由 NUSEP26 普通物理（卓越班）实验仿真平台生成',
+    ].join('\n');
+
+    const out = document.getElementById('reportOutput');
+    out.textContent = report;
+    out.classList.add('show');
+    document.getElementById('rmCopyBtn').style.display = 'inline-flex';
+    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+
+  window.copyReport = function() {
+    const text = document.getElementById('reportOutput').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('rmCopyBtn');
+      const orig = btn.textContent;
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => btn.textContent = orig, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      const btn = document.getElementById('rmCopyBtn');
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => btn.textContent = '复制报告', 2000);
+    });
+  };
+
+  ['rName','rStuId','rDate','rPartner','rPurpose','rProcess','rData','rAnalysis','rError','rConclusion']
+    .forEach(id => document.getElementById(id).addEventListener('input', saveDraft));
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>电磁学 — 普通物理（卓）下</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    canvas#particles {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ── 顶栏 ── */
+    .topbar {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; gap: 14px;
+      padding: 20px 36px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      background: rgba(15,12,41,0.6);
+      backdrop-filter: blur(12px);
+    }
+    .back-btn {
+      display: flex; align-items: center; gap: 6px;
+      color: rgba(255,255,255,0.55); font-size: 14px;
+      cursor: pointer; text-decoration: none;
+      transition: color 0.2s;
+    }
+    .back-btn:hover { color: #818cf8; }
+    .topbar-title-wrap {
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .topbar-title {
+      font-size: 18px; font-weight: 700; color: #fff; letter-spacing: 1px;
+    }
+    .topbar-course {
+      font-size: 11px; color: rgba(255,255,255,0.4); letter-spacing: 1px;
+    }
+    .topbar-sub {
+      margin-left: auto; font-size: 12px;
+      color: rgba(255,255,255,0.3); letter-spacing: 1px;
+    }
+
+    /* ── 页面主体 ── */
+    .page {
+      position: relative; z-index: 10;
+      max-width: 900px; margin: 0 auto;
+      padding: 40px 24px 60px;
+    }
+
+    .page-hero {
+      text-align: center; margin-bottom: 48px;
+    }
+    .page-hero .icon {
+      font-size: 56px; margin-bottom: 16px;
+      filter: drop-shadow(0 0 20px rgba(99,102,241,0.6));
+    }
+    .page-hero h2 {
+      font-size: 36px; font-weight: 700; color: #fff; letter-spacing: 2px;
+    }
+    .hero-course {
+      font-size: 13px; color: rgba(255,255,255,0.45);
+      letter-spacing: 2px; margin-top: 6px; margin-bottom: 4px;
+    }
+    .page-hero p {
+      margin-top: 10px; font-size: 15px;
+      color: rgba(255,255,255,0.5); letter-spacing: 1px;
+    }
+
+    /* ── 章节卡片 ── */
+    .chapter {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 18px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      transition: border-color 0.25s, box-shadow 0.25s, transform 0.2s;
+    }
+    .chapter:hover {
+      border-color: rgba(99,102,241,0.35);
+      box-shadow: 0 8px 32px rgba(99,102,241,0.15);
+      transform: translateY(-1px);
+    }
+
+    .chapter-header {
+      display: flex; align-items: center; gap: 16px;
+      padding: 24px 32px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .chapter-num {
+      width: 48px; height: 48px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .ch1 .chapter-num { background: linear-gradient(135deg,#6366f1,#818cf8); }
+    .ch2 .chapter-num { background: linear-gradient(135deg,#0ea5e9,#38bdf8); }
+    .ch3 .chapter-num { background: linear-gradient(135deg,#10b981,#34d399); }
+    .ch4 .chapter-num { background: linear-gradient(135deg,#f59e0b,#fbbf24); }
+    .ch4 .section-dot { background: rgba(251,191,36,0.6); }
+    .new-badge {
+      display: inline-flex; align-items: center;
+      background: linear-gradient(135deg,#f59e0b,#fbbf24);
+      color: #1a1200; font-size: 10px; font-weight: 800;
+      padding: 2px 8px; border-radius: 20px; letter-spacing: 1px;
+      margin-left: 10px; vertical-align: middle;
+      box-shadow: 0 0 10px rgba(251,191,36,0.5);
+      animation: pulse-badge 2s ease-in-out infinite;
+    }
+    @keyframes pulse-badge {
+      0%,100% { box-shadow: 0 0 8px rgba(251,191,36,0.4); }
+      50% { box-shadow: 0 0 18px rgba(251,191,36,0.8); }
+    }
+
+
+    .chapter-info { flex: 1; }
+    .chapter-info h3 {
+      font-size: 18px; font-weight: 600; color: #fff; letter-spacing: 0.5px;
+    }
+    .chapter-info p {
+      margin-top: 4px; font-size: 12.5px;
+      color: rgba(255,255,255,0.45); line-height: 1.5;
+    }
+
+    .chapter-toggle {
+      font-size: 18px; color: rgba(255,255,255,0.3);
+      transition: transform 0.3s, color 0.2s;
+    }
+    .chapter.ch4:hover {
+      border-color: rgba(251,191,36,0.45);
+      box-shadow: 0 8px 32px rgba(251,191,36,0.18);
+    }
+    .chapter.ch4.open {
+      border-color: rgba(251,191,36,0.3);
+      box-shadow: 0 4px 24px rgba(251,191,36,0.1);
+    }
+    .chapter.open .chapter-toggle { transform: rotate(90deg); color: #818cf8; }
+    .chapter.ch4.open .chapter-toggle { color: #fbbf24; }
+
+    /* ── 小节列表 ── */
+    .section-list {
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1);
+      border-top: 1px solid rgba(255,255,255,0);
+    }
+    .chapter.open .section-list {
+      max-height: 800px;
+      border-top-color: rgba(255,255,255,0.07);
+    }
+
+    .section-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 32px 14px 40px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .section-item:last-child { border-bottom: none; }
+
+    .section-dot {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(255,255,255,0.2);
+    }
+    .ch1 .section-dot { background: rgba(99,102,241,0.6); }
+    .ch2 .section-dot { background: rgba(56,189,248,0.6); }
+    .ch3 .section-dot { background: rgba(52,211,153,0.6); }
+    .ch4 .section-dot { background: rgba(251,191,36,0.6); }
+
+    .section-text { flex: 1; }
+    .section-text .sec-num {
+      font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 0.5px;
+    }
+    .section-text .sec-name {
+      font-size: 15px; color: rgba(255,255,255,0.88); margin-top: 2px;
+    }
+
+    /* ── 三按钮组 ── */
+    .sec-btns {
+      display: flex; gap: 6px; flex-shrink: 0;
+    }
+    .sec-btn {
+      font-size: 12px; font-weight: 600; padding: 5px 13px;
+      border-radius: 9px; cursor: pointer; border: 1px solid;
+      transition: all .18s; white-space: nowrap;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    /* 笔记按钮 */
+    .btn-note {
+      background: rgba(99,102,241,0.12); color: #818cf8;
+      border-color: rgba(99,102,241,0.28);
+    }
+    .btn-note:hover { background: rgba(99,102,241,0.28); color: #fff; }
+    .ch2 .btn-note { background: rgba(56,189,248,0.1); color: #38bdf8; border-color: rgba(56,189,248,0.28); }
+    .ch2 .btn-note:hover { background: rgba(56,189,248,0.28); color: #fff; }
+    .ch3 .btn-note { background: rgba(52,211,153,0.1); color: #34d399; border-color: rgba(52,211,153,0.28); }
+    .ch3 .btn-note:hover { background: rgba(52,211,153,0.28); color: #fff; }
+    .ch4 .btn-note { background: rgba(251,191,36,0.1); color: #fbbf24; border-color: rgba(251,191,36,0.28); }
+    .ch4 .btn-note:hover { background: rgba(251,191,36,0.28); color: #fff; }
+
+    /* 实验按钮 */
+    .btn-lab {
+      background: rgba(52,211,153,0.08); color: #34d399;
+      border-color: rgba(52,211,153,0.25);
+    }
+    .btn-lab:hover { background: rgba(52,211,153,0.25); color: #fff; }
+    .btn-lab.disabled {
+      opacity: 0.3; cursor: default; pointer-events: none;
+    }
+    /* ── 进度面板 ── */
+    .progress-panel {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 24px 28px 20px;
+      margin-bottom: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .progress-panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(99,102,241,0.06) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .progress-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+    .progress-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.7);
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .progress-title::before {
+      content: '';
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #818cf8;
+      box-shadow: 0 0 8px #818cf8;
+    }
+    .progress-pct {
+      font-size: 28px;
+      font-weight: 900;
+      background: linear-gradient(90deg, #818cf8, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+    }
+    .progress-bar-wrap {
+      height: 6px;
+      background: rgba(255,255,255,0.07);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #6366f1, #818cf8, #38bdf8, #34d399);
+      background-size: 200% 100%;
+      animation: shimmer 3s linear infinite;
+      transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+    }
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    .progress-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .prog-stat {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      padding: 10px 12px;
+      text-align: center;
+    }
+    .prog-stat-num {
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+    .prog-stat-num.c-note { color: #818cf8; }
+    .prog-stat-num.c-lab  { color: #34d399; }
+
+    .prog-stat-label {
+      font-size: 10px;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 1px;
+      margin-top: 3px;
+      text-transform: uppercase;
+    }
+    .progress-reset {
+      position: absolute;
+      top: 16px; right: 16px;
+      font-size: 10px;
+      color: rgba(255,255,255,0.2);
+      cursor: pointer;
+      letter-spacing: 0.5px;
+      transition: color 0.2s;
+    }
+    .progress-reset:hover { color: rgba(255,255,255,0.5); }
+    /* section-item 已读状态 */
+    .section-item.visited .sec-name {
+      color: rgba(255,255,255,0.5);
+    }
+    .section-item.visited .section-dot {
+      position: relative;
+    }
+    .section-item.visited .section-dot::after {
+      content: '✓';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 7px;
+      color: #fff;
+      font-weight: 900;
+    }
+    .section-item.visited .section-dot {
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+
+<div style="position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(99,102,241,0.12) 0%,transparent 70%);"></div>
+<canvas id="particles"></canvas>
+
+<div class="topbar">
+  <a class="back-btn" href="index.html">← 主页</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">⚡ 电磁学</div>
+    <span class="topbar-course">普通物理（卓越班）下册</span>
+  </div>
+  <div class="topbar-sub">NUSEP26 · 普通物理（卓）下</div>
+</div>
+
+<div class="page">
+
+  <!-- 学习进度面板 -->
+  <div class="progress-panel">
+    <div class="progress-reset" onclick="resetProgress()">重置</div>
+    <div class="progress-header">
+      <div class="progress-title">学习进度</div>
+      <div class="progress-pct" id="progPct">0%</div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progBar" style="width:0%"></div>
+    </div>
+    <div class="progress-stats">
+      <div class="prog-stat">
+        <div class="prog-stat-num c-note" id="progNote">0/22</div>
+        <div class="prog-stat-label">笔记</div>
+      </div>
+      <div class="prog-stat">
+        <div class="prog-stat-num c-lab" id="progLab">0/23</div>
+        <div class="prog-stat-label">实验</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-hero">
+    <div class="icon">⚡</div>
+    <h2>电磁学</h2>
+    <div class="hero-course">普通物理（卓越班）下册 · Electromagnetic Theory</div>
+    <p>静电场 · 导体与电介质 · 恒定磁场 · 变化的电磁场</p>
+  </div>
+
+  <!-- 第1章 -->
+  <div class="chapter ch1" onclick="toggle(this)">
+    <div class="chapter-header">
+      <div class="chapter-num">1</div>
+      <div class="chapter-info">
+        <h3>第1章 &nbsp;静电场</h3>
+        <p>从库仑定律出发，建立电场强度与电势的概念，掌握高斯定理与环路定理</p>
+      </div>
+      <div class="chapter-toggle">›</div>
+    </div>
+    <div class="section-list">
+      <div class="section-item">
+        <div class="section-dot"></div>
+        <div class="section-text">
+          <div class="sec-num">1-1</div>
+          <div class="sec-name">电荷 &nbsp;库仑定律</div>
+        </div>
+        <div class="sec-btns">
+          <div class="sec-btn btn-note" onclick="openNote(event,'1-1')">笔记</div>
+
+          <div class="sec-btn btn-lab" onclick="openLab(event,'1-1')">实验</div>
+        </div>
+      </div>
+      <div class="section-item">
+        <div class="section-dot"></div>
+        <div class="section-text">
+          <div class="sec-num">1-2</div>
+          <div class="sec-name">电场 &nbsp;电场强度</div>
+        </div>
+        <div class="sec-btns">
+          <div class="sec-btn btn-note" onclick="openNote(event,'1-2')">笔记</div>
+
+          <div class="sec-btn btn-lab" onclick="openLab(event,'1-2')">实验</div>
+        </div>
+      </div>
+      <div class="section-item">
+        <div class="section-dot"></div>
+        <div class="section-text">
+          <div class="sec-num">1-3</div>
+          <div class="sec-name">高斯定理及其应用</div>
+        </div>
+        <div class="sec-btns">
+          <div class="sec-btn btn-note" onclick="openNote(event,'1-3')">笔记</div>
+
+          <div class="sec-btn btn-lab" onclick="openLab(event,'1-3')">实验</div>
+        </div>
+      </div>
+      <div class="section-item">
+        <div class="section-dot"></div>
+        <div class="section-text">
+          <div class="sec-num">1-4</div>
+          <div class="sec-name">静电场的环路定理 &nbsp;电势</div>
+        </div>
+        <div class="sec-btns">
+          <div class="sec-btn btn-note" onclick="openNote(event,'1-4')">笔记</div>
+
+          <div class="sec-btn btn-lab" onclick="openLab(event,'1-4')">实验</div>
+        </div>
+      </div>
+      <div class="section-item">
+        <div class="section-dot"></div>
+        <div class="section-text">
+          <div class="sec-num">1-5</div>
+          <div class="sec-name">等势面 &nbsp;电势梯度</div>
+        </div>
+        <div class="sec-btns">
+          <div class="sec-btn btn-note" onclick="openNote(event,'1-5')">笔记</div>
+
+          <div class="sec-btn btn-lab" onclick="openLab(event,'1-5')">实验</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 第2章 -->
+  <div class="chapter ch2" onclick="toggle(this)">
+    <div class="chapter-header">
+      <div class="chapter-num">2</div>
+      <div class="chapter-info">
+        <h3>第2章 &nbsp;静电场中的导体和电介质</h3>
+        <p>导体静电平衡、电介质极化、电容器储能，理解静电场的能量分布</p>
+      </div>
+      <div class="chapter-toggle">›</div>
+    </div>
+    <div class="section-list">
+      <div class="section-item">
+        <div class="section-dot"></div>
+        <div class="section-text">
+          <div class="sec-num">2-1</div>
+          <div class="sec-name">导体的静电平衡性质</div>
+        </div>
+        <div class="sec-btns">
+          <div class="sec-btn btn-note" onclick="openNote(event,'2-1')">笔记</div>
+
+          <div class="sec-btn btn-lab" onclick="openLab(event,'2-1')">实验</div>
+        </div>
+      </div>
+      <div class="section-item">
+        <div class="section-dot"></div>
+        <div class="section-text">
+          <div class="sec-num">2-2</div>
+          <div class="sec-name">静电场中的电介质</div>
+        </div>
+        <div class="sec-btns">
+          <div class="sec-btn btn-note" onclick="openNote(event,'2-2')">笔记</div>
+
+          <div class="sec-btn btn-lab" onclick="openLab(event,'2-2')">实验</div>
+        </div>
+      </div>
+      <div class="section-item">
+        <div class="section-dot"></div>
+        <div class="section-text">
+          <div class="sec-num">2-3</div>
+          <div class="sec-name">电容和电容器</div>
+        </div>
+        <div class="sec-btns">
+          <div class="sec-btn btn-note" onclick="openNote(event,'2-3')">笔记</div>
+
+          <div class="sec-btn btn-lab" onclick="openLab(event,'2-3')">实验</div>
+        </div>
+      </div>
+      <div class="section-item">
+        <div class="section-dot"></div>
+        <div class="section-text">
+          <div class="sec-num">2-4</div>
+          <div class="sec-name">静电场的能量</div>
+        </div>
+        <div class="sec-btns">
+          <div class="sec-btn btn-note" onclick="openNote(event,'2-4')">笔记</div>
+
+          <div class="sec-btn btn-lab" onclick="openLab(event,'2-4')">实验</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 第3章 -->
+  <div class="chapter ch3" onclick="toggle(this)">
+    <div class="chapter-header">
+      <div class="chapter-num">3</div>
+      <div class="chapter-info">
+        <h3>第3章 &nbsp;恒定磁场</h3>
+        <p>毕奥-萨伐尔定律、安培环路定理，洛伦兹力与安培力，磁介质的磁化</p>
+      </div>
+      <div class="chapter-toggle">›</div>
+    </div>
+    <div class="section-list">
+      <div class="section-item">
+        <div class="section-dot"></div>
+        <div class="section-text">
+          <div class="sec-num">3-1</div>
+          <div class="sec-name">恒定电流 &nbsp;电动势</div>
+        </div>
+        <div class="sec-btns">
+          <div class="sec-btn btn-note disabled" onclick="showDisabledAlert(event)">笔记</div>
+
+          <div class="sec-btn btn-lab" onclick="openLab(event,'3-1')">实验</div>
+        </div>
+      </div>
+      <div class="section-item">
+        <div class="section-dot"></div>
+        <div class="section-text">
+          <div class="sec-num">3-2</div>
+          <div class="sec-name">磁场 &nbsp;磁感应强度</div>
+        </div>
+        <div class="sec-btns">
+          <div class="sec-btn btn-note" onclick="openNote(event,'3-2')">笔记</div>
+
+          <div class="sec-btn btn-lab" onclick="openLab(event,'3-2')">实验</div>
+        </div>
+      </div>
+      <div class="section-item">
+        <div class="section-dot"></div>
+        <div class="section-text">
+          <div class="sec-num">3-3</div>
+          <div class="sec-name">毕奥-萨伐尔定律</div>
+        </div>
+        <div class="sec-btns">
+          <div class="sec-btn btn-note" onclick="openNote(event,'3-3')">笔记</div>
+
+          <div class="sec-btn btn-lab" onclick="openLab(event,'3-3')">实验</div>
+        </div>
+      </div>
+      <div class="section-item">
+        <div class="section-dot"></div>
+        <div class="section-text">
+          <div class="sec-num">3-4</div>
+          <div class="sec-name">磁场中的高斯定理</div>
+        </div>
+        <div class="sec-btns">
+          <div class="sec-btn btn-note" onclick="openNote(event,'3-4')">笔记</div>
+
+          <div class="sec-btn btn-lab" onclick="openLab(event,'3-4')">实验</div>
+        </div>
+      </div>
+      <div class="section-item">
+        <div class="section-dot"></div>
+        <div class="section-text">
+          <div class="sec-num">3-5</div>
+          <div class="sec-name">安培环路定理</div>
+        </div>
+        <div class="sec-btns">
+          <div class="sec-btn btn-note" onclick="openNote(event,'3-5')">笔记</div>
+
+          <div class="sec-btn btn-lab" onclick="openLab(event,'3-5')">实验</div>
+        </div>
+      </div>
+      <div class="section-item">
+        <div class="section-dot"></div>
+        <div class="section-text">
+          <div class="sec-num">3-6</div>
+          <div class="sec-name">磁场对运动电荷的作用</div>
+        </div>
+        <div class="sec-btns">
+          <div class="sec-btn btn-note" onclick="openNote(event,'3-6')">笔记</div>
+
+          <div class="sec-btn btn-lab" onclick="openLab(event,'3-6')">实验</div>
+        </div>
+      </div>
+      <div class="section-item">
+        <div class="section-dot"></div>
+        <div class="section-text">
+          <div class="sec-num">3-7</div>
+          <div class="sec-name">磁场对载流导线的作用</div>
+        </div>
+        <div class="sec-btns">
+          <div class="sec-btn btn-note" onclick="openNote(event,'3-7')">笔记</div>
+
+          <div class="sec-btn btn-lab" onclick="openLab(event,'3-7')">实验</div>
+        </div>
+      </div>
+      <div class="section-item">
+        <div class="section-dot"></div>
+        <div class="section-text">
+          <div class="sec-num">3-8</div>
+          <div class="sec-name">磁介质 &amp; 位移电流</div>
+        </div>
+        <div class="sec-btns">
+          <div class="sec-btn btn-note" onclick="openNote(event,'3-8')">笔记</div>
+
+          <div class="sec-btn btn-lab" onclick="openLab(event,'3-8')">实验</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 第4章 -->
+  <div class="chapter ch4" onclick="toggle(this)">
+    <div class="chapter-header">
+      <div class="chapter-num">4</div>
+      <div class="chapter-info">
+        <h3>第4章 &nbsp;变化的电磁场<span class="new-badge">NEW</span></h3>
+        <p>电磁感应、自感互感、位移电流，麦克斯韦方程组统一电磁场理论</p>
+      </div>
+      <div class="chapter-toggle">›</div>
+    </div>
+    <div class="section-list">
+      <div class="section-item">
+        <div class="section-dot"></div>
+        <div class="section-text">
+          <div class="sec-num">4-1</div>
+          <div class="sec-name">电磁感应定律</div>
+        </div>
+        <div class="sec-btns">
+          <div class="sec-btn btn-note" onclick="openNote(event,'4-1')">笔记</div>
+
+          <div class="sec-btn btn-lab" onclick="openLab(event,'4-1')">实验</div>
+        </div>
+      </div>
+      <div class="section-item">
+        <div class="section-dot"></div>
+        <div class="section-text">
+          <div class="sec-num">4-2</div>
+          <div class="sec-name">动生电动势 &nbsp;感生电动势</div>
+        </div>
+        <div class="sec-btns">
+          <div class="sec-btn btn-note" onclick="openNote(event,'4-2')">笔记</div>
+
+          <div class="sec-btn btn-lab" onclick="openLab(event,'4-2')">实验</div>
+        </div>
+      </div>
+      <div class="section-item">
+        <div class="section-dot"></div>
+        <div class="section-text">
+          <div class="sec-num">4-3</div>
+          <div class="sec-name">自感和互感</div>
+        </div>
+        <div class="sec-btns">
+          <div class="sec-btn btn-note" onclick="openNote(event,'4-3')">笔记</div>
+
+          <div class="sec-btn btn-lab" onclick="openLab(event,'4-3')">实验</div>
+        </div>
+      </div>
+      <div class="section-item">
+        <div class="section-dot"></div>
+        <div class="section-text">
+          <div class="sec-num">4-4</div>
+          <div class="sec-name">磁场的能量</div>
+        </div>
+        <div class="sec-btns">
+          <div class="sec-btn btn-note" onclick="openNote(event,'4-4')">笔记</div>
+
+          <div class="sec-btn btn-lab" onclick="openLab(event,'4-4')">实验</div>
+        </div>
+      </div>
+      <div class="section-item">
+        <div class="section-dot"></div>
+        <div class="section-text">
+          <div class="sec-num">4-5</div>
+          <div class="sec-name">位移电流</div>
+        </div>
+        <div class="sec-btns">
+          <div class="sec-btn btn-note" onclick="openNote(event,'4-5')">笔记</div>
+
+          <div class="sec-btn btn-lab" onclick="openLab(event,'4-5')">实验</div>
+        </div>
+      </div>
+      <div class="section-item">
+        <div class="section-dot"></div>
+        <div class="section-text">
+          <div class="sec-num">4-6</div>
+          <div class="sec-name">麦克斯韦方程组 &nbsp;电磁波</div>
+        </div>
+        <div class="sec-btns">
+          <div class="sec-btn btn-note" onclick="openNote(event,'4-6')">笔记</div>
+
+          <div class="sec-btn btn-lab" onclick="openLab(event,'4-6')">实验</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+</div><!-- /page -->
+
+<div style="position:relative;z-index:10;text-align:center;padding:24px 0 40px;font-size:11px;color:rgba(255,255,255,0.2);letter-spacing:0.8px;font-family:'Microsoft YaHei',sans-serif;">
+  技术开发：尹梓骏 2552840 &nbsp;·&nbsp; 技术支持：王俊博、徐帆 &nbsp;·&nbsp; 同济大学启迪书院
+</div>
+
+<script>
+  // 粒子背景
+  (function () {
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let W, H, pts = [];
+    function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+    window.addEventListener('resize', resize); resize();
+    const COLORS = ['#818cf8','#38bdf8','#c084fc','#34d399'];
+    function spawn() { return { x: Math.random()*W, y: H+10, r: Math.random()*2.5+0.5, speed: Math.random()*0.5+0.15, color: COLORS[Math.random()*COLORS.length|0], op: Math.random()*0.15+0.04 }; }
+    for (let i=0;i<50;i++){const p=spawn();p.y=Math.random()*H;pts.push(p);}
+    function draw(){ctx.clearRect(0,0,W,H);pts.forEach((p,i)=>{p.y-=p.speed;if(p.y<-10)pts[i]=spawn();ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.color;ctx.globalAlpha=p.op;ctx.fill();});ctx.globalAlpha=1;requestAnimationFrame(draw);}
+    draw();
+  })();
+
+  // 章节展开/收起
+  function toggle(el) {
+    // 阻止子元素点击冒泡到章节
+    el.classList.toggle('open');
+  }
+
+  const notePages = { '1-1': 'em_1-1.html', '1-2': 'em_1-2.html', '1-3': 'em_1-3.html', '1-4': 'em_1-4.html', '1-5': 'em_1-5.html', '2-1': 'em_2-1.html', '2-2': 'em_2-2.html', '2-3': 'em_2-3.html', '2-4': 'em_2-4.html', '3-2': 'em_3-1.html', '3-3': 'em_3-2.html', '3-4': 'em_3-3.html', '3-5': 'em_3-4.html', '3-6': 'em_3-5.html', '3-7': 'em_3-6.html', '3-8': 'em_3-7.html', '4-1': 'em_4-1.html', '4-2': 'em_4-2.html', '4-3': 'em_4-3.html', '4-4': 'em_4-4.html', '4-5': 'em_4-5.html', '4-6': 'em_4-6.html' };
+  const hwPages   = { 'hw1': 'em_hw1.html', 'hw2': 'em_hw2.html' };
+  const labPages  = { '1-1': 'em_lab_1-1.html', '1-2': 'em_lab_1-2.html', '1-3': 'em_lab_1-3.html', '1-4': 'em_lab_1-45.html', '1-5': 'em_lab_1-45.html', '2-1': 'em_lab_2-1.html', '2-2': 'em_lab_2-2.html', '2-3': 'em_lab_2-3.html', '2-4': 'em_lab_2-4.html', '3-1': 'em_lab_3-1.html', '3-2': 'em_lab_3-2.html', '3-3': 'em_lab_3-3.html', '3-4': 'em_lab_3-4.html', '3-5': 'em_lab_3-5.html', '3-6': 'em_lab_3-6.html', '3-7': 'em_lab_3-7.html', '3-8': 'em_lab_3-8.html', '4-1': 'em_lab_4-1.html', '4-2': 'em_lab_4-2.html', '4-3': 'em_lab_4-3.html', '4-4': 'em_lab_4-4.html', '4-5': 'em_lab_4-5.html', '4-6': 'em_lab_4-6.html' };
+
+  function openNote(e, id) {
+    e.stopPropagation();
+    if (notePages[id]) {
+      const v = getVisited(); if (!v.notes.includes(id)) { v.notes.push(id); localStorage.setItem('phy26_visited', JSON.stringify(v)); }
+      location.href = notePages[id]; return;
+    }
+    alert(`§${id} 笔记即将开放，敬请期待！`);
+  }
+  function openHw(e, id) {
+    e.stopPropagation();
+    if (hwPages[id]) {
+      const v = getVisited(); if (!v.hws.includes(id)) { v.hws.push(id); localStorage.setItem('phy26_visited', JSON.stringify(v)); }
+      location.href = hwPages[id]; return;
+    }
+    alert(`作业 ${id} 即将开放，敬请期待！`);
+  }
+  function openLab(e, id) {
+    e.stopPropagation();
+    if (labPages[id]) {
+      const v = getVisited(); if (!v.labs.includes(id)) { v.labs.push(id); localStorage.setItem('phy26_visited', JSON.stringify(v)); }
+      location.href = labPages[id]; return;
+    }
+    alert(`§${id} 实验即将开放，敬请期待！`);
+  }
+  function showDisabledAlert(e) {
+    e.stopPropagation();
+    const modal = document.getElementById('disabledModal');
+    modal.style.display = 'flex';
+    setTimeout(() => modal.classList.add('show'), 10);
+  }
+  function closeModal() {
+    const modal = document.getElementById('disabledModal');
+    modal.classList.remove('show');
+    setTimeout(() => modal.style.display = 'none', 300);
+  }
+
+  // ── 学习进度系统 ──
+  const TOTAL_NOTES = 22, TOTAL_LABS = 23;
+  const ALL_NOTES = ['1-1','1-2','1-3','1-4','1-5','2-1','2-2','2-3','2-4','3-2','3-3','3-4','3-5','3-6','3-7','3-8','4-1','4-2','4-3','4-4','4-5','4-6'];
+  const ALL_LABS  = ['1-1','1-2','1-3','1-4','1-5','2-1','2-2','2-3','2-4','3-1','3-2','3-3','3-4','3-5','3-6','3-7','3-8','4-1','4-2','4-3','4-4','4-5','4-6'];
+
+  function getVisited() {
+    return JSON.parse(localStorage.getItem('phy26_visited') || '{"notes":[],"labs":[],"hws":[]}');
+  }
+  function updateProgressUI() {
+    const v = getVisited();
+    const n = v.notes.length, l = v.labs.length;
+    const total = TOTAL_NOTES + TOTAL_LABS;
+    const done  = n + l;
+    const pct   = Math.round(done / total * 100);
+    document.getElementById('progPct').textContent  = pct + '%';
+    document.getElementById('progBar').style.width  = pct + '%';
+    document.getElementById('progNote').textContent = n + '/' + TOTAL_NOTES;
+    document.getElementById('progLab').textContent  = l + '/' + TOTAL_LABS;
+
+    document.querySelectorAll('.section-item').forEach(item => {
+      const num = item.querySelector('.sec-num');
+      if (!num) return;
+      const t = num.textContent.trim();
+      if (ALL_NOTES.includes(t) && v.notes.includes(t)) item.classList.add('visited');
+      if (ALL_LABS.includes(t) && v.labs.includes(t)) item.classList.add('visited');
+
+    });
+  }
+  function resetProgress() {
+    if (!confirm('确认重置所有学习记录？')) return;
+    localStorage.removeItem('phy26_visited');
+    document.querySelectorAll('.section-item').forEach(i => i.classList.remove('visited'));
+    updateProgressUI();
+  }
+  updateProgressUI();
+</script>
+
+<!-- Modal for disabled buttons -->
+<div id="disabledModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;opacity:0;transition:opacity 0.3s;" onclick="closeModal()">
+  <div style="background:linear-gradient(135deg,#1e1b4b,#312e81);border:1px solid rgba(129,140,248,0.3);border-radius:20px;padding:40px 50px;max-width:400px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5);transform:scale(0.9);transition:transform 0.3s;" onclick="event.stopPropagation()">
+    <div style="font-size:48px;margin-bottom:20px;">🔒</div>
+    <div style="font-size:20px;font-weight:700;color:#818cf8;margin-bottom:12px;font-family:'Microsoft YaHei',sans-serif;">该部分暂未开放</div>
+    <div style="font-size:14px;color:rgba(255,255,255,0.6);margin-bottom:24px;font-family:'Microsoft YaHei',sans-serif;">This section is not yet available</div>
+    <button onclick="closeModal()" style="background:linear-gradient(135deg,#6366f1,#818cf8);border:none;color:#fff;padding:12px 32px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Microsoft YaHei',sans-serif;transition:transform 0.2s,box-shadow 0.2s;" onmouseover="this.style.transform='scale(1.05)';this.style.boxShadow='0 8px 20px rgba(99,102,241,0.4)'" onmouseout="this.style.transform='scale(1)';this.style.boxShadow='none'">知道了</button>
+  </div>
+</div>
+
+<style>
+#disabledModal.show { opacity: 1 !important; }
+#disabledModal.show > div { transform: scale(1) !important; }
+</style>
+
+</body>
+</html>

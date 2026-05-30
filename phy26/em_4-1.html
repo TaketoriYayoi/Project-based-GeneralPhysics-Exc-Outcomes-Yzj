@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>4-1 电磁感应定律 — 电磁学</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Times New Roman","Microsoft YaHei","PingFang SC",serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;color:#fff}
+    canvas#particles{position:fixed;inset:0;pointer-events:none;z-index:0}
+    .topbar{position:relative;z-index:10;display:flex;align-items:center;gap:14px;padding:18px 36px;border-bottom:1px solid rgba(255,255,255,0.07);background:rgba(15,12,41,0.7);backdrop-filter:blur(12px);font-family:"Microsoft YaHei",sans-serif}
+    .back-btn{color:rgba(255,255,255,0.5);font-size:14px;cursor:pointer;text-decoration:none;transition:color .2s}.back-btn:hover{color:#fbbf24}
+    .topbar-title{font-size:16px;font-weight:700;letter-spacing:1px}
+    .topbar-sub{margin-left:auto;font-size:12px;color:rgba(255,255,255,0.3)}
+    .tabs{display:flex;gap:10px;margin-bottom:32px;font-family:"Microsoft YaHei",sans-serif;flex-wrap:wrap}
+    .tab{padding:9px 22px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.5);transition:all .2s}
+    .tab.active{background:linear-gradient(135deg,#f59e0b,#fbbf24);border-color:transparent;color:#fff;box-shadow:0 4px 16px rgba(245,158,11,0.4)}
+    .tab-panel{display:none}.tab-panel.active{display:block}
+    .page{position:relative;z-index:10;max-width:860px;margin:0 auto;padding:36px 24px 80px}
+    .card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:16px;padding:28px 32px;margin-bottom:20px}
+    .card-title{font-size:16px;font-weight:700;color:#fbbf24;margin-bottom:14px;display:flex;align-items:center;gap:8px;font-family:"Microsoft YaHei",sans-serif}
+    .card-title::before{content:"";display:inline-block;width:4px;height:18px;border-radius:2px;background:linear-gradient(#f59e0b,#fbbf24);flex-shrink:0}
+    .card p{font-size:15px;color:rgba(255,255,255,0.8);line-height:2}.card p+p{margin-top:10px}
+    .hl{color:#fbbf24;font-weight:600}.hl-blue{color:#38bdf8;font-weight:600}.hl-green{color:#34d399;font-weight:600}.hl-red{color:#f87171;font-weight:600}.hl-purple{color:#c084fc;font-weight:600}
+    .katex{color:#e2e8f0;font-size:1.05em}.katex-display{margin:14px 0}.katex-display>.katex{color:#93c5fd}
+    .prop-list{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:12px}
+    .prop-item{display:flex;gap:14px;align-items:flex-start;background:rgba(255,255,255,0.03);border-radius:10px;padding:14px 18px;border-left:3px solid #f59e0b}
+    .prop-item:nth-child(2){border-left-color:#38bdf8}.prop-item:nth-child(3){border-left-color:#34d399}.prop-item:nth-child(4){border-left-color:#f87171}.prop-item:nth-child(5){border-left-color:#c084fc}
+    .prop-num{min-width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#fff;font-family:"Microsoft YaHei",sans-serif}
+    .prop-item:nth-child(2) .prop-num{background:linear-gradient(135deg,#0ea5e9,#38bdf8)}.prop-item:nth-child(3) .prop-num{background:linear-gradient(135deg,#10b981,#34d399)}.prop-item:nth-child(4) .prop-num{background:linear-gradient(135deg,#ef4444,#f87171)}.prop-item:nth-child(5) .prop-num{background:linear-gradient(135deg,#7c3aed,#c084fc)}
+    .prop-body{font-size:14.5px;color:rgba(255,255,255,0.78);line-height:1.9}.prop-body strong{color:#fff;font-family:"Microsoft YaHei",sans-serif}
+    .note-box{background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);border-radius:12px;padding:16px 20px;margin-top:14px;font-size:14px;color:rgba(255,255,255,0.7);line-height:1.9;font-family:"Microsoft YaHei",sans-serif}
+    .note-box .note-label{font-weight:700;color:#fbbf24;margin-bottom:4px;display:block}
+    .green-box{background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.2);border-radius:12px;padding:16px 20px;margin-top:14px;font-size:14px;color:rgba(255,255,255,0.75);line-height:1.9;font-family:"Microsoft YaHei",sans-serif}
+    .green-box .note-label{font-weight:700;color:#34d399;margin-bottom:4px;display:block}
+    .blue-box{background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.2);border-radius:12px;padding:16px 20px;margin-top:14px;font-size:14px;color:rgba(255,255,255,0.75);line-height:1.9;font-family:"Microsoft YaHei",sans-serif}
+    .blue-box .note-label{font-weight:700;color:#38bdf8;margin-bottom:4px;display:block}
+    .eg-block{background:rgba(251,191,36,0.04);border:1px solid rgba(251,191,36,0.15);border-radius:14px;padding:24px 28px;margin-bottom:20px}
+    .eg-title{font-size:15px;font-weight:700;color:#fbbf24;margin-bottom:14px;font-family:"Microsoft YaHei",sans-serif;display:flex;align-items:center;gap:8px}
+    .eg-title::before{content:"";display:inline-block;width:4px;height:16px;background:linear-gradient(#f59e0b,#fbbf24);border-radius:2px;flex-shrink:0}
+    .eg-block p{font-size:14.5px;color:rgba(255,255,255,0.8);line-height:2}.eg-block p+p{margin-top:8px}
+    .sol-steps{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+    .sol-step{background:rgba(255,255,255,0.025);border-left:3px solid #f59e0b;border-radius:0 8px 8px 0;padding:12px 16px;font-size:14.5px;color:rgba(255,255,255,0.78);line-height:2}
+    .sol-step:nth-child(2){border-left-color:#38bdf8}.sol-step:nth-child(3){border-left-color:#34d399}.sol-step:nth-child(4){border-left-color:#f87171}.sol-step:nth-child(5){border-left-color:#c084fc}.sol-step:nth-child(6){border-left-color:#fbbf24}
+    .sol-step strong{color:#fff;font-family:"Microsoft YaHei",sans-serif}
+    .ans-box{background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:10px;padding:12px 18px;margin-top:12px;font-size:14.5px;color:rgba(255,255,255,0.85);line-height:2}
+    .ans-box .ans-label{color:#fbbf24;font-weight:700;font-family:"Microsoft YaHei",sans-serif}
+    canvas.demo-canvas{display:block;margin:18px auto 0;background:rgba(0,0,0,0.25);border-radius:12px;border:1px solid rgba(255,255,255,0.07)}
+    .demo-label{text-align:center;font-size:12.5px;color:rgba(255,255,255,0.35);font-family:"Microsoft YaHei",sans-serif;margin-top:8px}
+    .sim-ctrl{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+    .sim-btn{padding:7px 20px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:13px;font-family:"Microsoft YaHei",sans-serif;cursor:pointer;transition:all .2s}
+    .sim-btn:hover{background:rgba(245,158,11,0.25);border-color:rgba(245,158,11,0.5);color:#fff}
+    .sim-btn.active{background:linear-gradient(135deg,#f59e0b,#fbbf24);border-color:transparent;color:#fff;box-shadow:0 2px 10px rgba(245,158,11,0.4)}
+    .slider-row{display:flex;align-items:center;gap:14px;margin-top:14px;font-family:"Microsoft YaHei",sans-serif;font-size:13px;color:rgba(255,255,255,0.65)}
+    .slider-row input[type=range]{flex:1;accent-color:#fbbf24}
+    .slider-val{min-width:60px;text-align:right;color:#fbbf24;font-weight:600}
+    .formula-row{display:flex;align-items:center;gap:18px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:12px;padding:16px 22px;margin-top:12px}
+    .formula-tag{font-size:12px;color:rgba(255,255,255,0.35);font-family:"Microsoft YaHei",sans-serif;min-width:80px}
+  </style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">§4-1 &nbsp;电磁感应定律</div>
+    <span class="topbar-course">普通物理（卓越班）下册 · 电磁学</span>
+  </div>
+  <div class="topbar-sub">NUSEP26 · 普通物理（卓）下</div>
+</div>
+
+<div class="page">
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(0)">法拉第电磁感应定律</div>
+    <div class="tab" onclick="switchTab(1)">感生电场</div>
+    <div class="tab" onclick="switchTab(2)">例题</div>
+  </div>
+
+  <!-- ══ Tab 0：法拉第电磁感应定律 ══ -->
+  <div class="tab-panel active" id="panel-0">
+    <div class="card">
+      <div class="card-title">电磁感应现象</div>
+      <p>当穿过<span class="hl">闭合回路</span>的磁通量发生变化时，回路中有<span class="hl">感应电流</span>产生——这就是电磁感应现象（法拉第，1831年）。</p>
+      <p>感应电流的存在说明回路中有<span class="hl-blue">感应电动势</span> $\varepsilon_i$，其大小由磁通量的变化率决定。</p>
+      <div class="note-box">
+        <span class="note-label">关键认识</span>
+        感应电动势的产生不依赖于回路是否闭合——只要磁通量在变化，导体中就存在感应电动势；闭合时才有感应电流。
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">法拉第电磁感应定律</div>
+      <p>单匝回路中，感应电动势等于磁通量对时间变化率的负值：</p>
+      $$\varepsilon_i = -\dfrac{d\Phi_m}{dt}$$
+      <p>对 $N$ 匝线圈，引入<span class="hl">磁通量链接</span>（全磁通）$\Psi_m = N\Phi_m$：</p>
+      $$\varepsilon_i = -\dfrac{d\Psi_m}{dt} = -N\dfrac{d\Phi_m}{dt}$$
+      <div class="blue-box">
+        <span class="note-label">楞次定律（负号的物理含义）</span>
+        感应电动势的方向总是使感应电流产生的磁场<strong>阻碍</strong>引起感应的磁通量变化。负号正是楞次定律的数学表达。
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">感应电流与感应电荷</div>
+      <p>闭合回路（电阻为 $R$）中的感应电流：</p>
+      $$I = \dfrac{\varepsilon}{R} = -\dfrac{1}{R}\dfrac{d\Psi_m}{dt}$$
+      <p>在 $t_1 \to t_2$ 时间内通过回路截面的感应电荷量：</p>
+      $$q = \int_{t_1}^{t_2} I\,dt = -\dfrac{1}{R}\!\left(\Psi_{m2} - \Psi_{m1}\right) = \dfrac{\Delta\Psi_m}{R}$$
+      <div class="note-box">
+        <span class="note-label">实用意义</span>
+        感应电荷量 $q$ 只与磁通量的<strong>变化量</strong>有关，与变化快慢无关。这是冲击电流计测量磁通量的物理基础。
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">楞次定律的判断方法</div>
+      <ul class="prop-list">
+        <li class="prop-item">
+          <span class="prop-num">①</span>
+          <div class="prop-body"><strong>判断原磁通量方向</strong>：确定穿过回路的磁通量 $\Phi_m$ 的方向（用右手定则与回路正方向关联）</div>
+        </li>
+        <li class="prop-item">
+          <span class="prop-num">②</span>
+          <div class="prop-body"><strong>判断磁通量变化趋势</strong>：$\Phi_m$ 增大还是减小？</div>
+        </li>
+        <li class="prop-item">
+          <span class="prop-num">③</span>
+          <div class="prop-body"><strong>确定感应电流方向</strong>：感应电流产生的磁场应阻碍 $\Phi_m$ 的变化——增大则反向，减小则同向</div>
+        </li>
+        <li class="prop-item">
+          <span class="prop-num">④</span>
+          <div class="prop-body"><strong>由右手定则</strong>确定感应电流在回路中的绕向</div>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ══ Tab 1：感生电场 ══ -->
+  <div class="tab-panel" id="panel-1">
+    <div class="card">
+      <div class="card-title">感生电场的概念</div>
+      <p>麦克斯韦提出：<span class="hl">变化的磁场能够在其周围空间激发电场</span>，称为<span class="hl">感生电场</span>（涡旋电场）$\vec{E}_{\text{感}}$。</p>
+      <p>感应电动势可以用感生电场沿回路的线积分来表示：</p>
+      $$\varepsilon_i = \oint_l \vec{E}_{\text{感}} \cdot d\vec{l} = -\iint_S \dfrac{\partial\vec{B}}{\partial t} \cdot d\vec{S}$$
+      <p>这是法拉第定律的<span class="hl-blue">微分形式</span>的积分表达，也是麦克斯韦方程组的第二个方程。</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">感生电场与静电场的比较</div>
+      <ul class="prop-list">
+        <li class="prop-item">
+          <span class="prop-num">旋</span>
+          <div class="prop-body"><strong>有旋性</strong>：$\oint \vec{E}_{\text{感}} \cdot d\vec{l} \neq 0$，感生电场是<span class="hl">有旋场</span>（非保守场），沿闭合路径做功不为零</div>
+        </li>
+        <li class="prop-item">
+          <span class="prop-num">无</span>
+          <div class="prop-body"><strong>无源性</strong>：$\oiint \vec{E}_{\text{感}} \cdot d\vec{S} = 0$，感生电场是<span class="hl-blue">无源场</span>，电场线是闭合曲线，无起点无终点</div>
+        </li>
+        <li class="prop-item">
+          <span class="prop-num">势</span>
+          <div class="prop-body"><strong>无电势</strong>：感生电场不能定义电势，不存在等势面；而静电场是无旋有源场，可定义电势</div>
+        </li>
+        <li class="prop-item">
+          <span class="prop-num">向</span>
+          <div class="prop-body"><strong>方向规律</strong>：感生电场线是围绕变化磁场区域的<span class="hl-green">闭合曲线</span>，方向由 $-\partial\vec{B}/\partial t$ 决定（右手定则）</div>
+        </li>
+      </ul>
+      <div class="green-box">
+        <span class="note-label">对比总结</span>
+        静电场：有源（$\oiint \vec{E}\cdot d\vec{S} \neq 0$）无旋（$\oint \vec{E}\cdot d\vec{l} = 0$），可定义电势；
+        感生电场：无源（$\oiint \vec{E}_{\text{感}}\cdot d\vec{S} = 0$）有旋（$\oint \vec{E}_{\text{感}}\cdot d\vec{l} \neq 0$），不可定义电势。
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">交互仿真：感生电场分布</div>
+      <p>长直螺线管截面内磁场均匀变化，调节 $dB/dt$ 观察感生电场 $\vec{E}_{\text{感}}$ 的分布与强度变化。</p>
+      <div class="slider-row">
+        <span>$dB/dt$ =</span>
+        <input type="range" id="dBdtSlider" min="-5" max="5" step="0.1" value="2" oninput="updateEField()">
+        <span class="slider-val" id="dBdtVal">+2.0 T/s</span>
+      </div>
+      <div class="sim-ctrl">
+        <button class="sim-btn active" id="btnShowE" onclick="toggleShowE()">E 场线</button>
+        <button class="sim-btn active" id="btnShowB" onclick="toggleShowB()">B 场方向</button>
+        <button class="sim-btn" onclick="animateEField()">▶ 动画</button>
+      </div>
+      <canvas id="efieldCanvas" class="demo-canvas" width="620" height="340"></canvas>
+      <div class="demo-label">圆形区域：螺线管截面（B 场区域）；闭合曲线：感生电场线（$\vec{E}_{\text{感}}$ 方向）</div>
+    </div>
+  </div>
+
+  <!-- ══ Tab 2：例题 ══ -->
+  <div class="tab-panel" id="panel-2">
+    <div class="eg-block">
+      <div class="eg-title">例题 1：亥姆霍兹线圈中的感生电动势与感生电场</div>
+      <p>在亥姆霍兹线圈中间轴上放一半径 $R = 0.1\ \text{m}$ 的小线圈，其包围面积内磁场近似均匀。设亥姆霍兹线圈中通以电流 $i = 5.0\times10^{-3}\sin(100\pi t)$（SI）激发磁场，已知轴线处 $B = ki$（$k$ 为常数），求小线圈中的感生电动势和感生电场强度。</p>
+      <div class="sol-steps">
+        <div class="sol-step">
+          <strong>磁通量</strong>：$\Phi_B = B \cdot S = B \cdot \pi R^2$，其中 $B \propto i = 5.0\times10^{-3}\sin(100\pi t)$
+        </div>
+        <div class="sol-step">
+          <strong>感生电动势</strong>：由法拉第定律 $\varepsilon = -\dfrac{d\Phi_B}{dt} = -\pi R^2 \dfrac{dB}{dt}$，对 $B$ 求时间导数即可得到 $\varepsilon(t)$
+        </div>
+        <div class="sol-step">
+          <strong>感生电场</strong>：由对称性，$\vec{E}_{\text{感}}$ 沿小线圈周向均匀分布，利用 $\oint \vec{E}_{\text{感}} \cdot d\vec{l} = 2\pi R \cdot E = -\dfrac{d\Phi_B}{dt} = \varepsilon$
+        </div>
+        <div class="sol-step">
+          <strong>联立求解</strong>：$E = \dfrac{\varepsilon}{2\pi R} = \dfrac{1}{2\pi R}\left|\dfrac{d\Phi_B}{dt}\right|$，代入 $R = 0.1\ \text{m}$ 即得 $E(t)$
+        </div>
+      </div>
+      <div class="ans-box">
+        <span class="ans-label">方法要点：</span>先由法拉第定律求 $\varepsilon = -d\Phi_B/dt$，再利用感生电场的环路积分 $\oint \vec{E}_{\text{感}} \cdot d\vec{l} = 2\pi r E$（对称性），联立得 $E = \varepsilon/(2\pi R)$。
+      </div>
+    </div>
+
+    <div class="eg-block">
+      <div class="eg-title">例题 2：螺线管截面内金属棒的感生电动势</div>
+      <p>在长直螺线管（半径 $R$，磁场指向截面内部，$B$ 随时间增大）的一截面内放置长为 $2R$ 的金属棒 $ac$，棒的中点 $b$ 在轴线上，$ab$ 段（长 $R$）在圆内，$bc$ 段（长 $R$）在圆外。求棒中感生电动势 $\varepsilon_{ab}$、$\varepsilon_{bc}$、$\varepsilon_{ac}$。</p>
+      <div class="sol-steps">
+        <div class="sol-step">
+          <strong>法一（直接积分）</strong>：求出感生电场 $\vec{E}_{\text{感}}$ 的分布后，沿棒的路径积分 $\varepsilon = \int_a^c \vec{E}_{\text{感}} \cdot d\vec{l}$。圆内 $E_{\text{内}} = \dfrac{r}{2}\dfrac{dB}{dt}$，圆外 $E_{\text{外}} = \dfrac{R^2}{2r}\dfrac{dB}{dt}$。
+        </div>
+        <div class="sol-step">
+          <strong>法二（构造回路）</strong>：连接 $O$（圆心）与 $a$、$b$，构造闭合回路 $O \to a \to b \to O$。对该回路应用感生电场环路定理：$\oint \vec{E} \cdot d\vec{l} = -\dfrac{d\Phi_m}{dt}$
+        </div>
+        <div class="sol-step">
+          <strong>求 $\varepsilon_{ab}$</strong>：回路 $Oab$ 围住的面积为三角形 $Oab$（$O$ 在圆心，$a$、$b$ 在直径端点），面积 $= \dfrac{\sqrt{3}}{4}R^2$（等边三角形），故 $\varepsilon_{ab} = \displaystyle\int_a^b \vec{E} \cdot d\vec{l} = \dfrac{\sqrt{3}}{4}R^2 \dfrac{dB}{dt}$
+        </div>
+        <div class="sol-step">
+          <strong>电势关系</strong>：感生电场总指向电源正极，$\varphi_a < \varphi_b$（$b$ 为高电势端）。类似地，连接 $Oc$ 构造回路求 $\varepsilon_{bc}$，再叠加得 $\varepsilon_{ac} = \varepsilon_{ab} + \varepsilon_{bc}$。
+        </div>
+      </div>
+      <div class="ans-box">
+        <span class="ans-label">关键技巧：</span>构造辅助闭合回路（连接圆心 $O$），利用 $\oint \vec{E} \cdot d\vec{l} = -d\Phi_m/dt$ 将线积分转化为面积分，避免直接对 $\vec{E}$ 积分的繁琐计算。注意感生电场不是静电场，$\varphi_a < \varphi_b$ 的判断需用楞次定律。
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Particle BG -->
+<script>
+(function(){
+  const cv=document.getElementById('particles'),cx=cv.getContext('2d');
+  let W,H,pts=[];
+  function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  for(let i=0;i<90;i++)pts.push({x:Math.random()*2000,y:Math.random()*1200,vx:(Math.random()-.5)*0.3,vy:(Math.random()-.5)*0.3,r:Math.random()*1.6+0.4,a:Math.random()*0.5+0.1});
+  (function frame(){cx.clearRect(0,0,W,H);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle=`rgba(251,191,36,${p.a*0.5})`;cx.fill();});requestAnimationFrame(frame);})();
+})();
+</script>
+
+<script>
+function switchTab(i){
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',j===i));
+  document.querySelectorAll('.tab-panel').forEach((p,j)=>p.classList.toggle('active',j===i));
+  if(i===1) drawEField();
+}
+</script>
+
+<!-- Tab 1: E-field simulation -->
+<script>
+let dBdtVal=2.0;
+let showELines=true;
+let showBDir=true;
+let efieldAnimId=null;
+let efieldAnimT=0;
+
+function toggleShowE(){
+  showELines=!showELines;
+  document.getElementById('btnShowE').classList.toggle('active',showELines);
+  drawEField();
+}
+function toggleShowB(){
+  showBDir=!showBDir;
+  document.getElementById('btnShowB').classList.toggle('active',showBDir);
+  drawEField();
+}
+function updateEField(){
+  dBdtVal=parseFloat(document.getElementById('dBdtSlider').value);
+  const sign=dBdtVal>=0?'+':'';
+  document.getElementById('dBdtVal').textContent=sign+dBdtVal.toFixed(1)+' T/s';
+  drawEField();
+}
+function animateEField(){
+  if(efieldAnimId){cancelAnimationFrame(efieldAnimId);efieldAnimId=null;return;}
+  function frame(){
+    efieldAnimT+=0.03;
+    dBdtVal=2.5*Math.sin(efieldAnimT);
+    const sign=dBdtVal>=0?'+':'';
+    document.getElementById('dBdtVal').textContent=sign+dBdtVal.toFixed(2)+' T/s';
+    document.getElementById('dBdtSlider').value=dBdtVal;
+    drawEField();
+    efieldAnimId=requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+function drawEField(){
+  const cv=document.getElementById('efieldCanvas');if(!cv)return;
+  const ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  const cx=W/2,cy=H/2,R=110;
+
+  // Draw solenoid cross-section circle
+  ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);
+  ctx.fillStyle='rgba(245,158,11,0.07)';ctx.fill();
+  ctx.strokeStyle='rgba(245,158,11,0.4)';ctx.lineWidth=2;ctx.stroke();
+
+  // B field symbols inside circle
+  if(showBDir && dBdtVal!==0){
+    const nRows=5,nCols=5;
+    const spacing=R*2/(nRows+1);
+    for(let r=0;r<nRows;r++){
+      for(let c=0;c<nCols;c++){
+        const px=cx-R+spacing*(c+1);
+        const py=cy-R+spacing*(r+1);
+        const dist=Math.sqrt((px-cx)**2+(py-cy)**2);
+        if(dist>R-12)continue;
+        ctx.fillStyle='rgba(56,189,248,0.7)';
+        ctx.font='14px serif';ctx.textAlign='center';ctx.textBaseline='middle';
+        // B into page (×) if dBdt>0 (increasing into page), out (·) if dBdt<0
+        ctx.fillText(dBdtVal>0?'×':'·',px,py);
+      }
+    }
+    ctx.fillStyle='rgba(56,189,248,0.5)';ctx.font='11px "Microsoft YaHei"';ctx.textAlign='center';ctx.textBaseline='alphabetic';
+    ctx.fillText(dBdtVal>0?'B 向纸面内，增大':'B 向纸面外，增大',cx,cy+R+18);
+  }
+
+  // Draw induced E field lines (circular, centered on solenoid axis)
+  if(showELines && Math.abs(dBdtVal)>0.01){
+    const nRings=4;
+    const radii=[R*0.45,R*0.75,R*1.1,R*1.55];
+    // Direction: if dB/dt > 0 (B into page increasing), E is CCW (by Lenz)
+    const ccw = dBdtVal > 0;
+    radii.forEach((r,idx)=>{
+      const alpha=0.85-idx*0.15;
+      const Emag=idx<2?(r/(2*R))*Math.abs(dBdtVal):(R*R/(2*r*R))*Math.abs(dBdtVal);
+      const thick=Math.max(1,2.5-idx*0.4);
+      ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(251,191,36,${alpha})`;ctx.lineWidth=thick;ctx.stroke();
+
+      // Arrow on the ring
+      const arrowAng=ccw?-Math.PI*0.15:Math.PI*0.15;
+      const ax=cx+r*Math.cos(arrowAng);
+      const ay=cy+r*Math.sin(arrowAng);
+      const tangDir=ccw?arrowAng-Math.PI/2:arrowAng+Math.PI/2;
+      const aLen=9;
+      ctx.fillStyle=`rgba(251,191,36,${alpha})`;
+      ctx.beginPath();
+      ctx.moveTo(ax,ay);
+      ctx.lineTo(ax-aLen*Math.cos(tangDir-0.4),ay-aLen*Math.sin(tangDir-0.4));
+      ctx.lineTo(ax-aLen*Math.cos(tangDir+0.4),ay-aLen*Math.sin(tangDir+0.4));
+      ctx.closePath();ctx.fill();
+
+      // E magnitude label on outermost ring
+      if(idx===0){
+        ctx.fillStyle='rgba(251,191,36,0.6)';ctx.font='10px Times New Roman';ctx.textAlign='left';ctx.textBaseline='alphabetic';
+        ctx.fillText('E∝r (r<R)',cx+r+6,cy-4);
+      }
+      if(idx===2){
+        ctx.fillStyle='rgba(251,191,36,0.5)';ctx.font='10px Times New Roman';ctx.textAlign='left';
+        ctx.fillText('E∝1/r (r>R)',cx+r+6,cy-4);
+      }
+    });
+
+    // Direction label
+    ctx.fillStyle='rgba(251,191,36,0.7)';ctx.font='bold 12px "Microsoft YaHei"';ctx.textAlign='center';ctx.textBaseline='alphabetic';
+    ctx.fillText(ccw?'E 感 逆时针（楞次定律）':'E 感 顺时针（楞次定律）',cx,cy-R-14);
+  }
+
+  // Axis labels
+  ctx.fillStyle='rgba(255,255,255,0.25)';ctx.font='11px "Microsoft YaHei"';ctx.textAlign='center';ctx.textBaseline='alphabetic';
+  ctx.fillText('螺线管截面（半径 R）',cx,cy+R+34);
+
+  // R label
+  ctx.strokeStyle='rgba(255,255,255,0.2)';ctx.lineWidth=1;ctx.setLineDash([4,3]);
+  ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+R,cy);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='rgba(255,255,255,0.35)';ctx.font='12px Times New Roman';ctx.textAlign='center';
+  ctx.fillText('R',cx+R/2,cy-6);
+}
+window.addEventListener('DOMContentLoaded',()=>{updateEField();});
+</script>
+
+<!-- ── 笔记工具栏 ── -->
+<style>
+.note-fab {
+  position: fixed; bottom: 28px; right: 28px; z-index: 1000;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+}
+.fab-main {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 22px; box-shadow: 0 4px 20px rgba(245,158,11,0.5);
+  transition: transform 0.2s, box-shadow 0.2s;
+  color: #fff;
+}
+.fab-main:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(245,158,11,0.65); }
+.fab-main.active { background: linear-gradient(135deg, #d97706, #f59e0b); transform: rotate(45deg); }
+.fab-menu {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+  opacity: 0; pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.fab-menu.open { opacity: 1; pointer-events: all; transform: translateY(0); }
+.fab-item {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(15,12,41,0.92); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px; padding: 9px 16px 9px 12px;
+  cursor: pointer; white-space: nowrap;
+  backdrop-filter: blur(12px);
+  transition: border-color 0.2s, background 0.2s;
+  font-family: "Microsoft YaHei", sans-serif;
+}
+.fab-item:hover { border-color: rgba(251,191,36,0.4); background: rgba(245,158,11,0.15); }
+.fab-item .fi-icon { font-size: 17px; }
+.fab-item .fi-label { font-size: 13px; color: rgba(255,255,255,0.8); }
+.fab-item.starred .fi-label { color: #fbbf24; }
+.fab-item.starred { border-color: rgba(251,191,36,0.35); }
+.fab-item.read-done .fi-label { color: #34d399; }
+.fab-item.read-done { border-color: rgba(52,211,153,0.35); }
+.note-drawer {
+  position: fixed; bottom: 0; right: 0; left: 0; z-index: 999;
+  background: rgba(10,8,30,0.96);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(20px);
+  padding: 20px 28px 28px;
+  transform: translateY(100%);
+  transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
+}
+.note-drawer.open { transform: translateY(0); }
+.drawer-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.drawer-title { font-size: 14px; font-weight: 700; color: #fbbf24; font-family: "Microsoft YaHei",sans-serif; letter-spacing: 1px; }
+.drawer-close { font-size: 20px; color: rgba(255,255,255,0.4); cursor: pointer; transition: color 0.2s; line-height: 1; }
+.drawer-close:hover { color: #fff; }
+.drawer-textarea {
+  width: 100%; height: 120px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; padding: 12px 16px;
+  color: #fff; font-size: 14px; font-family: "Microsoft YaHei",sans-serif;
+  resize: vertical; outline: none; line-height: 1.8;
+  transition: border-color 0.2s;
+}
+.drawer-textarea:focus { border-color: rgba(251,191,36,0.5); }
+.drawer-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+.drawer-hint { font-size: 11px; color: rgba(255,255,255,0.25); font-family: "Microsoft YaHei",sans-serif; }
+.drawer-save {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24); border: none;
+  color: #fff; font-size: 13px; font-weight: 600; padding: 8px 22px; border-radius: 10px;
+  cursor: pointer; font-family: "Microsoft YaHei",sans-serif; transition: opacity 0.2s;
+}
+.drawer-save:hover { opacity: 0.85; }
+.phy-toast {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: rgba(15,12,41,0.95); border: 1px solid rgba(251,191,36,0.3);
+  border-radius: 24px; padding: 10px 22px;
+  font-size: 13px; color: rgba(255,255,255,0.85); font-family: "Microsoft YaHei",sans-serif;
+  z-index: 1100; opacity: 0;
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none; white-space: nowrap;
+}
+.phy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+
+<div class="note-fab">
+  <div class="fab-menu" id="fabMenu">
+    <div class="fab-item" id="fabStar" onclick="toggleStar()">
+      <span class="fi-icon">☆</span>
+      <span class="fi-label">收藏此节</span>
+    </div>
+    <div class="fab-item" id="fabRead" onclick="toggleRead()">
+      <span class="fi-icon">○</span>
+      <span class="fi-label">标记已读</span>
+    </div>
+    <div class="fab-item" onclick="openDrawer()">
+      <span class="fi-icon">📝</span>
+      <span class="fi-label">我的笔记</span>
+    </div>
+  </div>
+  <button class="fab-main" id="fabBtn" onclick="toggleFab()" title="工具">✦</button>
+</div>
+
+<div class="note-drawer" id="noteDrawer">
+  <div class="drawer-header">
+    <div class="drawer-title">📝 我的笔记 · §4-1</div>
+    <div class="drawer-close" onclick="closeDrawer()">×</div>
+  </div>
+  <textarea class="drawer-textarea" id="drawerTA" placeholder="在此记录你的理解、疑问或总结……"></textarea>
+  <div class="drawer-footer">
+    <span class="drawer-hint">自动保存到本地，刷新不丢失</span>
+    <button class="drawer-save" onclick="saveNote()">保存</button>
+  </div>
+</div>
+
+<div class="phy-toast" id="phyToast"></div>
+
+<script>
+(function(){
+  const PID = '4-1';
+  const SK  = 'phy26_note_' + PID;
+  const STK = 'phy26_star_' + PID;
+  const RDK = 'phy26_read_' + PID;
+  let fabOpen = false;
+
+  function showToast(msg) {
+    const t = document.getElementById('phyToast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  window.toggleFab = function() {
+    fabOpen = !fabOpen;
+    document.getElementById('fabMenu').classList.toggle('open', fabOpen);
+    document.getElementById('fabBtn').classList.toggle('active', fabOpen);
+  };
+
+  window.toggleStar = function() {
+    const starred = localStorage.getItem(STK) === '1';
+    if (starred) { localStorage.removeItem(STK); showToast('已取消收藏'); }
+    else { localStorage.setItem(STK, '1'); showToast('⭐ 已收藏此节'); }
+    refreshStarUI();
+  };
+
+  window.toggleRead = function() {
+    const read = localStorage.getItem(RDK) === '1';
+    if (read) { localStorage.removeItem(RDK); showToast('已取消已读标记'); }
+    else { localStorage.setItem(RDK, '1'); showToast('✓ 已标记为已读'); }
+    refreshReadUI();
+  };
+
+  function refreshStarUI() {
+    const starred = localStorage.getItem(STK) === '1';
+    const el = document.getElementById('fabStar');
+    el.querySelector('.fi-icon').textContent = starred ? '★' : '☆';
+    el.querySelector('.fi-label').textContent = starred ? '已收藏' : '收藏此节';
+    el.classList.toggle('starred', starred);
+  }
+
+  function refreshReadUI() {
+    const read = localStorage.getItem(RDK) === '1';
+    const el = document.getElementById('fabRead');
+    el.querySelector('.fi-icon').textContent = read ? '✓' : '○';
+    el.querySelector('.fi-label').textContent = read ? '已读' : '标记已读';
+    el.classList.toggle('read-done', read);
+  }
+
+  window.openDrawer = function() {
+    document.getElementById('drawerTA').value = localStorage.getItem(SK) || '';
+    document.getElementById('noteDrawer').classList.add('open');
+    document.getElementById('fabMenu').classList.remove('open');
+    document.getElementById('fabBtn').classList.remove('active');
+    fabOpen = false;
+    setTimeout(() => document.getElementById('drawerTA').focus(), 350);
+  };
+
+  window.closeDrawer = function() {
+    document.getElementById('noteDrawer').classList.remove('open');
+  };
+
+  window.saveNote = function() {
+    const val = document.getElementById('drawerTA').value.trim();
+    if (val) { localStorage.setItem(SK, val); showToast('✓ 笔记已保存'); }
+    else { localStorage.removeItem(SK); showToast('笔记已清空'); }
+    closeDrawer();
+  };
+
+  let saveTimer;
+  document.getElementById('drawerTA').addEventListener('input', function() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      const val = this.value.trim();
+      if (val) localStorage.setItem(SK, val);
+    }, 1500);
+  });
+
+  refreshStarUI(); refreshReadUI();
+
+  if (localStorage.getItem(SK)) {
+    const noteItem = document.querySelector('.fab-item:last-of-type .fi-icon');
+    if (noteItem) noteItem.textContent = '📋';
+  }
+})();
+</script>
+</body>
+</html>

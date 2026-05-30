@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>实验：恒定电流与电动势 — 3-1</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;color:#fff;overflow-x:hidden}
+    .topbar{display:flex;align-items:center;gap:14px;padding:16px 28px;border-bottom:1px solid rgba(255,255,255,0.07);background:rgba(15,12,41,0.7);backdrop-filter:blur(12px)}
+    .back-btn{color:rgba(255,255,255,0.55);font-size:14px;cursor:pointer;text-decoration:none;transition:color .2s}
+    .back-btn:hover{color:#34d399}
+    .topbar-title-wrap{display:flex;flex-direction:column;gap:2px}.topbar-title{font-size:16px;font-weight:700}.topbar-course{font-size:11px;color:rgba(255,255,255,0.38);letter-spacing:1px}
+    .topbar-sub{margin-left:auto;font-size:12px;color:rgba(255,255,255,0.3)}
+    .layout{display:flex;height:calc(100vh - 57px)}
+    .sidebar{width:250px;flex-shrink:0;background:rgba(255,255,255,0.03);border-right:1px solid rgba(255,255,255,0.07);padding:20px 16px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+    .ctrl-group h3{font-size:11px;color:rgba(255,255,255,0.38);letter-spacing:1px;margin-bottom:10px;text-transform:uppercase}
+    .divider{height:1px;background:rgba(255,255,255,0.07);flex-shrink:0}
+    .slider-row{display:flex;flex-direction:column;gap:4px}
+    .slider-row label{font-size:12.5px;color:rgba(255,255,255,0.6);display:flex;justify-content:space-between}
+    .slider-row label span{color:#34d399;font-weight:600}
+    input[type=range]{width:100%;accent-color:#10b981}
+    .toggle-row{display:flex;align-items:center;justify-content:space-between}
+    .toggle-row span{font-size:13px;color:rgba(255,255,255,0.6)}
+    .toggle{width:38px;height:20px;border-radius:10px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+    .toggle.on{background:rgba(16,185,129,0.5);border-color:#10b981}
+    .toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,0.6);transition:left .2s}
+    .toggle.on::after{left:20px;background:#fff}
+    .result-panel{background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:7px}
+    .result-panel h3{font-size:11px;color:rgba(52,211,153,0.7);letter-spacing:1px;margin-bottom:2px}
+    .result-row{display:flex;justify-content:space-between;align-items:baseline}
+    .result-label{font-size:12px;color:rgba(255,255,255,0.45)}
+    .result-value{font-size:14px;font-weight:700;color:#34d399}
+    .result-unit{font-size:11px;color:rgba(255,255,255,0.3);margin-left:2px}
+    .result-warn{color:#f59e0b}
+    .canvas-wrap{flex:1;overflow:hidden;display:flex;flex-direction:column;padding:10px;gap:8px}
+    .canvas-row{display:flex;gap:14px;flex:1;overflow:hidden;align-items:stretch}
+    canvas{background:rgba(0,0,0,0.3);display:block}
+    #circuitCanvas{flex:1}
+    .formula-bar{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 20px;font-size:13px;color:rgba(255,255,255,0.55);text-align:center;width:100%}
+    .formula-bar b{color:#34d399}
+    .chart-panel{display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+    .chart-label{font-size:11px;color:rgba(255,255,255,0.35);text-align:center}
+    #tooltip{position:fixed;pointer-events:none;display:none;background:rgba(10,10,30,0.93);border:1px solid rgba(52,211,153,0.35);border-radius:8px;padding:8px 12px;font-size:12px;color:#d1fae5;line-height:1.7;z-index:999}
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">⚡ 实验：恒定电流与电动势</div>
+    <span class="topbar-course">普通物理（卓越班）下册 · 电磁学</span>
+  </div>
+  <div class="topbar-sub">§3-1 恒定电流 · 电动势</div>
+</div>
+
+<div class="layout">
+  <!-- ===== SIDEBAR ===== -->
+  <div class="sidebar">
+    <div class="ctrl-group">
+      <h3>电路参数</h3>
+      <div class="slider-row">
+        <label>电动势 ε = <span id="epsVal">12</span> V</label>
+        <input type="range" id="epsSlider" min="1" max="24" step="0.5" value="12" oninput="recalc()">
+      </div>
+      <div class="slider-row">
+        <label>内阻 r = <span id="rVal">1.0</span> Ω</label>
+        <input type="range" id="rSlider" min="0.1" max="10" step="0.1" value="1" oninput="recalc()">
+      </div>
+      <div class="slider-row">
+        <label>外阻 R = <span id="RVal">10</span> Ω</label>
+        <input type="range" id="RSlider" min="1" max="50" step="0.5" value="10" oninput="recalc()">
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="ctrl-group">
+      <h3>显示选项</h3>
+      <div class="toggle-row">
+        <span>电子流方向</span>
+        <div class="toggle on" id="togElectron" onclick="tog('Electron')"></div>
+      </div>
+      <div class="toggle-row" style="margin-top:8px">
+        <span>导体内电场</span>
+        <div class="toggle" id="togEfield" onclick="tog('Efield')"></div>
+      </div>
+      <div class="toggle-row" style="margin-top:8px">
+        <span>热耗散可视化</span>
+        <div class="toggle on" id="togHeat" onclick="tog('Heat')"></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="result-panel">
+      <h3>计算结果</h3>
+      <div class="result-row">
+        <span class="result-label">电流 I</span>
+        <span><span class="result-value" id="resI">1.091</span><span class="result-unit">A</span></span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">路端电压 V<sub>term</sub></span>
+        <span><span class="result-value" id="resVt">10.91</span><span class="result-unit">V</span></span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">外阻压降 V<sub>R</sub></span>
+        <span><span class="result-value" id="resVR">10.91</span><span class="result-unit">V</span></span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">总功率 P<sub>total</sub></span>
+        <span><span class="result-value" id="resPt">13.09</span><span class="result-unit">W</span></span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">外阻功率 P<sub>R</sub></span>
+        <span><span class="result-value" id="resPR">11.90</span><span class="result-unit">W</span></span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">内耗功率 P<sub>r</sub></span>
+        <span><span class="result-value result-warn" id="resPr">1.19</span><span class="result-unit">W</span></span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">效率 η</span>
+        <span><span class="result-value" id="resEta">90.9</span><span class="result-unit">%</span></span>
+      </div>
+    </div>
+  </div>
+    <div class="report-fab" style="margin-top:auto;padding-top:12px"><button class="report-fab-btn" onclick="openReport()"><span class="rfb-icon">📄</span> 生成实验报告</button></div>
+
+  <!-- ===== MAIN AREA ===== -->
+  <div class="canvas-wrap">
+    <div class="canvas-row">
+      <canvas id="circuitCanvas"></canvas>
+      <div class="chart-panel">
+        <div class="chart-label">路端电压 V–电流 I 图</div>
+        <canvas id="viCanvas" width="200" height="150"></canvas>
+        <div class="chart-label" style="font-size:10px;color:rgba(255,255,255,0.25)">● 工作点随 R 变化</div>
+      </div>
+    </div>
+    <div class="formula-bar">
+      <b>ε = I(R + r)</b> &nbsp;|&nbsp; <b>V<sub>term</sub> = ε − Ir</b> &nbsp;|&nbsp; <b>η = P<sub>R</sub> / P<sub>total</sub> = R/(R+r)</b>
+    </div>
+  </div>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+/* ===== State ===== */
+let eps = 12, r = 1, R = 10;
+let showElectron = true, showEfield = false, showHeat = true;
+let I, Vt, VR, Pt, PR, Pr, eta;
+
+/* ===== Toggles ===== */
+function tog(name) {
+  if (name === 'Electron') { showElectron = !showElectron; }
+  if (name === 'Efield')   { showEfield   = !showEfield; }
+  if (name === 'Heat')     { showHeat     = !showHeat; }
+  document.getElementById('tog' + name).classList.toggle('on');
+}
+
+/* ===== Recalc ===== */
+function recalc() {
+  eps = parseFloat(document.getElementById('epsSlider').value);
+  r   = parseFloat(document.getElementById('rSlider').value);
+  R   = parseFloat(document.getElementById('RSlider').value);
+
+  document.getElementById('epsVal').textContent = eps.toFixed(1);
+  document.getElementById('rVal').textContent   = r.toFixed(1);
+  document.getElementById('RVal').textContent   = R.toFixed(1);
+
+  I   = eps / (R + r);
+  Vt  = eps - I * r;
+  VR  = I * R;
+  Pt  = eps * I;
+  PR  = I * I * R;
+  Pr  = I * I * r;
+  eta = R / (R + r) * 100;
+
+  document.getElementById('resI').textContent   = I.toFixed(3);
+  document.getElementById('resVt').textContent  = Vt.toFixed(3);
+  document.getElementById('resVR').textContent  = VR.toFixed(3);
+  document.getElementById('resPt').textContent  = Pt.toFixed(3);
+  document.getElementById('resPR').textContent  = PR.toFixed(3);
+  document.getElementById('resPr').textContent  = Pr.toFixed(3);
+  document.getElementById('resEta').textContent = eta.toFixed(1);
+
+  drawVI();
+}
+
+/* ===== Circuit layout constants ===== */
+let CW = 560, CH = 360;
+
+// Circuit rectangle corners (wire path)
+const PAD = 70;
+let LEFT, RIGHT, TOP, BOT;
+let BAT_CY, BAT_T, BAT_B, RES_CY, RES_T, RES_B;
+const BAT_H = 80, RES_H = 80;
+
+function computeLayout() {
+  LEFT = PAD; RIGHT = CW - PAD; TOP = PAD + 10; BOT = CH - PAD;
+  BAT_CY = (TOP + BOT) / 2; BAT_T = BAT_CY - BAT_H/2; BAT_B = BAT_CY + BAT_H/2;
+  RES_CY = (TOP + BOT) / 2; RES_T = RES_CY - RES_H/2; RES_B = RES_CY + RES_H/2;
+}
+computeLayout();
+
+/* ===== Electron animation ===== */
+const NUM_DOTS = 12;
+// Build path (CCW for electrons, since conventional current is CW)
+// Path: TOP-LEFT → TOP-RIGHT → BOT-RIGHT → BOT-LEFT → TOP-LEFT
+// Electrons travel CCW: top-right → top-left → bot-left → bot-right → top-right
+function buildPath() {
+  // Waypoints CCW (electron direction)
+  return [
+    {x: RIGHT, y: TOP},
+    {x: LEFT,  y: TOP},
+    {x: LEFT,  y: BOT},
+    {x: RIGHT, y: BOT},
+    {x: RIGHT, y: TOP},
+  ];
+}
+
+function pathLength(pts) {
+  let L = 0;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const dx = pts[i+1].x - pts[i].x, dy = pts[i+1].y - pts[i].y;
+    L += Math.sqrt(dx*dx + dy*dy);
+  }
+  return L;
+}
+
+function posOnPath(pts, t) {
+  // t in [0,1)
+  const totalL = pathLength(pts);
+  let target = t * totalL;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const dx = pts[i+1].x - pts[i].x, dy = pts[i+1].y - pts[i].y;
+    const seg = Math.sqrt(dx*dx + dy*dy);
+    if (target <= seg) {
+      const frac = target / seg;
+      return {x: pts[i].x + dx*frac, y: pts[i].y + dy*frac};
+    }
+    target -= seg;
+  }
+  return pts[pts.length-1];
+}
+
+let phase = 0;  // 0..1
+
+/* ===== Draw circuit ===== */
+const ctx = document.getElementById('circuitCanvas').getContext('2d');
+
+function drawCircuit(ts) {
+  ctx.clearRect(0, 0, CW, CH);
+
+  const pts = buildPath();
+  const maxI = 24 / (1 + 0.1); // ~22 A  (max possible)
+  const speed = 0.00012 * I;   // fraction of loop per ms
+
+  // Update phase
+  phase = (phase + speed * (ts - (drawCircuit._last || ts))) % 1;
+  drawCircuit._last = ts;
+
+  /* ---- Background region tints ---- */
+  // Battery (EMF) region: left wire from BAT_T to BAT_B
+  const grad = ctx.createLinearGradient(0, BAT_T, 0, BAT_B);
+  grad.addColorStop(0, 'rgba(251,146,60,0.18)');
+  grad.addColorStop(1, 'rgba(251,146,60,0.05)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(LEFT - 22, BAT_T, 44, BAT_H);
+
+  // External circuit region: right wire
+  const gradR = ctx.createLinearGradient(0, RES_T, 0, RES_B);
+  gradR.addColorStop(0, 'rgba(56,189,248,0.12)');
+  gradR.addColorStop(1, 'rgba(56,189,248,0.04)');
+  ctx.fillStyle = gradR;
+  ctx.fillRect(RIGHT - 22, RES_T, 44, RES_H);
+
+  /* ---- Heat glow on resistors ---- */
+  if (showHeat) {
+    // External R
+    const glowAlpha = Math.min(0.7, PR / 30);
+    const grR = ctx.createRadialGradient(RIGHT, RES_CY, 5, RIGHT, RES_CY, 45);
+    grR.addColorStop(0, `rgba(251,146,60,${glowAlpha})`);
+    grR.addColorStop(1, 'rgba(251,146,60,0)');
+    ctx.fillStyle = grR;
+    ctx.fillRect(RIGHT - 50, RES_T - 20, 100, RES_H + 40);
+
+    // Internal r
+    const glowAlphaR = Math.min(0.55, Pr / 15);
+    const grr = ctx.createRadialGradient(LEFT, BAT_CY + 20, 3, LEFT, BAT_CY + 20, 38);
+    grr.addColorStop(0, `rgba(239,68,68,${glowAlphaR})`);
+    grr.addColorStop(1, 'rgba(239,68,68,0)');
+    ctx.fillStyle = grr;
+    ctx.fillRect(LEFT - 45, BAT_CY, 90, 60);
+  }
+
+  /* ---- Wires ---- */
+  ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+  ctx.lineWidth = 3;
+  ctx.lineCap = 'round';
+  // Top wire
+  ctx.beginPath(); ctx.moveTo(LEFT, TOP); ctx.lineTo(RIGHT, TOP); ctx.stroke();
+  // Bottom wire
+  ctx.beginPath(); ctx.moveTo(LEFT, BOT); ctx.lineTo(RIGHT, BOT); ctx.stroke();
+  // Left wire (top part, above battery)
+  ctx.beginPath(); ctx.moveTo(LEFT, TOP); ctx.lineTo(LEFT, BAT_T); ctx.stroke();
+  // Left wire (bottom part, below battery)
+  ctx.beginPath(); ctx.moveTo(LEFT, BAT_B); ctx.lineTo(LEFT, BOT); ctx.stroke();
+  // Right wire (top part, above R)
+  ctx.beginPath(); ctx.moveTo(RIGHT, TOP); ctx.lineTo(RIGHT, RES_T); ctx.stroke();
+  // Right wire (bottom part, below R)
+  ctx.beginPath(); ctx.moveTo(RIGHT, RES_B); ctx.lineTo(RIGHT, BOT); ctx.stroke();
+
+  /* ---- Current direction arrows on wires (conventional: CW) ---- */
+  drawArrow(ctx, (LEFT + RIGHT)/2, TOP, 'right', 'rgba(52,211,153,0.8)');
+  drawArrow(ctx, (LEFT + RIGHT)/2, BOT, 'left',  'rgba(52,211,153,0.8)');
+  drawArrow(ctx, LEFT,  (TOP + BAT_T)/2, 'up',   'rgba(52,211,153,0.8)');
+  drawArrow(ctx, RIGHT, (RES_B + BOT)/2, 'down',  'rgba(52,211,153,0.8)');
+
+  /* ---- Electric field inside conductors ---- */
+  if (showEfield) {
+    drawEfieldArrows();
+  }
+
+  /* ---- Battery symbol ---- */
+  drawBattery();
+
+  /* ---- Resistor R ---- */
+  drawResistor(RIGHT, RES_T, RES_B, R);
+
+  /* ---- Labels ---- */
+  ctx.font = 'bold 13px "Microsoft YaHei",sans-serif';
+  ctx.fillStyle = '#fbbf24';
+  ctx.textAlign = 'center';
+  ctx.fillText('ε = ' + eps.toFixed(1) + ' V', LEFT - 42, BAT_CY - 8);
+  ctx.fillText('r = ' + r.toFixed(1) + ' Ω', LEFT - 42, BAT_CY + 8);
+  ctx.fillStyle = '#38bdf8';
+  ctx.fillText('R = ' + R.toFixed(1) + ' Ω', RIGHT + 46, RES_CY);
+
+  // +/- terminals
+  ctx.font = 'bold 16px monospace';
+  ctx.fillStyle = '#f87171';
+  ctx.fillText('−', LEFT - 10, BAT_T - 8);
+  ctx.fillStyle = '#4ade80';
+  ctx.fillText('+', LEFT - 10, BAT_B + 18);
+
+  // V labels on nodes
+  ctx.font = '11px "Microsoft YaHei",sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.35)';
+  ctx.textAlign = 'left';
+  ctx.fillText('V⁺', LEFT + 6, TOP + 14);
+  ctx.textAlign = 'right';
+  ctx.fillText('V⁻', RIGHT - 6, BOT - 6);
+
+  /* ---- Animated dots (electrons/conventional) ---- */
+  const numDots = NUM_DOTS;
+  for (let i = 0; i < numDots; i++) {
+    let t = (phase + i / numDots) % 1;
+    // showElectron: CCW → t as-is
+    // conventional current: CW → reverse t
+    if (!showElectron) t = 1 - t;
+    const pos = posOnPath(pts, t);
+    const color = showElectron ? '#a78bfa' : '#34d399';
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, 4.5, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 8;
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+
+  /* ---- Legend ---- */
+  drawLegend();
+
+  requestAnimationFrame(drawCircuit);
+}
+
+function drawArrow(ctx, x, y, dir, color) {
+  const sz = 8;
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  if (dir === 'right') {
+    ctx.moveTo(x, y - sz/2); ctx.lineTo(x + sz, y); ctx.lineTo(x, y + sz/2);
+  } else if (dir === 'left') {
+    ctx.moveTo(x, y - sz/2); ctx.lineTo(x - sz, y); ctx.lineTo(x, y + sz/2);
+  } else if (dir === 'up') {
+    ctx.moveTo(x - sz/2, y); ctx.lineTo(x, y - sz); ctx.lineTo(x + sz/2, y);
+  } else {
+    ctx.moveTo(x - sz/2, y); ctx.lineTo(x, y + sz); ctx.lineTo(x + sz/2, y);
+  }
+  ctx.closePath();
+  ctx.fill();
+}
+
+function drawBattery() {
+  const x = LEFT, yt = BAT_T, yb = BAT_B;
+  const cx = x;
+
+  // Outer border
+  ctx.strokeStyle = 'rgba(251,146,60,0.6)';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([3,3]);
+  ctx.strokeRect(cx - 18, yt, 36, yb - yt);
+  ctx.setLineDash([]);
+
+  // EMF stack lines (battery cells)
+  const cells = 4;
+  const cellH = (yb - yt) / cells;
+  for (let i = 0; i < cells; i++) {
+    const cy = yt + i * cellH;
+    // Long plate
+    ctx.strokeStyle = 'rgba(251,146,60,0.85)';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(cx - 14, cy + cellH * 0.3); ctx.lineTo(cx + 14, cy + cellH * 0.3); ctx.stroke();
+    // Short plate
+    ctx.strokeStyle = 'rgba(251,146,60,0.55)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(cx - 8, cy + cellH * 0.65); ctx.lineTo(cx + 8, cy + cellH * 0.65); ctx.stroke();
+  }
+
+  // Internal resistance marker
+  const iry = (BAT_T + BAT_B)/2 + 14;
+  drawSmallResistor(cx, iry);
+  ctx.font = '10px monospace'; ctx.fillStyle = 'rgba(251,146,60,0.7)'; ctx.textAlign = 'center';
+  ctx.fillText('r', cx + 22, iry + 4);
+}
+
+function drawSmallResistor(cx, cy) {
+  const w = 14, h = 8;
+  ctx.strokeStyle = 'rgba(251,146,60,0.6)';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(cx - w/2, cy - h/2, w, h);
+}
+
+function drawResistor(x, yt, yb, Rval) {
+  const cx = x, cy = (yt + yb) / 2;
+  const rw = 24, rh = yb - yt;
+
+  // Heat color based on power
+  const heatFrac = Math.min(1, PR / 20);
+  const r0 = Math.round(56 + 180 * heatFrac);
+  const g0 = Math.round(189 - 120 * heatFrac);
+  const b0 = Math.round(248 - 200 * heatFrac);
+
+  ctx.strokeStyle = `rgb(${r0},${g0},${b0})`;
+  ctx.lineWidth = 2.5;
+  ctx.strokeRect(cx - rw/2, yt, rw, rh);
+
+  // Zig-zag inside
+  ctx.beginPath();
+  const segs = 6;
+  const segH = rh / segs;
+  ctx.moveTo(cx, yt);
+  for (let i = 0; i < segs; i++) {
+    const yi = yt + (i + 0.5) * segH;
+    ctx.lineTo(cx + (i % 2 === 0 ? 10 : -10), yi);
+  }
+  ctx.lineTo(cx, yb);
+  ctx.strokeStyle = `rgba(${r0},${g0},${b0},0.6)`;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+}
+
+function drawEfieldArrows() {
+  // Show E field direction in top and bottom wires (conventional: top→right, bottom→left)
+  ctx.fillStyle = 'rgba(250,204,21,0.6)';
+  const spacing = 40;
+  // Top wire: left to right
+  for (let x = LEFT + spacing; x < RIGHT - 10; x += spacing) {
+    miniArrow(x, TOP - 14, 'right');
+  }
+  // Bottom wire: right to left
+  for (let x = RIGHT - spacing; x > LEFT + 10; x -= spacing) {
+    miniArrow(x, BOT + 14, 'left');
+  }
+  ctx.font = '10px sans-serif'; ctx.fillStyle = 'rgba(250,204,21,0.5)'; ctx.textAlign = 'left';
+  ctx.fillText('E→', LEFT + 4, TOP - 18);
+}
+
+function miniArrow(x, y, dir) {
+  const sz = 5;
+  ctx.fillStyle = 'rgba(250,204,21,0.65)';
+  ctx.beginPath();
+  if (dir === 'right') {
+    ctx.moveTo(x - sz, y - sz/2); ctx.lineTo(x + sz, y); ctx.lineTo(x - sz, y + sz/2);
+  } else {
+    ctx.moveTo(x + sz, y - sz/2); ctx.lineTo(x - sz, y); ctx.lineTo(x + sz, y + sz/2);
+  }
+  ctx.closePath(); ctx.fill();
+}
+
+function drawLegend() {
+  const lx = 14, ly = CH - 14;
+  ctx.font = '11px "Microsoft YaHei",sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.textAlign = 'left';
+
+  ctx.fillStyle = showElectron ? '#a78bfa' : '#34d399';
+  ctx.beginPath(); ctx.arc(lx + 5, ly - 5, 4, 0, Math.PI*2); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.fillText(showElectron ? '● 电子流 (实际方向)' : '● 传统电流方向', lx + 14, ly);
+
+  ctx.fillStyle = 'rgba(251,146,60,0.8)';
+  ctx.fillText('▣ 电源区(EMF)', lx + 150, ly);
+  ctx.fillStyle = 'rgba(56,189,248,0.8)';
+  ctx.fillText('▣ 外电路', lx + 255, ly);
+}
+
+/* ===== V-I Graph ===== */
+const viCtx = document.getElementById('viCanvas').getContext('2d');
+const VW = 200, VH = 150;
+
+function drawVI() {
+  viCtx.clearRect(0, 0, VW, VH);
+
+  const PAX = 32, PAY = 14, PBX = VW - 14, PBY = VH - 28;
+  const gw = PBX - PAX, gh = PBY - PAY;
+
+  // Background
+  viCtx.fillStyle = 'rgba(0,0,0,0.25)';
+  viCtx.fillRect(0, 0, VW, VH);
+
+  // Grid
+  viCtx.strokeStyle = 'rgba(255,255,255,0.06)';
+  viCtx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = PAY + gh * i / 4;
+    viCtx.beginPath(); viCtx.moveTo(PAX, y); viCtx.lineTo(PBX, y); viCtx.stroke();
+    const x = PAX + gw * i / 4;
+    viCtx.beginPath(); viCtx.moveTo(x, PAY); viCtx.lineTo(x, PBY); viCtx.stroke();
+  }
+
+  // Axes
+  viCtx.strokeStyle = 'rgba(255,255,255,0.3)';
+  viCtx.lineWidth = 1.5;
+  viCtx.beginPath(); viCtx.moveTo(PAX, PAY); viCtx.lineTo(PAX, PBY); viCtx.lineTo(PBX, PBY); viCtx.stroke();
+
+  // Axis labels
+  viCtx.font = '10px sans-serif'; viCtx.fillStyle = 'rgba(255,255,255,0.35)'; viCtx.textAlign = 'center';
+  viCtx.fillText('I (A)', PAX + gw/2, PBY + 16);
+  viCtx.save(); viCtx.translate(10, PAY + gh/2); viCtx.rotate(-Math.PI/2);
+  viCtx.fillText('V (V)', 0, 0); viCtx.restore();
+
+  // V = eps - r*I   →  I from 0 to eps/(r+0) = eps/r (short circuit)
+  const Imax = eps / r;             // short circuit current
+  const Iscale = Imax * 1.15;
+  const Vscale = eps * 1.15;
+
+  // Line V = eps - r*I
+  viCtx.strokeStyle = '#34d399';
+  viCtx.lineWidth = 2;
+  viCtx.beginPath();
+  const x0 = PAX, y0 = PAY + gh * (1 - eps/Vscale);
+  const x1 = PAX + gw * (Imax/Iscale), y1 = PBY;
+  viCtx.moveTo(x0, y0); viCtx.lineTo(x1, y1); viCtx.stroke();
+
+  // ε label on Y axis
+  viCtx.fillStyle = '#34d399'; viCtx.textAlign = 'right';
+  viCtx.fillText('ε', PAX - 3, y0 + 4);
+
+  // Operating point
+  const opX = PAX + gw * (I / Iscale);
+  const opY = PAY + gh * (1 - Vt / Vscale);
+  viCtx.beginPath(); viCtx.arc(opX, opY, 5, 0, Math.PI*2);
+  viCtx.fillStyle = '#f59e0b'; viCtx.fill();
+  viCtx.strokeStyle = '#fff'; viCtx.lineWidth = 1; viCtx.stroke();
+
+  // Dashed lines to axes
+  viCtx.setLineDash([3,3]);
+  viCtx.strokeStyle = 'rgba(245,158,11,0.4)'; viCtx.lineWidth = 1;
+  viCtx.beginPath(); viCtx.moveTo(opX, opY); viCtx.lineTo(opX, PBY); viCtx.stroke();
+  viCtx.beginPath(); viCtx.moveTo(opX, opY); viCtx.lineTo(PAX, opY); viCtx.stroke();
+  viCtx.setLineDash([]);
+
+  // Tick labels near operating point
+  viCtx.font = '9px monospace'; viCtx.fillStyle = 'rgba(245,158,11,0.8)';
+  viCtx.textAlign = 'center';
+  viCtx.fillText(I.toFixed(2), opX, PBY + 10);
+  viCtx.textAlign = 'right';
+  viCtx.fillText(Vt.toFixed(1), PAX - 2, opY + 3);
+}
+
+/* ===== Tooltip on hover ===== */
+const tooltip = document.getElementById('tooltip');
+const circuitCanvas = document.getElementById('circuitCanvas');
+const rect0 = { l: LEFT, r: RIGHT, t: TOP, b: BOT };
+
+function hitTest(mx, my) {
+  const tol = 14;
+  // Top wire
+  if (Math.abs(my - TOP) < tol && mx > LEFT && mx < RIGHT) {
+    return { label: '上导线', V: Vt.toFixed(3) + ' V → ε', I: I.toFixed(3) + ' A', P: (I * I * 0).toFixed(3) + ' W·m⁻¹' };
+  }
+  // Bottom wire
+  if (Math.abs(my - BOT) < tol && mx > LEFT && mx < RIGHT) {
+    return { label: '下导线', V: '0 V (参考)', I: I.toFixed(3) + ' A', P: '—' };
+  }
+  // Left wire (battery side)
+  if (Math.abs(mx - LEFT) < tol && my > TOP && my < BOT) {
+    const frac = (my - TOP) / (BOT - TOP);
+    if (my >= BAT_T && my <= BAT_B) {
+      return { label: '电源内部', V: (eps * (1 - frac)).toFixed(3) + ' V', I: I.toFixed(3) + ' A', P: 'P_r=' + Pr.toFixed(3) + ' W' };
+    }
+    return { label: '左导线', V: (Vt * (1 - (my-TOP)/(BOT-TOP))).toFixed(3) + ' V', I: I.toFixed(3) + ' A', P: '—' };
+  }
+  // Right wire (R side)
+  if (Math.abs(mx - RIGHT) < tol && my > TOP && my < BOT) {
+    if (my >= RES_T && my <= RES_B) {
+      const frac = (my - RES_T) / (RES_H);
+      return { label: '外阻 R', V: (VR * (1 - frac)).toFixed(3) + ' V', I: I.toFixed(3) + ' A', P: 'P_R=' + PR.toFixed(3) + ' W' };
+    }
+    return { label: '右导线', V: Vt.toFixed(3) + ' V', I: I.toFixed(3) + ' A', P: '—' };
+  }
+  return null;
+}
+
+circuitCanvas.addEventListener('mousemove', (e) => {
+  const rect = circuitCanvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+  const hit = hitTest(mx, my);
+  if (hit) {
+    tooltip.style.display = 'block';
+    tooltip.style.left = (e.clientX + 14) + 'px';
+    tooltip.style.top  = (e.clientY - 10) + 'px';
+    tooltip.innerHTML =
+      `<b style="color:#34d399">${hit.label}</b><br>` +
+      `电位：${hit.V}<br>电流：${hit.I}<br>${hit.P}`;
+  } else {
+    tooltip.style.display = 'none';
+  }
+});
+circuitCanvas.addEventListener('mouseleave', () => { tooltip.style.display = 'none'; });
+
+/* ===== Boot ===== */
+function resizeCanvas(){
+  const cc=document.getElementById('circuitCanvas');
+  CW=cc.offsetWidth||560; CH=cc.offsetHeight||360;
+  cc.width=CW; cc.height=CH;
+  computeLayout();
+  recalc();
+}
+window.addEventListener('resize',resizeCanvas);
+setTimeout(()=>{resizeCanvas();requestAnimationFrame(drawCircuit);},80);
+</script>
+<!-- ── 实验报告生成器 ── -->
+<style>
+.report-fab { }
+.report-fab-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  border: none; border-radius: 12px; padding: 10px 14px; width: 100%;
+  color: #fff; font-size: 13px; font-weight: 700;
+  font-family: "Microsoft YaHei", sans-serif;
+  cursor: pointer; letter-spacing: 0.5px;
+  box-shadow: 0 4px 20px rgba(52,211,153,0.4);
+  transition: box-shadow 0.2s;
+}
+.report-fab-btn:hover { box-shadow: 0 8px 28px rgba(52,211,153,0.55); }
+.report-fab-btn .rfb-icon { font-size: 17px; }
+
+.report-overlay {
+  position: fixed; inset: 0; z-index: 1200;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.report-overlay.open { display: flex; }
+.report-modal {
+  background: #0e0c24;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  width: min(760px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+  animation: slideUp 0.3s cubic-bezier(0.4,0,0.2,1) both;
+}
+@keyframes slideUp {
+  from { opacity:0; transform: translateY(30px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.rm-header {
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.rm-title { font-size: 17px; font-weight: 700; color: #fff; font-family: "Microsoft YaHei",sans-serif; }
+.rm-title span { color: #34d399; }
+.rm-close { font-size: 22px; color: rgba(255,255,255,0.4); cursor: pointer; line-height:1; transition: color 0.2s; }
+.rm-close:hover { color: #fff; }
+.rm-body { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; }
+.rm-field { display: flex; flex-direction: column; gap: 6px; }
+.rm-label { font-size: 12px; color: rgba(255,255,255,0.45); font-family: "Microsoft YaHei",sans-serif; letter-spacing: 0.5px; }
+.rm-label span { color: #f87171; }
+.rm-input, .rm-textarea {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 10px 14px;
+  color: #fff; font-size: 14px; font-family: "Microsoft YaHei",sans-serif;
+  outline: none; transition: border-color 0.2s; width: 100%;
+}
+.rm-input:focus, .rm-textarea:focus { border-color: rgba(52,211,153,0.5); }
+.rm-textarea { resize: vertical; min-height: 80px; line-height: 1.8; }
+.rm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.rm-section-title {
+  font-size: 12px; font-weight: 700; color: rgba(52,211,153,0.8);
+  letter-spacing: 1px; text-transform: uppercase;
+  border-bottom: 1px solid rgba(52,211,153,0.15);
+  padding-bottom: 8px; margin-top: 4px;
+  font-family: "Microsoft YaHei",sans-serif;
+}
+.rm-footer { padding: 16px 28px 24px; display: flex; gap: 12px; justify-content: flex-end; }
+.rm-btn {
+  padding: 10px 28px; border-radius: 12px; border: none; cursor: pointer;
+  font-size: 14px; font-weight: 700; font-family: "Microsoft YaHei",sans-serif;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.rm-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.rm-btn-cancel { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6); }
+.rm-btn-gen { background: linear-gradient(135deg,#10b981,#34d399); color: #fff; }
+.rm-btn-copy { background: linear-gradient(135deg,#6366f1,#818cf8); color: #fff; display:none; }
+
+.report-output {
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px; padding: 20px 24px; margin: 0 28px 24px;
+  font-family: "Microsoft YaHei", "Times New Roman", serif;
+  font-size: 13.5px; color: rgba(255,255,255,0.85);
+  line-height: 2; white-space: pre-wrap; display: none;
+  max-height: 340px; overflow-y: auto;
+}
+.report-output.show { display: block; }
+</style>
+
+
+<div class="report-overlay" id="reportOverlay" onclick="overlayClick(event)">
+  <div class="report-modal">
+    <div class="rm-header">
+      <div class="rm-title">实验报告 · <span>恒定电流</span></div>
+      <div class="rm-close" onclick="closeReport()">×</div>
+    </div>
+    <div class="rm-body">
+      <div class="rm-section-title">基本信息</div>
+      <div class="rm-row">
+        <div class="rm-field">
+          <div class="rm-label">姓名 <span>*</span></div>
+          <input class="rm-input" id="rName" placeholder="请输入姓名">
+        </div>
+        <div class="rm-field">
+          <div class="rm-label">学号 <span>*</span></div>
+          <input class="rm-input" id="rStuId" placeholder="请输入学号">
+        </div>
+      </div>
+      <div class="rm-row">
+        <div class="rm-field">
+          <div class="rm-label">实验日期</div>
+          <input class="rm-input" id="rDate" type="date">
+        </div>
+        <div class="rm-field">
+          <div class="rm-label">实验伙伴</div>
+          <input class="rm-input" id="rPartner" placeholder="可选">
+        </div>
+      </div>
+      <div class="rm-section-title">实验内容</div>
+      <div class="rm-field">
+        <div class="rm-label">实验目的</div>
+        <textarea class="rm-textarea" id="rPurpose" placeholder="描述本次实验的目的和预期目标……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验步骤与观察</div>
+        <textarea class="rm-textarea" id="rProcess" placeholder="描述你进行的操作步骤和实验过程中的观察……" style="min-height:100px"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验数据记录</div>
+        <textarea class="rm-textarea" id="rData" placeholder="记录关键数据、参数和仿真结果……"></textarea>
+      </div>
+      <div class="rm-section-title">分析与总结</div>
+      <div class="rm-field">
+        <div class="rm-label">结果分析</div>
+        <textarea class="rm-textarea" id="rAnalysis" placeholder="对实验现象和数据进行分析……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">误差分析与思考</div>
+        <textarea class="rm-textarea" id="rError" placeholder="分析可能的误差来源，以及对物理规律的思考……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验结论</div>
+        <textarea class="rm-textarea" id="rConclusion" placeholder="总结本次实验的结论……"></textarea>
+      </div>
+    </div>
+    <div class="report-output" id="reportOutput"></div>
+    <div class="rm-footer">
+      <button class="rm-btn rm-btn-cancel" onclick="closeReport()">取消</button>
+      <button class="rm-btn rm-btn-copy" id="rmCopyBtn" onclick="copyReport()">复制报告</button>
+      <button class="rm-btn rm-btn-gen" onclick="generateReport()">生成报告</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const EXP_NAME = '恒定电流';
+  const EXP_SEC  = '§3-1';
+  const STORE_KEY = 'phy26_report_' + EXP_SEC.replace(/[§\/]/g,'');
+
+  function loadSaved() {
+    const d = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+    if (d.name)       document.getElementById('rName').value      = d.name;
+    if (d.stuId)      document.getElementById('rStuId').value     = d.stuId;
+    if (d.date)       document.getElementById('rDate').value      = d.date;
+    if (d.partner)    document.getElementById('rPartner').value   = d.partner;
+    if (d.purpose)    document.getElementById('rPurpose').value   = d.purpose;
+    if (d.process)    document.getElementById('rProcess').value   = d.process;
+    if (d.data)       document.getElementById('rData').value      = d.data;
+    if (d.analysis)   document.getElementById('rAnalysis').value  = d.analysis;
+    if (d.error)      document.getElementById('rError').value     = d.error;
+    if (d.conclusion) document.getElementById('rConclusion').value= d.conclusion;
+  }
+
+  function saveDraft() {
+    const d = {
+      name:       document.getElementById('rName').value,
+      stuId:      document.getElementById('rStuId').value,
+      date:       document.getElementById('rDate').value,
+      partner:    document.getElementById('rPartner').value,
+      purpose:    document.getElementById('rPurpose').value,
+      process:    document.getElementById('rProcess').value,
+      data:       document.getElementById('rData').value,
+      analysis:   document.getElementById('rAnalysis').value,
+      error:      document.getElementById('rError').value,
+      conclusion: document.getElementById('rConclusion').value,
+    };
+    localStorage.setItem(STORE_KEY, JSON.stringify(d));
+  }
+
+  window.openReport = function() {
+    document.getElementById('reportOverlay').classList.add('open');
+    document.getElementById('reportOutput').classList.remove('show');
+    document.getElementById('rmCopyBtn').style.display = 'none';
+    const dateEl = document.getElementById('rDate');
+    if (!dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
+    loadSaved();
+    const _d = {
+      rPurpose:    '研究恒定电流的形成条件，理解电动势的概念和作用，验证欧姆定律（I=U/R）和基尔霍夫定律，分析简单电路中电流、电压和功率的分布。',
+      rProcess:    '构建含电源（EMF=ε，内阻r）和外电阻R的简单回路，测量路端电压U和电流I；改变外电阻R，记录I和U的变化，验证I=ε/(R+r)；构建串并联电路，验证基尔霍夫电流定律（KCL）和电压定律（KVL）；计算各元件的功率P=UI。',
+      rData:       '电源ε=12V，内阻r=1Ω；R=5Ω时：I=2A，U=10V，P_外=20W，P_内=4W；R=11Ω时：I=1A，U=11V；短路（R=0）：I=12A，U=0V；串联R₁=3Ω，R₂=9Ω：I=1A，U₁=3V，U₂=9V，验证KVL：3+9=12V。',
+      rAnalysis:   '电动势是非静电力做功的量度，维持电路中的恒定电流。路端电压U=ε-Ir随电流增大而减小。欧姆定律在线性电阻中严格成立。基尔霍夫定律是电荷守恒（KCL）和能量守恒（KVL）的体现。电源最大输出功率在R=r时取得（P_max=ε²/4r）。',
+      rError:      '仿真使用理想电源和线性电阻，忽略了导线电阻、接触电阻和温度效应；实际电池的内阻随放电程度变化；电流表和电压表的内阻会引入测量误差（安培表分压、伏特表分流）。',
+      rConclusion: '电动势驱动恒定电流，路端电压随负载电流增大而减小；欧姆定律和基尔霍夫定律在线性电路中严格成立；电源最大输出功率条件为外电阻等于内阻；电路中能量守恒，电源提供的功率等于各元件消耗功率之和。',
+    };
+    Object.entries(_d).forEach(([id, val]) => { const el = document.getElementById(id); if (el && !el.value) el.value = val; });
+  };
+
+  window.closeReport = function() {
+    saveDraft();
+    document.getElementById('reportOverlay').classList.remove('open');
+  };
+
+  window.overlayClick = function(e) {
+    if (e.target === document.getElementById('reportOverlay')) closeReport();
+  };
+
+  window.generateReport = function() {
+    const name       = document.getElementById('rName').value.trim();
+    const stuId      = document.getElementById('rStuId').value.trim();
+    const date       = document.getElementById('rDate').value || '—';
+    const partner    = document.getElementById('rPartner').value.trim() || '—';
+    const purpose    = document.getElementById('rPurpose').value.trim() || '（未填写）';
+    const process    = document.getElementById('rProcess').value.trim() || '（未填写）';
+    const data       = document.getElementById('rData').value.trim() || '（未填写）';
+    const analysis   = document.getElementById('rAnalysis').value.trim() || '（未填写）';
+    const error      = document.getElementById('rError').value.trim() || '（未填写）';
+    const conclusion = document.getElementById('rConclusion').value.trim() || '（未填写）';
+
+    if (!name || !stuId) { alert('请填写姓名和学号'); return; }
+    saveDraft();
+
+    const divider = '─'.repeat(40);
+    const report = [
+      '普通物理（卓越班）下册 · 电磁学',
+      `实验报告：${EXP_NAME}（${EXP_SEC}）`,
+      divider,
+      `姓　　名：${name}　　　学　　号：${stuId}`,
+      `实验日期：${date}　　　实验伙伴：${partner}`,
+      divider,
+      '',
+      '一、实验目的',
+      purpose,
+      '',
+      '二、实验步骤与观察',
+      process,
+      '',
+      '三、实验数据记录',
+      data,
+      '',
+      '四、结果分析',
+      analysis,
+      '',
+      '五、误差分析与思考',
+      error,
+      '',
+      '六、实验结论',
+      conclusion,
+      '',
+      divider,
+      `生成时间：${new Date().toLocaleString('zh-CN')}`,
+      '本报告由 NUSEP26 普通物理（卓越班）实验仿真平台生成',
+    ].join('\n');
+
+    const out = document.getElementById('reportOutput');
+    out.textContent = report;
+    out.classList.add('show');
+    document.getElementById('rmCopyBtn').style.display = 'inline-flex';
+    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+
+  window.copyReport = function() {
+    const text = document.getElementById('reportOutput').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('rmCopyBtn');
+      const orig = btn.textContent;
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => btn.textContent = orig, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      const btn = document.getElementById('rmCopyBtn');
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => btn.textContent = '复制报告', 2000);
+    });
+  };
+
+  ['rName','rStuId','rDate','rPartner','rPurpose','rProcess','rData','rAnalysis','rError','rConclusion']
+    .forEach(id => document.getElementById(id).addEventListener('input', saveDraft));
+})();
+</script>
+
+</body>
+</html>

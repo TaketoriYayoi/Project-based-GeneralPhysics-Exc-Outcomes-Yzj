@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>实验：导体静电平衡 — 2-1</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;color:#fff;overflow-x:hidden}
+    .topbar{display:flex;align-items:center;gap:14px;padding:16px 28px;border-bottom:1px solid rgba(255,255,255,0.07);background:rgba(15,12,41,0.7);backdrop-filter:blur(12px)}
+    .back-btn{color:rgba(255,255,255,0.55);font-size:14px;cursor:pointer;text-decoration:none;transition:color .2s}
+    .back-btn:hover{color:#818cf8}
+    .topbar-title-wrap{display:flex;flex-direction:column;gap:2px}.topbar-title{font-size:16px;font-weight:700}.topbar-course{font-size:11px;color:rgba(255,255,255,0.38);letter-spacing:1px}
+    .topbar-sub{margin-left:auto;font-size:12px;color:rgba(255,255,255,0.3)}
+    .layout{display:flex;height:calc(100vh - 57px)}
+    .sidebar{width:250px;flex-shrink:0;background:rgba(255,255,255,0.03);border-right:1px solid rgba(255,255,255,0.07);padding:20px 16px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+    .ctrl-group h3{font-size:11px;color:rgba(255,255,255,0.38);letter-spacing:1px;margin-bottom:10px;text-transform:uppercase}
+    .divider{height:1px;background:rgba(255,255,255,0.07)}
+    .shape-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+    .shape-btn{padding:8px 4px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);font-size:12px;cursor:pointer;text-align:center;color:rgba(255,255,255,0.45);transition:all .18s;font-family:"Microsoft YaHei",sans-serif}
+    .shape-btn.active{background:rgba(14,165,233,0.15);border-color:rgba(14,165,233,0.4);color:#38bdf8}
+    .shape-btn:hover:not(.active){background:rgba(255,255,255,0.05)}
+    .slider-row{display:flex;flex-direction:column;gap:4px}
+    .slider-row label{font-size:12.5px;color:rgba(255,255,255,0.6);display:flex;justify-content:space-between}
+    .slider-row label span{color:#38bdf8;font-weight:600}
+    input[type=range]{width:100%;accent-color:#38bdf8}
+    .toggle-row{display:flex;align-items:center;justify-content:space-between}
+    .toggle-row span{font-size:13px;color:rgba(255,255,255,0.6)}
+    .toggle{width:38px;height:20px;border-radius:10px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);cursor:pointer;position:relative;transition:background .2s}
+    .toggle.on{background:rgba(14,165,233,0.5);border-color:#38bdf8}
+    .toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,0.6);transition:left .2s}
+    .toggle.on::after{left:20px;background:#fff}
+    .result-panel{background:rgba(14,165,233,0.06);border:1px solid rgba(14,165,233,0.2);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px}
+    .result-panel h3{font-size:11px;color:rgba(14,165,233,0.7);letter-spacing:1px}
+    .result-row{display:flex;justify-content:space-between;align-items:baseline}
+    .result-label{font-size:12px;color:rgba(255,255,255,0.45)}
+    .result-value{font-size:14px;font-weight:700;color:#38bdf8}
+    .result-unit{font-size:11px;color:rgba(255,255,255,0.3);margin-left:2px}
+    .info-box{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px;font-size:12px;color:rgba(255,255,255,0.4);line-height:1.8}
+    .canvas-wrap{flex:1;overflow:hidden;display:flex;flex-direction:column;padding:10px;gap:8px}
+    canvas{background:rgba(0,0,0,0.3);display:block;flex:1;width:100%}
+    .formula-bar{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px 20px;font-size:13px;color:rgba(255,255,255,0.55);text-align:center;width:100%;flex-shrink:0}
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">⚡ 实验：导体静电平衡</div>
+    <span class="topbar-course">普通物理（卓越班）下册 · 电磁学</span>
+  </div>
+  <div class="topbar-sub">§2-1 导体的静电平衡性质</div>
+</div>
+<div class="layout">
+  <div class="sidebar">
+    <div class="ctrl-group">
+      <h3>导体形状</h3>
+      <div class="shape-grid">
+        <div class="shape-btn active" onclick="setShape(this,'sphere')">圆球</div>
+        <div class="shape-btn" onclick="setShape(this,'ellipse')">椭球</div>
+        <div class="shape-btn" onclick="setShape(this,'pear')">梨形</div>
+        <div class="shape-btn" onclick="setShape(this,'needle')">针形</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="slider-row">
+      <label>总电荷量 Q = <span id="Qval">+3</span> μC</label>
+      <input type="range" id="Qslider" min="-5" max="5" step="1" value="3" oninput="update()">
+    </div>
+    <div class="slider-row" id="ecRow" style="display:none">
+      <label>外加均匀场 E₀ = <span id="E0val">0</span></label>
+      <input type="range" id="E0slider" min="0" max="5" step="1" value="0" oninput="update()">
+    </div>
+    <div class="divider"></div>
+    <div class="toggle-row">
+      <span>显示表面电荷密度</span>
+      <div class="toggle on" id="togSigma" onclick="tog('Sigma')"></div>
+    </div>
+    <div class="toggle-row" style="margin-top:8px">
+      <span>显示外部电场线</span>
+      <div class="toggle on" id="togE" onclick="tog('E')"></div>
+    </div>
+    <div class="toggle-row" style="margin-top:8px">
+      <span>显示内部零场</span>
+      <div class="toggle on" id="togIn" onclick="tog('In')"></div>
+    </div>
+    <div class="divider"></div>
+    <div class="result-panel">
+      <h3>关键性质</h3>
+      <div class="result-row"><span class="result-label">内部电场</span><span class="result-value">E = 0</span></div>
+      <div class="result-row"><span class="result-label">导体电势</span><span class="result-value">等势体</span></div>
+      <div class="result-row"><span class="result-label">表面电场方向</span><span class="result-value">⊥ 表面</span></div>
+      <div class="result-row"><span class="result-label">尖端效应</span><span><span class="result-value" id="resTip">无</span></span></div>
+    </div>
+    <div class="info-box">
+      曲率大处（尖端）电荷密度大<br>
+      内部场强恒为零<br>
+      导体是等势体，表面是等势面
+    </div>
+    <div class="report-fab" style="margin-top:auto;padding-top:12px">
+      <button class="report-fab-btn" onclick="openReport()">
+        <span class="rfb-icon">📄</span> 生成实验报告
+      </button>
+    </div>
+  </div>
+
+  <div class="canvas-wrap">
+    <canvas id="condCanvas"></canvas>
+    <div class="formula-bar">
+      静电平衡：E_内 = 0 &nbsp;|&nbsp; σ ∝ 曲率 &nbsp;|&nbsp; E_表面 ⊥ 导体表面
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('condCanvas');
+const ctx = canvas.getContext('2d');
+
+let shape='sphere', showSigma=true, showE=true, showIn=true;
+
+function setShape(el,s){
+  document.querySelectorAll('.shape-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  shape=s;
+  document.getElementById('resTip').textContent = (s==='pear'||s==='needle') ? '显著' : s==='ellipse'?'轻微':'无';
+  update();
+}
+function tog(name){
+  if(name==='Sigma')showSigma=!showSigma;
+  else if(name==='E')showE=!showE;
+  else if(name==='In')showIn=!showIn;
+  document.getElementById('tog'+name).classList.toggle('on',eval('show'+name));
+  update();
+}
+
+function update(){
+  const Q=parseInt(document.getElementById('Qslider').value);
+  document.getElementById('Qval').textContent=(Q>0?'+':'')+Q;
+  draw(Q);
+}
+
+// Returns shape path and normal/sigma function
+function getShapeData(cx,cy){
+  if(shape==='sphere'){
+    const r=100;
+    return {
+      type:'sphere', cx, cy, r,
+      path:()=>{ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);},
+      sigma:(ang)=>1.0, // uniform
+      normal:(ang)=>[Math.cos(ang),Math.sin(ang)],
+      surfacePoint:(ang)=>[cx+r*Math.cos(ang),cy+r*Math.sin(ang)],
+    };
+  } else if(shape==='ellipse'){
+    const rx=140, ry=85;
+    return {
+      type:'ellipse', cx, cy, rx, ry,
+      path:()=>{ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);},
+      sigma:(ang)=>{
+        // σ ∝ 1/r_local where r_local = (rx²sin²θ + ry²cos²θ)^(3/2)/(rx*ry)
+        const denom=Math.sqrt((rx*Math.sin(ang))**2+(ry*Math.cos(ang))**2);
+        return (rx*ry)/(denom*denom*denom)*1e4+0.1;
+      },
+      normal:(ang)=>{const nx=Math.cos(ang)/rx,ny=Math.sin(ang)/ry;const m=Math.sqrt(nx*nx+ny*ny);return[nx/m,ny/m];},
+      surfacePoint:(ang)=>[cx+rx*Math.cos(ang),cy+ry*Math.sin(ang)],
+    };
+  } else if(shape==='pear'){
+    // pear: r(θ) = r0*(1 + 0.5*cos(θ))
+    const r0=90;
+    return {
+      type:'pear', cx, cy, r0,
+      path:()=>{
+        ctx.beginPath();
+        for(let i=0;i<=360;i++){
+          const a=i*Math.PI/180;
+          const r=r0*(1+0.5*Math.cos(a));
+          const x=cx+r*Math.cos(a), y=cy+r*Math.sin(a);
+          i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+        }
+        ctx.closePath();
+      },
+      sigma:(ang)=>{
+        const r=r0*(1+0.5*Math.cos(ang));
+        // curvature ~ larger at small r (right side, ang=π)
+        const sig = 1/(r/r0); return Math.max(0.1,sig);
+      },
+      normal:(ang)=>{
+        const r=r0*(1+0.5*Math.cos(ang)),dr=-r0*0.5*Math.sin(ang);
+        const nx=r*Math.cos(ang)-dr*Math.sin(ang), ny=r*Math.sin(ang)+dr*Math.cos(ang);
+        const m=Math.sqrt(nx*nx+ny*ny);return[nx/m,ny/m];
+      },
+      surfacePoint:(ang)=>{const r=r0*(1+0.5*Math.cos(ang));return[cx+r*Math.cos(ang),cy+r*Math.sin(ang)];},
+    };
+  } else { // needle
+    const rx=150, ry=30;
+    return {
+      type:'needle', cx, cy, rx, ry,
+      path:()=>{ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);},
+      sigma:(ang)=>{
+        const denom=Math.sqrt((rx*Math.sin(ang))**2+(ry*Math.cos(ang))**2);
+        return (rx*ry)/(denom*denom*denom)*5e3+0.05;
+      },
+      normal:(ang)=>{const nx=Math.cos(ang)/rx,ny=Math.sin(ang)/ry;const m=Math.sqrt(nx*nx+ny*ny);return[nx/m,ny/m];},
+      surfacePoint:(ang)=>[cx+rx*Math.cos(ang),cy+ry*Math.sin(ang)],
+    };
+  }
+}
+
+function draw(Q){
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const cx=W/2, cy=H/2;
+  const sd=getShapeData(cx,cy);
+
+  // conductor fill
+  const cgrad=ctx.createRadialGradient(cx-20,cy-20,10,cx,cy,160);
+  cgrad.addColorStop(0,'rgba(100,120,200,0.25)');
+  cgrad.addColorStop(1,'rgba(40,60,140,0.15)');
+  sd.path();
+  ctx.fillStyle=cgrad;ctx.fill();
+  ctx.strokeStyle='rgba(100,160,255,0.6)';ctx.lineWidth=2;ctx.stroke();
+
+  // surface charge density visualization
+  if(showSigma && Q!==0){
+    const nPts=60;
+    for(let i=0;i<nPts;i++){
+      const ang=2*Math.PI*i/nPts;
+      const sigma=sd.sigma(ang);
+      const norm=sd.normal(ang);
+      const [sx,sy]=sd.surfacePoint(ang);
+      const chargeSize=Math.min(sigma*3,12);
+      const col=Q>0?'#f87171':'#38bdf8';
+      ctx.beginPath();ctx.arc(sx+norm[0]*10,sy+norm[1]*10,Math.max(1.5,chargeSize*0.5),0,Math.PI*2);
+      ctx.fillStyle=col+'cc';ctx.fill();
+      // tick line
+      ctx.strokeStyle=col+'88';ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(sx+norm[0]*chargeSize*1.5,sy+norm[1]*chargeSize*1.5);ctx.stroke();
+    }
+  }
+
+  // E=0 inside
+  if(showIn){
+    const [spx,spy]=sd.surfacePoint(0);
+    const innerText='E = 0（内部）';
+    ctx.fillStyle='rgba(134,239,172,0.6)';ctx.font='bold 14px "Microsoft YaHei"';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(innerText,cx,cy);
+    ctx.font='11px "Microsoft YaHei"';ctx.fillStyle='rgba(134,239,172,0.35)';
+    ctx.fillText('等势体',cx,cy+22);
+  }
+
+  // external field lines
+  if(showE && Q!==0){
+    const nLines=12;
+    for(let i=0;i<nLines;i++){
+      const ang=2*Math.PI*i/nLines;
+      const [sx,sy]=sd.surfacePoint(ang);
+      const norm=sd.normal(ang);
+      const sigma=sd.sigma(ang);
+      const lineLen=20+sigma*12;
+      const ex=sx+norm[0]*16, ey=sy+norm[1]*16;
+      const tx=sx+norm[0]*(16+lineLen), ty=sy+norm[1]*(16+lineLen);
+      const col=Q>0?'rgba(255,200,60,0.6)':'rgba(100,180,255,0.6)';
+      ctx.strokeStyle=col;ctx.lineWidth=1.2;
+      ctx.beginPath();ctx.moveTo(ex,ey);ctx.lineTo(tx,ty);ctx.stroke();
+      // arrow
+      const a=Math.atan2(norm[1],norm[0])*(Q>0?1:-1);
+      const arrowX=Q>0?tx:ex, arrowY=Q>0?ty:ey;
+      const adir=Q>0?1:-1;
+      ctx.fillStyle=col;ctx.beginPath();
+      ctx.moveTo(arrowX,arrowY);
+      ctx.lineTo(arrowX-8*Math.cos(a-0.4)*adir,arrowY-8*Math.sin(a-0.4)*adir);
+      ctx.lineTo(arrowX-8*Math.cos(a+0.4)*adir,arrowY-8*Math.sin(a+0.4)*adir);
+      ctx.closePath();ctx.fill();
+    }
+  }
+
+  // tip effect annotation for pear/needle
+  if(shape==='pear'||shape==='needle'){
+    const tipAng=shape==='pear'?Math.PI:0;
+    const [tx,ty]=sd.surfacePoint(tipAng);
+    const norm=sd.normal(tipAng);
+    ctx.fillStyle='rgba(251,191,36,0.8)';ctx.font='bold 12px "Microsoft YaHei"';
+    ctx.textAlign=norm[0]>0?'left':'right';ctx.textBaseline='middle';
+    ctx.fillText('尖端效应：σ最大，E最强',tx+norm[0]*20,ty);
+  }
+
+  // title
+  const shapeNames={sphere:'球形导体',ellipse:'椭球形导体',pear:'梨形导体',needle:'针形导体'};
+  ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='14px "Microsoft YaHei"';
+  ctx.textAlign='center';ctx.textBaseline='top';
+  ctx.fillText(`${shapeNames[shape]}  Q = ${Q>0?'+':''}${Q} μC`, W/2, 12);
+}
+
+function resizeCanvas(){canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;update();}
+window.addEventListener('resize',resizeCanvas);
+setTimeout(resizeCanvas,80);
+</script>
+<!-- ── 实验报告生成器 ── -->
+<style>
+.report-fab { }
+.report-fab-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  border: none; border-radius: 12px; padding: 10px 14px; width: 100%;
+  color: #fff; font-size: 13px; font-weight: 700;
+  font-family: "Microsoft YaHei", sans-serif;
+  cursor: pointer; letter-spacing: 0.5px;
+  box-shadow: 0 4px 20px rgba(52,211,153,0.4);
+  transition: box-shadow 0.2s;
+}
+.report-fab-btn:hover { box-shadow: 0 8px 28px rgba(52,211,153,0.55); }
+.report-fab-btn .rfb-icon { font-size: 17px; }
+
+.report-overlay {
+  position: fixed; inset: 0; z-index: 1200;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.report-overlay.open { display: flex; }
+.report-modal {
+  background: #0e0c24;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  width: min(760px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+  animation: slideUp 0.3s cubic-bezier(0.4,0,0.2,1) both;
+}
+@keyframes slideUp {
+  from { opacity:0; transform: translateY(30px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.rm-header {
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.rm-title { font-size: 17px; font-weight: 700; color: #fff; font-family: "Microsoft YaHei",sans-serif; }
+.rm-title span { color: #34d399; }
+.rm-close { font-size: 22px; color: rgba(255,255,255,0.4); cursor: pointer; line-height:1; transition: color 0.2s; }
+.rm-close:hover { color: #fff; }
+.rm-body { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; }
+.rm-field { display: flex; flex-direction: column; gap: 6px; }
+.rm-label { font-size: 12px; color: rgba(255,255,255,0.45); font-family: "Microsoft YaHei",sans-serif; letter-spacing: 0.5px; }
+.rm-label span { color: #f87171; }
+.rm-input, .rm-textarea {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 10px 14px;
+  color: #fff; font-size: 14px; font-family: "Microsoft YaHei",sans-serif;
+  outline: none; transition: border-color 0.2s; width: 100%;
+}
+.rm-input:focus, .rm-textarea:focus { border-color: rgba(52,211,153,0.5); }
+.rm-textarea { resize: vertical; min-height: 80px; line-height: 1.8; }
+.rm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.rm-section-title {
+  font-size: 12px; font-weight: 700; color: rgba(52,211,153,0.8);
+  letter-spacing: 1px; text-transform: uppercase;
+  border-bottom: 1px solid rgba(52,211,153,0.15);
+  padding-bottom: 8px; margin-top: 4px;
+  font-family: "Microsoft YaHei",sans-serif;
+}
+.rm-footer { padding: 16px 28px 24px; display: flex; gap: 12px; justify-content: flex-end; }
+.rm-btn {
+  padding: 10px 28px; border-radius: 12px; border: none; cursor: pointer;
+  font-size: 14px; font-weight: 700; font-family: "Microsoft YaHei",sans-serif;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.rm-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.rm-btn-cancel { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6); }
+.rm-btn-gen { background: linear-gradient(135deg,#10b981,#34d399); color: #fff; }
+.rm-btn-copy { background: linear-gradient(135deg,#6366f1,#818cf8); color: #fff; display:none; }
+
+.report-output {
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px; padding: 20px 24px; margin: 0 28px 24px;
+  font-family: "Microsoft YaHei", "Times New Roman", serif;
+  font-size: 13.5px; color: rgba(255,255,255,0.85);
+  line-height: 2; white-space: pre-wrap; display: none;
+  max-height: 340px; overflow-y: auto;
+}
+.report-output.show { display: block; }
+</style>
+
+
+<div class="report-overlay" id="reportOverlay" onclick="overlayClick(event)">
+  <div class="report-modal">
+    <div class="rm-header">
+      <div class="rm-title">实验报告 · <span>导体静电平衡</span></div>
+      <div class="rm-close" onclick="closeReport()">×</div>
+    </div>
+    <div class="rm-body">
+      <div class="rm-section-title">基本信息</div>
+      <div class="rm-row">
+        <div class="rm-field">
+          <div class="rm-label">姓名 <span>*</span></div>
+          <input class="rm-input" id="rName" placeholder="请输入姓名">
+        </div>
+        <div class="rm-field">
+          <div class="rm-label">学号 <span>*</span></div>
+          <input class="rm-input" id="rStuId" placeholder="请输入学号">
+        </div>
+      </div>
+      <div class="rm-row">
+        <div class="rm-field">
+          <div class="rm-label">实验日期</div>
+          <input class="rm-input" id="rDate" type="date">
+        </div>
+        <div class="rm-field">
+          <div class="rm-label">实验伙伴</div>
+          <input class="rm-input" id="rPartner" placeholder="可选">
+        </div>
+      </div>
+      <div class="rm-section-title">实验内容</div>
+      <div class="rm-field">
+        <div class="rm-label">实验目的</div>
+        <textarea class="rm-textarea" id="rPurpose" placeholder="描述本次实验的目的和预期目标……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验步骤与观察</div>
+        <textarea class="rm-textarea" id="rProcess" placeholder="描述你进行的操作步骤和实验过程中的观察……" style="min-height:100px"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验数据记录</div>
+        <textarea class="rm-textarea" id="rData" placeholder="记录关键数据、参数和仿真结果……"></textarea>
+      </div>
+      <div class="rm-section-title">分析与总结</div>
+      <div class="rm-field">
+        <div class="rm-label">结果分析</div>
+        <textarea class="rm-textarea" id="rAnalysis" placeholder="对实验现象和数据进行分析……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">误差分析与思考</div>
+        <textarea class="rm-textarea" id="rError" placeholder="分析可能的误差来源，以及对物理规律的思考……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验结论</div>
+        <textarea class="rm-textarea" id="rConclusion" placeholder="总结本次实验的结论……"></textarea>
+      </div>
+    </div>
+    <div class="report-output" id="reportOutput"></div>
+    <div class="rm-footer">
+      <button class="rm-btn rm-btn-cancel" onclick="closeReport()">取消</button>
+      <button class="rm-btn rm-btn-copy" id="rmCopyBtn" onclick="copyReport()">复制报告</button>
+      <button class="rm-btn rm-btn-gen" onclick="generateReport()">生成报告</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const EXP_NAME = '导体静电平衡';
+  const EXP_SEC  = '§2-1';
+  const STORE_KEY = 'phy26_report_' + EXP_SEC.replace(/[§\/]/g,'');
+
+  function loadSaved() {
+    const d = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+    if (d.name)       document.getElementById('rName').value      = d.name;
+    if (d.stuId)      document.getElementById('rStuId').value     = d.stuId;
+    if (d.date)       document.getElementById('rDate').value      = d.date;
+    if (d.partner)    document.getElementById('rPartner').value   = d.partner;
+    if (d.purpose)    document.getElementById('rPurpose').value   = d.purpose;
+    if (d.process)    document.getElementById('rProcess').value   = d.process;
+    if (d.data)       document.getElementById('rData').value      = d.data;
+    if (d.analysis)   document.getElementById('rAnalysis').value  = d.analysis;
+    if (d.error)      document.getElementById('rError').value     = d.error;
+    if (d.conclusion) document.getElementById('rConclusion').value= d.conclusion;
+  }
+
+  function saveDraft() {
+    const d = {
+      name:       document.getElementById('rName').value,
+      stuId:      document.getElementById('rStuId').value,
+      date:       document.getElementById('rDate').value,
+      partner:    document.getElementById('rPartner').value,
+      purpose:    document.getElementById('rPurpose').value,
+      process:    document.getElementById('rProcess').value,
+      data:       document.getElementById('rData').value,
+      analysis:   document.getElementById('rAnalysis').value,
+      error:      document.getElementById('rError').value,
+      conclusion: document.getElementById('rConclusion').value,
+    };
+    localStorage.setItem(STORE_KEY, JSON.stringify(d));
+  }
+
+  window.openReport = function() {
+    document.getElementById('reportOverlay').classList.add('open');
+    document.getElementById('reportOutput').classList.remove('show');
+    document.getElementById('rmCopyBtn').style.display = 'none';
+    const dateEl = document.getElementById('rDate');
+    if (!dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
+    loadSaved();
+    const _d = {
+      rPurpose:    '研究导体在静电平衡状态下的电荷分布规律，验证导体内部电场为零、表面电场垂直于表面、电荷只分布在表面等基本性质，理解静电屏蔽现象。',
+      rProcess:    '对孤立导体球施加电荷，观察电荷在表面的分布；在导体内部放置空腔，观察内外表面的感应电荷；将带电体放入导体空腔，观察静电屏蔽效果；改变导体形状（球形、椭球形），观察曲率对表面电荷密度的影响。',
+      rData:       '导体球（R=0.1m，Q=1μC）：表面σ=Q/(4πR²)=7.96×10⁻⁵C/m²，表面外侧E=σ/ε₀=8.99×10⁶V/m，内部E=0；椭球导体：曲率大（尖端）处σ较大，E较强；空腔导体：外部电场不影响腔内，腔内电荷在外表面感应等量异号电荷。',
+      rAnalysis:   '静电平衡时导体内部E=0，自由电子重新分布直到内部合场强为零。表面电场垂直于表面（否则切向分量会驱动电荷运动）。尖端效应：曲率越大处电荷密度越高，电场越强，这是避雷针工作的物理基础。接地导体壳可完全屏蔽外部电场。',
+      rError:      '仿真中导体模型为理想导体，忽略了实际导体的有限电导率；实际实验中感应电荷的测量受探针干扰；导体形状的不规则性会导致电荷分布的计算复杂化。',
+      rConclusion: '导体静电平衡时，内部电场为零，电荷只分布在表面，表面电场垂直于表面且大小为σ/ε₀；尖端处电荷密度和电场强度最大；导体空腔具有静电屏蔽作用，外部电场不影响腔内区域。',
+    };
+    Object.entries(_d).forEach(([id, val]) => { const el = document.getElementById(id); if (el && !el.value) el.value = val; });
+  };
+
+  window.closeReport = function() {
+    saveDraft();
+    document.getElementById('reportOverlay').classList.remove('open');
+  };
+
+  window.overlayClick = function(e) {
+    if (e.target === document.getElementById('reportOverlay')) closeReport();
+  };
+
+  window.generateReport = function() {
+    const name       = document.getElementById('rName').value.trim();
+    const stuId      = document.getElementById('rStuId').value.trim();
+    const date       = document.getElementById('rDate').value || '—';
+    const partner    = document.getElementById('rPartner').value.trim() || '—';
+    const purpose    = document.getElementById('rPurpose').value.trim() || '（未填写）';
+    const process    = document.getElementById('rProcess').value.trim() || '（未填写）';
+    const data       = document.getElementById('rData').value.trim() || '（未填写）';
+    const analysis   = document.getElementById('rAnalysis').value.trim() || '（未填写）';
+    const error      = document.getElementById('rError').value.trim() || '（未填写）';
+    const conclusion = document.getElementById('rConclusion').value.trim() || '（未填写）';
+
+    if (!name || !stuId) { alert('请填写姓名和学号'); return; }
+    saveDraft();
+
+    const divider = '─'.repeat(40);
+    const report = [
+      '普通物理（卓越班）下册 · 电磁学',
+      `实验报告：${EXP_NAME}（${EXP_SEC}）`,
+      divider,
+      `姓　　名：${name}　　　学　　号：${stuId}`,
+      `实验日期：${date}　　　实验伙伴：${partner}`,
+      divider,
+      '',
+      '一、实验目的',
+      purpose,
+      '',
+      '二、实验步骤与观察',
+      process,
+      '',
+      '三、实验数据记录',
+      data,
+      '',
+      '四、结果分析',
+      analysis,
+      '',
+      '五、误差分析与思考',
+      error,
+      '',
+      '六、实验结论',
+      conclusion,
+      '',
+      divider,
+      `生成时间：${new Date().toLocaleString('zh-CN')}`,
+      '本报告由 NUSEP26 普通物理（卓越班）实验仿真平台生成',
+    ].join('\n');
+
+    const out = document.getElementById('reportOutput');
+    out.textContent = report;
+    out.classList.add('show');
+    document.getElementById('rmCopyBtn').style.display = 'inline-flex';
+    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+
+  window.copyReport = function() {
+    const text = document.getElementById('reportOutput').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('rmCopyBtn');
+      const orig = btn.textContent;
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => btn.textContent = orig, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      const btn = document.getElementById('rmCopyBtn');
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => btn.textContent = '复制报告', 2000);
+    });
+  };
+
+  ['rName','rStuId','rDate','rPartner','rPurpose','rProcess','rData','rAnalysis','rError','rConclusion']
+    .forEach(id => document.getElementById(id).addEventListener('input', saveDraft));
+})();
+</script>
+
+</body>
+</html>

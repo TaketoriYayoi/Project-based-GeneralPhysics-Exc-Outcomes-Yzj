@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>实验：带电粒子在磁场中的运动 — 3-6</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;color:#fff;overflow-x:hidden}
+    .topbar{display:flex;align-items:center;gap:14px;padding:16px 28px;border-bottom:1px solid rgba(255,255,255,0.07);background:rgba(15,12,41,0.7);backdrop-filter:blur(12px)}
+    .back-btn{color:rgba(255,255,255,0.55);font-size:14px;cursor:pointer;text-decoration:none;transition:color .2s}
+    .back-btn:hover{color:#f59e0b}
+    .topbar-title-wrap{display:flex;flex-direction:column;gap:2px}.topbar-title{font-size:16px;font-weight:700}.topbar-course{font-size:11px;color:rgba(255,255,255,0.38);letter-spacing:1px}
+    .topbar-sub{margin-left:auto;font-size:12px;color:rgba(255,255,255,0.3)}
+    .layout{display:flex;height:calc(100vh - 57px)}
+    .sidebar{width:260px;flex-shrink:0;background:rgba(255,255,255,0.03);border-right:1px solid rgba(255,255,255,0.07);padding:20px 16px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+    .ctrl-group h3{font-size:11px;color:rgba(255,255,255,0.38);letter-spacing:1px;margin-bottom:10px;text-transform:uppercase}
+    .divider{height:1px;background:rgba(255,255,255,0.07)}
+    .slider-row{display:flex;flex-direction:column;gap:4px;margin-bottom:6px}
+    .slider-row label{font-size:12.5px;color:rgba(255,255,255,0.6);display:flex;justify-content:space-between}
+    .slider-row label span{color:#f59e0b;font-weight:600}
+    input[type=range]{width:100%;accent-color:#f59e0b}
+    .toggle-row{display:flex;align-items:center;justify-content:space-between}
+    .toggle-row span{font-size:13px;color:rgba(255,255,255,0.6)}
+    .toggle{width:38px;height:20px;border-radius:10px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);cursor:pointer;position:relative;transition:background .2s}
+    .toggle.on{background:rgba(245,158,11,0.5);border-color:#f59e0b}
+    .toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,0.6);transition:left .2s}
+    .toggle.on::after{left:20px;background:#fff}
+    .result-panel{background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px}
+    .result-panel h3{font-size:11px;color:rgba(245,158,11,0.7);letter-spacing:1px}
+    .result-row{display:flex;justify-content:space-between;align-items:baseline}
+    .result-label{font-size:12px;color:rgba(255,255,255,0.45)}
+    .result-value{font-size:14px;font-weight:700;color:#f59e0b}
+    .result-unit{font-size:11px;color:rgba(255,255,255,0.3);margin-left:2px}
+    .particle-btns{display:flex;gap:6px}
+    .particle-btn{flex:1;padding:7px 4px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);font-size:11.5px;cursor:pointer;text-align:center;color:rgba(255,255,255,0.45);transition:all .18s;font-family:"Microsoft YaHei",sans-serif}
+    .particle-btn.active{background:rgba(245,158,11,0.15);border-color:rgba(245,158,11,0.4);color:#f59e0b}
+    .ctrl-btns{display:flex;gap:8px}
+    .ctrl-btn{flex:1;padding:8px;border-radius:9px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.5);font-size:13px;cursor:pointer;text-align:center;transition:all .18s;font-family:"Microsoft YaHei",sans-serif}
+    .ctrl-btn:hover{background:rgba(245,158,11,0.15);color:#f59e0b;border-color:rgba(245,158,11,0.3)}
+    .canvas-wrap{flex:1;position:relative;overflow:hidden;background:rgba(0,0,0,0.3)}
+    #lorentzCanvas{display:block;width:100%;height:100%}
+    .formula-bar{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(15,12,41,0.85);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:9px 18px;font-size:12px;color:rgba(255,255,255,0.5);white-space:nowrap}
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">⚡ 实验：洛伦兹力与带电粒子运动</div>
+    <span class="topbar-course">普通物理（卓越班）下册 · 电磁学</span>
+  </div>
+  <div class="topbar-sub">§3-6 磁场对运动电荷的作用</div>
+</div>
+<div class="layout">
+  <div class="sidebar">
+    <div class="ctrl-group">
+      <h3>粒子类型</h3>
+      <div class="particle-btns">
+        <div class="particle-btn active" id="pPos" onclick="setParticle('pos')">正离子<br>q>0</div>
+        <div class="particle-btn" id="pNeg" onclick="setParticle('neg')">负离子<br>q<0</div>
+        <div class="particle-btn" id="pElec" onclick="setParticle('elec')">电子<br>e</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="ctrl-group">
+      <h3>磁场</h3>
+      <div class="slider-row">
+        <label>B = <span id="Bval">2</span> (单位)</label>
+        <input type="range" id="Bslider" min="0.5" max="5" step="0.5" value="2" oninput="restart()">
+      </div>
+      <div class="toggle-row">
+        <span>B 方向向外（⊙）</span>
+        <div class="toggle on" id="togBdir" onclick="togBdir()"></div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="ctrl-group">
+      <h3>初速度</h3>
+      <div class="slider-row">
+        <label>|v₀| = <span id="v0val">3</span> (单位)</label>
+        <input type="range" id="v0slider" min="1" max="8" step="1" value="3" oninput="restart()">
+      </div>
+      <div class="slider-row">
+        <label>入射角 θ = <span id="angVal">0</span>°</label>
+        <input type="range" id="angSlider" min="-80" max="80" step="10" value="0" oninput="restart()">
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="ctrl-group">
+      <h3>叠加电场</h3>
+      <div class="toggle-row">
+        <span>加入均匀电场 E</span>
+        <div class="toggle" id="togE" onclick="togEfield()"></div>
+      </div>
+      <div class="slider-row" id="Erow" style="display:none">
+        <label>E_y = <span id="Eval">1</span> (单位)</label>
+        <input type="range" id="Eslider" min="-3" max="3" step="0.5" value="1" oninput="restart()">
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="result-panel">
+      <h3>运动参数</h3>
+      <div class="result-row"><span class="result-label">回旋半径 r</span><span><span class="result-value" id="resR">—</span><span class="result-unit">单位</span></span></div>
+      <div class="result-row"><span class="result-label">回旋周期 T</span><span><span class="result-value" id="resT">—</span><span class="result-unit">（相对）</span></span></div>
+      <div class="result-row"><span class="result-label">洛伦兹力 F</span><span><span class="result-value" id="resF">—</span><span class="result-unit">单位</span></span></div>
+      <div class="result-row"><span class="result-label">轨迹类型</span><span class="result-value" id="resType">圆形</span></div>
+    </div>
+    <div class="divider"></div>
+    <div class="ctrl-group">
+      <h3>速度选择器模式</h3>
+      <div class="toggle-row">
+        <span>开启（E⊥B⊥v）</span>
+        <div class="toggle" id="togVS" onclick="togVelocitySelector()"></div>
+      </div>
+      <div id="vsInfo" style="display:none;margin-top:8px;font-size:11.5px;color:rgba(255,255,255,0.4);line-height:1.7;border:1px solid rgba(245,158,11,0.15);border-radius:8px;padding:9px 11px;">
+        选择条件：qE = qvB<br>
+        只有 v = E/B 的粒子直线通过<br>
+        其余粒子偏转
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="ctrl-btns">
+      <div class="ctrl-btn" onclick="restart()">重置</div>
+      <div class="ctrl-btn" id="pauseBtn" onclick="togglePause()">暂停</div>
+    </div>
+    <div class="report-fab" style="margin-top:auto;padding-top:12px">
+      <button class="report-fab-btn" onclick="openReport()">
+        <span class="rfb-icon">📄</span> 生成实验报告
+      </button>
+    </div>
+  </div>
+
+  <div class="canvas-wrap">
+    <canvas id="lorentzCanvas"></canvas>
+    <div class="formula-bar">F = qv×B &nbsp;|&nbsp; r = mv/(qB) &nbsp;|&nbsp; T = 2πm/(qB)</div>
+  </div>
+</div>
+
+<script>
+const canvas=document.getElementById('lorentzCanvas');
+const ctx=canvas.getContext('2d');
+
+let particleType='pos', Bdir=1, useE=false, paused=false, useVS=false;
+let animId=null;
+let px,py,vx,vy;
+let trail=[];
+
+function togVelocitySelector(){
+  useVS=!useVS;
+  document.getElementById('togVS').classList.toggle('on',useVS);
+  document.getElementById('vsInfo').style.display=useVS?'block':'none';
+  if(useVS){
+    // auto-enable E field for selector
+    useE=true;
+    document.getElementById('togE').classList.add('on');
+    document.getElementById('Erow').style.display='flex';
+    // set E so qE=qvB => E=v*B
+    const B=parseFloat(document.getElementById('Bslider').value);
+    const v0=parseFloat(document.getElementById('v0slider').value);
+    document.getElementById('Eslider').value=Math.min(3,v0*B/20).toFixed(1);
+    document.getElementById('Eval').textContent=document.getElementById('Eslider').value;
+  }
+  restart();
+}
+
+function setParticle(t){
+  particleType=t;
+  document.getElementById('pPos').classList.toggle('active',t==='pos');
+  document.getElementById('pNeg').classList.toggle('active',t==='neg');
+  document.getElementById('pElec').classList.toggle('active',t==='elec');
+  restart();
+}
+function togBdir(){
+  Bdir=-Bdir;
+  document.getElementById('togBdir').classList.toggle('on',Bdir>0);
+  restart();
+}
+function togEfield(){
+  useE=!useE;
+  document.getElementById('togE').classList.toggle('on',useE);
+  document.getElementById('Erow').style.display=useE?'flex':'none';
+  restart();
+}
+function togglePause(){paused=!paused;document.getElementById('pauseBtn').textContent=paused?'继续':'暂停';if(!paused)loop();}
+
+function resize(){
+  canvas.width=canvas.parentElement.clientWidth;
+  canvas.height=canvas.parentElement.clientHeight;
+  restart();
+}
+window.addEventListener('resize',resize);
+
+function getCharge(){ return particleType==='elec'?-1:particleType==='pos'?1:-1; }
+function getMass(){ return particleType==='elec'?0.01:1; }
+
+function restart(){
+  cancelAnimationFrame(animId);
+  trail=[];
+  const B=parseFloat(document.getElementById('Bslider').value);
+  const v0=parseFloat(document.getElementById('v0slider').value)*20;
+  const ang=parseFloat(document.getElementById('angSlider').value)*Math.PI/180;
+  const W=canvas.width,H=canvas.height;
+  px=W*0.2; py=H/2;
+  vx=v0*Math.cos(ang); vy=-v0*Math.sin(ang);
+
+  const q=getCharge(), m=getMass(), v=Math.sqrt(vx*vx+vy*vy);
+  const r=m*v/(Math.abs(q)*B);
+  document.getElementById('resR').textContent=r.toFixed(1);
+  document.getElementById('resT').textContent=(2*Math.PI*m/(Math.abs(q)*B)).toFixed(2);
+  document.getElementById('resF').textContent=(Math.abs(q)*v*B).toFixed(1);
+  document.getElementById('Bval').textContent=B;
+  document.getElementById('v0val').textContent=parseFloat(document.getElementById('v0slider').value);
+  document.getElementById('angVal').textContent=parseFloat(document.getElementById('angSlider').value);
+
+  const Ey=useE?parseFloat(document.getElementById('Eslider').value):0;
+  const hasE=useE&&Ey!==0;
+  const isCircle=!hasE;
+  const isHelix=parseFloat(document.getElementById('angSlider').value)!==0&&!hasE;
+  document.getElementById('resType').textContent=hasE?(B*Math.abs(q)*v===Math.abs(q)*Math.abs(Ey*20)?'直线':'漂移圆'):isHelix?'螺旋线':'圆形';
+
+  if(!paused) loop();
+}
+
+function loop(){
+  if(paused)return;
+  update();
+  render();
+  animId=requestAnimationFrame(loop);
+}
+
+function update(){
+  const dt=0.3;
+  const B=parseFloat(document.getElementById('Bslider').value)*Bdir;
+  const q=getCharge(), m=getMass();
+  const Ey=useE?parseFloat(document.getElementById('Eslider').value)*20:0;
+
+  // Lorentz: F = q(E + v×B), B in z direction
+  const Fx = q*(vy*B); // q*vy*Bz
+  const Fy = q*(-vx*B + Ey); // q*(-vx*Bz + Ey)
+
+  vx+=Fx/m*dt;
+  vy+=Fy/m*dt;
+  px+=vx*dt;
+  py+=vy*dt;
+
+  trail.push({x:px,y:py});
+  if(trail.length>800)trail.shift();
+
+  // wrap
+  const W=canvas.width,H=canvas.height;
+  if(px<-50||px>W+50||py<-50||py>H+50) restart();
+}
+
+function render(){
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  // velocity selector region
+  if(useVS){
+    const Bval=parseFloat(document.getElementById('Bslider').value);
+    const Ey=useE?parseFloat(document.getElementById('Eslider').value)*20:0;
+    const vSel=Bval>0?Math.abs(Ey/Bval):0;
+    ctx.save();
+    ctx.fillStyle='rgba(251,191,36,0.07)';
+    ctx.fillRect(0,H*0.25,W,H*0.5);
+    ctx.strokeStyle='rgba(251,191,36,0.35)';ctx.lineWidth=2;ctx.setLineDash([]);
+    ctx.beginPath();ctx.moveTo(0,H*0.25);ctx.lineTo(W,H*0.25);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(0,H*0.75);ctx.lineTo(W,H*0.75);ctx.stroke();
+    ctx.fillStyle='rgba(251,191,36,0.5)';ctx.font='11px "Microsoft YaHei"';
+    ctx.textAlign='left';ctx.textBaseline='top';
+    ctx.fillText(`速度选择器  v_选 = E/B = ${vSel.toFixed(1)} 单位`,8,H*0.25+5);
+    // straight-line guide
+    ctx.strokeStyle='rgba(52,211,153,0.3)';ctx.lineWidth=1;ctx.setLineDash([5,4]);
+    ctx.beginPath();ctx.moveTo(0,H/2);ctx.lineTo(W,H/2);ctx.stroke();
+    ctx.setLineDash([]);
+    const vNow=Math.sqrt(vx*vx+vy*vy);
+    if(vSel>0 && Math.abs(vNow-vSel)<vSel*0.18){
+      ctx.fillStyle='rgba(52,211,153,0.75)';ctx.font='bold 13px "Microsoft YaHei"';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('✓ v = E/B — 直线穿过选择器',W/2,H*0.25-14);
+    }
+    ctx.restore();
+  }
+
+  // B field background
+  const B=parseFloat(document.getElementById('Bslider').value);
+  const sym=Bdir>0?'⊙':'⊗';
+  ctx.fillStyle='rgba(52,211,153,0.06)';ctx.fillRect(0,0,W,H);
+  ctx.font='14px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillStyle='rgba(52,211,153,0.15)';
+  for(let x=50;x<W;x+=70) for(let y=50;y<H;y+=70) ctx.fillText(sym,x,y);
+
+  // E field arrows if enabled
+  if(useE){
+    const Ey=parseFloat(document.getElementById('Eslider').value);
+    if(Ey!==0){
+      ctx.fillStyle='rgba(251,191,36,0.3)';ctx.font='16px sans-serif';
+      for(let x=60;x<W;x+=80){
+        ctx.fillText(Ey>0?'↓':'↑',x,H/4);
+        ctx.fillText(Ey>0?'↓':'↑',x,3*H/4);
+      }
+      ctx.fillStyle='rgba(251,191,36,0.5)';ctx.font='12px "Microsoft YaHei"';
+      ctx.textAlign='right';ctx.textBaseline='top';
+      ctx.fillText(`E = ${Ey>0?'+':''}${Ey} (向${Ey>0?'下':'上'})`,W-16,8);
+    }
+  }
+
+  // B label
+  ctx.fillStyle='rgba(52,211,153,0.5)';ctx.font='12px "Microsoft YaHei"';
+  ctx.textAlign='left';ctx.textBaseline='top';
+  ctx.fillText(`B = ${B} (${Bdir>0?'向外⊙':'向内⊗'})`,10,8);
+
+  // trail
+  if(trail.length>1){
+    const col=particleType==='pos'?'rgba(248,113,113,':'particleType==='neg'?'rgba(56,189,248,':'rgba(167,139,250,';
+    ctx.lineWidth=2;
+    for(let i=1;i<trail.length;i++){
+      const alpha=(i/trail.length)*0.7;
+      ctx.strokeStyle=col+alpha+')';
+      ctx.beginPath();ctx.moveTo(trail[i-1].x,trail[i-1].y);ctx.lineTo(trail[i].x,trail[i].y);ctx.stroke();
+    }
+  }
+
+  // particle
+  const color=particleType==='pos'?'#f87171':particleType==='neg'?'#38bdf8':'#c084fc';
+  const grd=ctx.createRadialGradient(px,py,0,px,py,12);
+  grd.addColorStop(0,color+'88');grd.addColorStop(1,'transparent');
+  ctx.fillStyle=grd;ctx.beginPath();ctx.arc(px,py,12,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.arc(px,py,6,0,Math.PI*2);
+  ctx.fillStyle=color;ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='bold 8px sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(particleType==='pos'?'+':particleType==='neg'?'−':'e',px,py+0.5);
+
+  // velocity arrow
+  const vMag=Math.sqrt(vx*vx+vy*vy);
+  if(vMag>0.01){
+    const vLen=Math.min(vMag*0.5,50);
+    const vx_n=vx/vMag,vy_n=vy/vMag;
+    const ax=px+vx_n*vLen,ay=py+vy_n*vLen;
+    ctx.strokeStyle='rgba(255,255,255,0.7)';ctx.fillStyle='rgba(255,255,255,0.7)';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(ax,ay);ctx.stroke();
+    const ang2=Math.atan2(vy_n,vx_n),as=7;
+    ctx.beginPath();ctx.moveTo(ax,ay);
+    ctx.lineTo(ax-as*Math.cos(ang2-0.4),ay-as*Math.sin(ang2-0.4));
+    ctx.lineTo(ax-as*Math.cos(ang2+0.4),ay-as*Math.sin(ang2+0.4));
+    ctx.closePath();ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='11px sans-serif';
+    ctx.textAlign='left';ctx.textBaseline='bottom';
+    ctx.fillText('v',ax+4,ay-4);
+  }
+}
+
+resize();
+</script>
+<!-- ── 实验报告生成器 ── -->
+<style>
+.report-fab { }
+.report-fab-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  border: none; border-radius: 12px; padding: 10px 14px; width: 100%;
+  color: #fff; font-size: 13px; font-weight: 700;
+  font-family: "Microsoft YaHei", sans-serif;
+  cursor: pointer; letter-spacing: 0.5px;
+  box-shadow: 0 4px 20px rgba(52,211,153,0.4);
+  transition: box-shadow 0.2s;
+}
+.report-fab-btn:hover { box-shadow: 0 8px 28px rgba(52,211,153,0.55); }
+.report-fab-btn .rfb-icon { font-size: 17px; }
+
+.report-overlay {
+  position: fixed; inset: 0; z-index: 1200;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.report-overlay.open { display: flex; }
+.report-modal {
+  background: #0e0c24;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  width: min(760px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+  animation: slideUp 0.3s cubic-bezier(0.4,0,0.2,1) both;
+}
+@keyframes slideUp {
+  from { opacity:0; transform: translateY(30px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.rm-header {
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.rm-title { font-size: 17px; font-weight: 700; color: #fff; font-family: "Microsoft YaHei",sans-serif; }
+.rm-title span { color: #34d399; }
+.rm-close { font-size: 22px; color: rgba(255,255,255,0.4); cursor: pointer; line-height:1; transition: color 0.2s; }
+.rm-close:hover { color: #fff; }
+.rm-body { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; }
+.rm-field { display: flex; flex-direction: column; gap: 6px; }
+.rm-label { font-size: 12px; color: rgba(255,255,255,0.45); font-family: "Microsoft YaHei",sans-serif; letter-spacing: 0.5px; }
+.rm-label span { color: #f87171; }
+.rm-input, .rm-textarea {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 10px 14px;
+  color: #fff; font-size: 14px; font-family: "Microsoft YaHei",sans-serif;
+  outline: none; transition: border-color 0.2s; width: 100%;
+}
+.rm-input:focus, .rm-textarea:focus { border-color: rgba(52,211,153,0.5); }
+.rm-textarea { resize: vertical; min-height: 80px; line-height: 1.8; }
+.rm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.rm-section-title {
+  font-size: 12px; font-weight: 700; color: rgba(52,211,153,0.8);
+  letter-spacing: 1px; text-transform: uppercase;
+  border-bottom: 1px solid rgba(52,211,153,0.15);
+  padding-bottom: 8px; margin-top: 4px;
+  font-family: "Microsoft YaHei",sans-serif;
+}
+.rm-footer { padding: 16px 28px 24px; display: flex; gap: 12px; justify-content: flex-end; }
+.rm-btn {
+  padding: 10px 28px; border-radius: 12px; border: none; cursor: pointer;
+  font-size: 14px; font-weight: 700; font-family: "Microsoft YaHei",sans-serif;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.rm-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.rm-btn-cancel { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6); }
+.rm-btn-gen { background: linear-gradient(135deg,#10b981,#34d399); color: #fff; }
+.rm-btn-copy { background: linear-gradient(135deg,#6366f1,#818cf8); color: #fff; display:none; }
+
+.report-output {
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px; padding: 20px 24px; margin: 0 28px 24px;
+  font-family: "Microsoft YaHei", "Times New Roman", serif;
+  font-size: 13.5px; color: rgba(255,255,255,0.85);
+  line-height: 2; white-space: pre-wrap; display: none;
+  max-height: 340px; overflow-y: auto;
+}
+.report-output.show { display: block; }
+</style>
+
+
+<div class="report-overlay" id="reportOverlay" onclick="overlayClick(event)">
+  <div class="report-modal">
+    <div class="rm-header">
+      <div class="rm-title">实验报告 · <span>磁场对运动电荷</span></div>
+      <div class="rm-close" onclick="closeReport()">×</div>
+    </div>
+    <div class="rm-body">
+      <div class="rm-section-title">基本信息</div>
+      <div class="rm-row">
+        <div class="rm-field">
+          <div class="rm-label">姓名 <span>*</span></div>
+          <input class="rm-input" id="rName" placeholder="请输入姓名">
+        </div>
+        <div class="rm-field">
+          <div class="rm-label">学号 <span>*</span></div>
+          <input class="rm-input" id="rStuId" placeholder="请输入学号">
+        </div>
+      </div>
+      <div class="rm-row">
+        <div class="rm-field">
+          <div class="rm-label">实验日期</div>
+          <input class="rm-input" id="rDate" type="date">
+        </div>
+        <div class="rm-field">
+          <div class="rm-label">实验伙伴</div>
+          <input class="rm-input" id="rPartner" placeholder="可选">
+        </div>
+      </div>
+      <div class="rm-section-title">实验内容</div>
+      <div class="rm-field">
+        <div class="rm-label">实验目的</div>
+        <textarea class="rm-textarea" id="rPurpose" placeholder="描述本次实验的目的和预期目标……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验步骤与观察</div>
+        <textarea class="rm-textarea" id="rProcess" placeholder="描述你进行的操作步骤和实验过程中的观察……" style="min-height:100px"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验数据记录</div>
+        <textarea class="rm-textarea" id="rData" placeholder="记录关键数据、参数和仿真结果……"></textarea>
+      </div>
+      <div class="rm-section-title">分析与总结</div>
+      <div class="rm-field">
+        <div class="rm-label">结果分析</div>
+        <textarea class="rm-textarea" id="rAnalysis" placeholder="对实验现象和数据进行分析……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">误差分析与思考</div>
+        <textarea class="rm-textarea" id="rError" placeholder="分析可能的误差来源，以及对物理规律的思考……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验结论</div>
+        <textarea class="rm-textarea" id="rConclusion" placeholder="总结本次实验的结论……"></textarea>
+      </div>
+    </div>
+    <div class="report-output" id="reportOutput"></div>
+    <div class="rm-footer">
+      <button class="rm-btn rm-btn-cancel" onclick="closeReport()">取消</button>
+      <button class="rm-btn rm-btn-copy" id="rmCopyBtn" onclick="copyReport()">复制报告</button>
+      <button class="rm-btn rm-btn-gen" onclick="generateReport()">生成报告</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const EXP_NAME = '磁场对运动电荷';
+  const EXP_SEC  = '§3-6';
+  const STORE_KEY = 'phy26_report_' + EXP_SEC.replace(/[§\/]/g,'');
+
+  function loadSaved() {
+    const d = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+    if (d.name)       document.getElementById('rName').value      = d.name;
+    if (d.stuId)      document.getElementById('rStuId').value     = d.stuId;
+    if (d.date)       document.getElementById('rDate').value      = d.date;
+    if (d.partner)    document.getElementById('rPartner').value   = d.partner;
+    if (d.purpose)    document.getElementById('rPurpose').value   = d.purpose;
+    if (d.process)    document.getElementById('rProcess').value   = d.process;
+    if (d.data)       document.getElementById('rData').value      = d.data;
+    if (d.analysis)   document.getElementById('rAnalysis').value  = d.analysis;
+    if (d.error)      document.getElementById('rError').value     = d.error;
+    if (d.conclusion) document.getElementById('rConclusion').value= d.conclusion;
+  }
+
+  function saveDraft() {
+    const d = {
+      name:       document.getElementById('rName').value,
+      stuId:      document.getElementById('rStuId').value,
+      date:       document.getElementById('rDate').value,
+      partner:    document.getElementById('rPartner').value,
+      purpose:    document.getElementById('rPurpose').value,
+      process:    document.getElementById('rProcess').value,
+      data:       document.getElementById('rData').value,
+      analysis:   document.getElementById('rAnalysis').value,
+      error:      document.getElementById('rError').value,
+      conclusion: document.getElementById('rConclusion').value,
+    };
+    localStorage.setItem(STORE_KEY, JSON.stringify(d));
+  }
+
+  window.openReport = function() {
+    document.getElementById('reportOverlay').classList.add('open');
+    document.getElementById('reportOutput').classList.remove('show');
+    document.getElementById('rmCopyBtn').style.display = 'none';
+    const dateEl = document.getElementById('rDate');
+    if (!dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
+    loadSaved();
+    const _d = {
+      rPurpose:    '研究带电粒子在匀强磁场中的运动规律，理解洛伦兹力的作用，验证带电粒子做匀速圆周运动的条件，分析粒子的回旋半径与速度、电荷量、质量和磁场强度的关系。',
+      rProcess:    '设置匀强磁场B，向磁场中射入带电粒子（质量m，电荷q，初速度v₀），观察粒子的运动轨迹；改变v₀、B、q、m，测量回旋半径r；验证r=mv₀/(qB)；设置粒子初速度与磁场不垂直，观察螺旋运动。',
+      rData:       '质子（m=1.67×10⁻²⁷kg，q=1.6×10⁻¹⁹C），B=0.1T，v₀=10⁶m/s：r=mv₀/(qB)=0.104m；v₀增大2倍：r=0.208m（r∝v₀）；B增大2倍：r=0.052m（r∝1/B）；电子（m=9.11×10⁻³¹kg）同参数：r=5.7×10⁻⁵m（r∝m）。',
+      rAnalysis:   '洛伦兹力F=qv×B始终垂直于速度，不做功，只改变速度方向。带电粒子在匀强磁场中做匀速圆周运动，回旋半径r=mv/(qB)，回旋周期T=2πm/(qB)与速度无关（等时性）。这一性质是回旋加速器的工作原理。粒子初速度与磁场不垂直时做螺旋运动，螺距h=v∥T。',
+      rError:      '仿真中忽略了粒子间的相互作用和辐射损失；实际实验中磁场的不均匀性会导致粒子轨迹偏离理想圆形；粒子速度接近光速时需要考虑相对论效应（质量增大）。',
+      rConclusion: '带电粒子在匀强磁场中做匀速圆周运动，回旋半径r=mv/(qB)，与速度成正比，与磁场强度成反比；回旋周期T=2πm/(qB)与速度无关；粒子速度与磁场不垂直时做螺旋运动。',
+    };
+    Object.entries(_d).forEach(([id, val]) => { const el = document.getElementById(id); if (el && !el.value) el.value = val; });
+  };
+
+  window.closeReport = function() {
+    saveDraft();
+    document.getElementById('reportOverlay').classList.remove('open');
+  };
+
+  window.overlayClick = function(e) {
+    if (e.target === document.getElementById('reportOverlay')) closeReport();
+  };
+
+  window.generateReport = function() {
+    const name       = document.getElementById('rName').value.trim();
+    const stuId      = document.getElementById('rStuId').value.trim();
+    const date       = document.getElementById('rDate').value || '—';
+    const partner    = document.getElementById('rPartner').value.trim() || '—';
+    const purpose    = document.getElementById('rPurpose').value.trim() || '（未填写）';
+    const process    = document.getElementById('rProcess').value.trim() || '（未填写）';
+    const data       = document.getElementById('rData').value.trim() || '（未填写）';
+    const analysis   = document.getElementById('rAnalysis').value.trim() || '（未填写）';
+    const error      = document.getElementById('rError').value.trim() || '（未填写）';
+    const conclusion = document.getElementById('rConclusion').value.trim() || '（未填写）';
+
+    if (!name || !stuId) { alert('请填写姓名和学号'); return; }
+    saveDraft();
+
+    const divider = '─'.repeat(40);
+    const report = [
+      '普通物理（卓越班）下册 · 电磁学',
+      `实验报告：${EXP_NAME}（${EXP_SEC}）`,
+      divider,
+      `姓　　名：${name}　　　学　　号：${stuId}`,
+      `实验日期：${date}　　　实验伙伴：${partner}`,
+      divider,
+      '',
+      '一、实验目的',
+      purpose,
+      '',
+      '二、实验步骤与观察',
+      process,
+      '',
+      '三、实验数据记录',
+      data,
+      '',
+      '四、结果分析',
+      analysis,
+      '',
+      '五、误差分析与思考',
+      error,
+      '',
+      '六、实验结论',
+      conclusion,
+      '',
+      divider,
+      `生成时间：${new Date().toLocaleString('zh-CN')}`,
+      '本报告由 NUSEP26 普通物理（卓越班）实验仿真平台生成',
+    ].join('\n');
+
+    const out = document.getElementById('reportOutput');
+    out.textContent = report;
+    out.classList.add('show');
+    document.getElementById('rmCopyBtn').style.display = 'inline-flex';
+    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+
+  window.copyReport = function() {
+    const text = document.getElementById('reportOutput').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('rmCopyBtn');
+      const orig = btn.textContent;
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => btn.textContent = orig, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      const btn = document.getElementById('rmCopyBtn');
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => btn.textContent = '复制报告', 2000);
+    });
+  };
+
+  ['rName','rStuId','rDate','rPartner','rPurpose','rProcess','rData','rAnalysis','rError','rConclusion']
+    .forEach(id => document.getElementById(id).addEventListener('input', saveDraft));
+})();
+</script>
+
+</body>
+</html>

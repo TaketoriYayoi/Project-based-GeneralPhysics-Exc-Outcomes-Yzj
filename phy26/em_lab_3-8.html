@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>实验：磁介质 §3-8</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    min-height: 100vh;
+    color: #e2e8f0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Topbar ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 24px;
+    background: rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    flex-shrink: 0;
+  }
+  .back-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #34d399;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border: 1px solid #10b981;
+    border-radius: 20px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .back-btn:hover { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+  .topbar-title-wrap { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+  .topbar-course { font-size: 11px; color: rgba(255,255,255,0.38); letter-spacing: 1px; }
+  .topbar-sub { margin-left: auto; font-size: 12px; color: rgba(255,255,255,0.3); }
+  .topbar-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    letter-spacing: 0.02em;
+  }
+  .topbar-subtitle {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    margin-top: 2px;
+  }
+  .formula-bar {
+    display: flex;
+    gap: 20px;
+    font-size: 0.82rem;
+    color: #34d399;
+    font-family: 'Courier New', monospace;
+    background: rgba(16,185,129,0.08);
+    border: 1px solid rgba(52,211,153,0.2);
+    border-radius: 8px;
+    padding: 6px 16px;
+  }
+  .formula-bar span { color: #94a3b8; }
+  .formula-bar span em { color: #34d399; font-style: normal; }
+
+  /* ── Main layout ── */
+  .main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 250px;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.04);
+    border-right: 1px solid rgba(255,255,255,0.08);
+    padding: 16px 14px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .sb-section {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 12px;
+  }
+  .sb-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+
+  /* material buttons */
+  .mat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .mat-btn {
+    padding: 7px 4px;
+    border-radius: 7px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.05);
+    color: #cbd5e1;
+    font-size: 0.72rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    line-height: 1.3;
+  }
+  .mat-btn:hover { border-color: #34d399; color: #34d399; background: rgba(52,211,153,0.08); }
+  .mat-btn.active { border-color: #10b981; background: rgba(16,185,129,0.2); color: #6ee7b7; font-weight: 600; }
+  .mat-mu {
+    font-size: 0.65rem;
+    color: #64748b;
+    display: block;
+    margin-top: 2px;
+  }
+  .mat-btn.active .mat-mu { color: #34d399; }
+
+  /* sliders */
+  .slider-row { margin-bottom: 10px; }
+  .slider-row:last-child { margin-bottom: 0; }
+  .slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+  }
+  .slider-name { font-size: 0.75rem; color: #94a3b8; }
+  .slider-val {
+    font-size: 0.75rem;
+    color: #34d399;
+    font-family: 'Courier New', monospace;
+    font-weight: 600;
+    min-width: 48px;
+    text-align: right;
+  }
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.12);
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #10b981;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { background: #34d399; }
+
+  /* toggles */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .toggle-row:last-child { margin-bottom: 0; }
+  .toggle-label { font-size: 0.75rem; color: #94a3b8; }
+  .toggle {
+    position: relative;
+    width: 34px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.1);
+    border-radius: 18px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #fff;
+    top: 3px;
+    left: 3px;
+    transition: transform 0.2s;
+  }
+  .toggle input:checked + .toggle-slider { background: #10b981; }
+  .toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
+
+  /* results */
+  .result-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .result-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 8px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .result-key { font-size: 0.72rem; color: #64748b; font-family: 'Courier New', monospace; }
+  .result-value { font-size: 0.8rem; color: #34d399; font-weight: 700; font-family: 'Courier New', monospace; }
+  .result-type { font-size: 0.7rem; color: #a78bfa; text-align: center; margin-top: 4px; line-height: 1.5; }
+
+  /* ── Canvas area ── */
+  .canvas-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    overflow: hidden;
+  }
+  .canvas-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    overflow: hidden;
+  }
+  .panel-label {
+    font-size: 0.72rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    text-align: left;
+    flex-shrink: 0;
+  }
+  canvas {
+    border: 1px solid rgba(255,255,255,0.1);
+    display: block; flex: 1; width: 100%;
+  }
+  #canvasA { background: #0d0b1e; }
+  #canvasB { background: #0d0b1e; }
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div class="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">⚡ 实验：磁介质</div>
+    <span class="topbar-course">普通物理（卓越班）下册 · 电磁学</span>
+  </div>
+  <div class="topbar-sub">§3-8 磁化强度 · 磁导率</div>
+  <div class="formula-bar">
+    <span><em>B = μ₀μᵣH</em></span>
+    <span><em>M = χₘH</em></span>
+    <span><em>χₘ = μᵣ − 1</em></span>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+
+    <!-- Material selector -->
+    <div class="sb-section">
+      <div class="sb-label">磁介质类型</div>
+      <div class="mat-grid">
+        <button class="mat-btn" data-mat="vacuum" onclick="setMaterial('vacuum')">
+          真空<span class="mat-mu">μᵣ = 1</span>
+        </button>
+        <button class="mat-btn" data-mat="para" onclick="setMaterial('para')">
+          顺磁质<span class="mat-mu">μᵣ = 1.001</span>
+        </button>
+        <button class="mat-btn" data-mat="dia" onclick="setMaterial('dia')">
+          抗磁质<span class="mat-mu">μᵣ = 0.999</span>
+        </button>
+        <button class="mat-btn active" data-mat="ferro" onclick="setMaterial('ferro')">
+          铁磁质<span class="mat-mu">μᵣ ≫ 1</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Sliders -->
+    <div class="sb-section">
+      <div class="sb-label">参数控制</div>
+      <div class="slider-row">
+        <div class="slider-header">
+          <span class="slider-name">外加磁场 H</span>
+          <span class="slider-val" id="valH">0.00</span>
+        </div>
+        <input type="range" id="slH" min="-5" max="5" step="0.05" value="0"
+               oninput="updateH(this.value)">
+      </div>
+      <div class="slider-row">
+        <div class="slider-header">
+          <span class="slider-name">线圈电流 I (A)</span>
+          <span class="slider-val" id="valI">2.00 A</span>
+        </div>
+        <input type="range" id="slI" min="0" max="5" step="0.1" value="2"
+               oninput="updateI(this.value)">
+      </div>
+    </div>
+
+    <!-- Toggles -->
+    <div class="sb-section">
+      <div class="sb-label">显示选项</div>
+      <div class="toggle-row">
+        <span class="toggle-label">磁矩方向</span>
+        <label class="toggle">
+          <input type="checkbox" id="togMoments" checked onchange="redrawAll()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-label">束缚面电流</span>
+        <label class="toggle">
+          <input type="checkbox" id="togBound" checked onchange="redrawAll()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-label">B / H 场线</span>
+        <label class="toggle">
+          <input type="checkbox" id="togField" checked onchange="redrawAll()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="sb-section">
+      <div class="sb-label">计算结果</div>
+      <div class="result-grid">
+        <div class="result-item">
+          <span class="result-key">μᵣ</span>
+          <span class="result-value" id="rMu">—</span>
+        </div>
+        <div class="result-item">
+          <span class="result-key">B (μT)</span>
+          <span class="result-value" id="rB">—</span>
+        </div>
+        <div class="result-item">
+          <span class="result-key">M (A/m)</span>
+          <span class="result-value" id="rM">—</span>
+        </div>
+        <div class="result-item">
+          <span class="result-key">χₘ</span>
+          <span class="result-value" id="rChi">—</span>
+        </div>
+      </div>
+      <div class="result-type" id="rType">铁磁质：μᵣ ≫ 1<br>存在磁滞现象和剩磁</div>
+    </div>
+
+    <div class="report-fab" style="margin-top:auto;padding-top:12px"><button class="report-fab-btn" onclick="openReport()"><span class="rfb-icon">📄</span> 生成实验报告</button></div>
+  </div><!-- /sidebar -->
+
+  <!-- Canvas area -->
+  <div class="canvas-area">
+    <div class="canvas-wrap">
+      <div class="panel-label">Panel A — 磁化模型（螺线管截面）</div>
+      <canvas id="canvasA"></canvas>
+      <div class="panel-label">Panel B — B-H 特性曲线</div>
+      <canvas id="canvasB"></canvas>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ═══════════════════════════════════════════════════════
+// State
+// ═══════════════════════════════════════════════════════
+const MU0 = 4 * Math.PI * 1e-7;
+
+const materials = {
+  vacuum: { name: '真空',     mu_r: 1,     type: 'linear',  color: '#94a3b8' },
+  para:   { name: '顺磁质',   mu_r: 1.001, type: 'linear',  color: '#60a5fa' },
+  dia:    { name: '抗磁质',   mu_r: 0.999, type: 'linear',  color: '#f472b6' },
+  ferro:  { name: '铁磁质',   mu_r: 1000,  type: 'ferro',   color: '#fbbf24' },
+};
+
+let state = {
+  matKey: 'ferro',
+  H: 0,       // applied H field (normalized -5..5)
+  I: 2,       // solenoid current A
+  ferroB: 0,  // current B on hysteresis loop (ferro only)
+  hysterDir: 1, // +1 or -1 (H increasing / decreasing)
+  animT: 0,
+};
+
+// Microscopic moment seeds (fixed random positions inside cylinder)
+const momentSeeds = [];
+for (let i = 0; i < 60; i++) {
+  // use rejection sampling in a circle
+  let x, y;
+  do {
+    x = (Math.random() - 0.5) * 1.8;
+    y = (Math.random() - 0.5) * 1.8;
+  } while (x*x + y*y > 0.81);
+  momentSeeds.push({ x, y, phi0: Math.random() * 2 * Math.PI });
+}
+
+// ═══════════════════════════════════════════════════════
+// Controls
+// ═══════════════════════════════════════════════════════
+function setMaterial(key) {
+  state.matKey = key;
+  state.ferroB = 0;
+  document.querySelectorAll('.mat-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-mat="${key}"]`).classList.add('active');
+  updateResults();
+  redrawAll();
+}
+
+function updateH(v) {
+  const prev = state.H;
+  state.H = parseFloat(v);
+  state.hysterDir = state.H >= prev ? 1 : -1;
+  document.getElementById('valH').textContent = parseFloat(v).toFixed(2);
+  updateResults();
+  redrawAll();
+}
+
+function updateI(v) {
+  state.I = parseFloat(v);
+  document.getElementById('valI').textContent = parseFloat(v).toFixed(2) + ' A';
+  updateResults();
+  redrawAll();
+}
+
+function updateResults() {
+  const mat = materials[state.matKey];
+  const mu_r = mat.mu_r;
+  const H = state.H; // normalized
+  const H_real = H * 1000; // A/m
+  let B, M, chi;
+
+  if (mat.type === 'ferro') {
+    // B from hysteresis
+    B = getHysteresisB(H) * 1e-4; // store in T, H_real in A/m
+    M = (B / MU0) - H_real;
+    chi = H_real !== 0 ? M / H_real : 0;
+    document.getElementById('rMu').textContent = (1 + chi).toExponential(2);
+    document.getElementById('rType').textContent = '铁磁质：μᵣ ≫ 1\n存在磁滞现象和剩磁';
+  } else {
+    chi = mu_r - 1;
+    B = MU0 * mu_r * H_real;
+    M = chi * H_real;
+    document.getElementById('rMu').textContent = mu_r.toFixed(4);
+    const typeTexts = {
+      vacuum: '真空：μᵣ = 1，无磁化',
+      para:   '顺磁质：μᵣ > 1\n磁矩顺向排列，χₘ > 0',
+      dia:    '抗磁质：μᵣ < 1\n感应反向磁矩，χₘ < 0',
+    };
+    document.getElementById('rType').textContent = typeTexts[state.matKey] || '';
+  }
+
+  document.getElementById('rB').textContent = (B * 1e6).toFixed(2);
+  document.getElementById('rM').textContent = M.toFixed(2);
+  document.getElementById('rChi').textContent = (mat.type === 'ferro' ? chi.toExponential(2) : (mu_r - 1).toExponential(3));
+}
+
+// ═══════════════════════════════════════════════════════
+// Hysteresis model  (returns B in arbitrary display units)
+// ═══════════════════════════════════════════════════════
+// State variable: last computed point on loop
+let hysterH = 0, hysterB = 0;
+let hysterPath = []; // {h, b}
+let hysterInitialized = false;
+
+function getHysteresisB(H) {
+  // Returns B in display units (-1..1 ~ -Bsat..+Bsat)
+  const Bsat = 1.0, Hc = 1.2, Br = 0.7;
+  // Upper branch: B = Bsat * tanh((H + Hc) / 1.5) shifted to pass through (Hc, 0)
+  // Lower branch: B = Bsat * tanh((H - Hc) / 1.5) shifted
+  if (state.hysterDir > 0) {
+    return Bsat * Math.tanh((H + Hc * 0.4) / 1.2) * 0.95 +
+           0.05 * Math.tanh(H / 0.3);
+  } else {
+    return Bsat * Math.tanh((H - Hc * 0.4) / 1.2) * 0.95 +
+           0.05 * Math.tanh(H / 0.3);
+  }
+}
+
+// Pre-compute full hysteresis loop for drawing
+function buildHysteresisLoop() {
+  const pts = { upper: [], lower: [] };
+  const steps = 200;
+  // Upper branch: H goes from -5 to +5
+  for (let i = 0; i <= steps; i++) {
+    const H = -5 + 10 * i / steps;
+    state.hysterDir = 1;
+    pts.upper.push({ h: H, b: getHysteresisB(H) });
+  }
+  // Lower branch: H goes from +5 to -5
+  for (let i = 0; i <= steps; i++) {
+    const H = 5 - 10 * i / steps;
+    state.hysterDir = -1;
+    pts.lower.push({ h: H, b: getHysteresisB(H) });
+  }
+  return pts;
+}
+
+// ═══════════════════════════════════════════════════════
+// Panel A — Magnetization model
+// ═══════════════════════════════════════════════════════
+function drawPanelA() {
+  const canvas = document.getElementById('canvasA');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const mat = materials[state.matKey];
+  const showMoments = document.getElementById('togMoments').checked;
+  const showBound   = document.getElementById('togBound').checked;
+  const showField   = document.getElementById('togField').checked;
+
+  // Layout
+  const cx = W / 2, cy = H / 2;
+  const solW = 500, solH = 160;
+  const cylR = solH * 0.38;
+  const solLeft = cx - solW / 2, solRight = cx + solW / 2;
+  const solTop  = cy - solH / 2, solBot   = cy + solH / 2;
+
+  // ── Field lines (B outside solenoid) ──
+  if (showField) {
+    const lineCount = 5;
+    ctx.strokeStyle = 'rgba(96,165,250,0.22)';
+    ctx.lineWidth = 1;
+    for (let k = 0; k < lineCount; k++) {
+      const yOff = (k - (lineCount - 1) / 2) * 28;
+      const y = cy + yOff;
+      if (Math.abs(yOff) < cylR - 5) continue; // skip inside cylinder drawn separately
+      ctx.beginPath();
+      ctx.moveTo(solLeft + 4, y);
+      ctx.lineTo(solRight - 4, y);
+      if (state.I > 0) {
+        // arrowhead
+        const ax = solRight - 12, ay = y;
+        ctx.moveTo(ax, ay); ctx.lineTo(ax - 8, ay - 4); ctx.moveTo(ax, ay); ctx.lineTo(ax - 8, ay + 4);
+      }
+      ctx.stroke();
+    }
+  }
+
+  // ── Solenoid coil (winding lines) ──
+  const turns = 18;
+  const pitchX = solW / turns;
+  ctx.strokeStyle = '#64748b';
+  ctx.lineWidth = 1.5;
+  for (let t = 0; t < turns; t++) {
+    const x = solLeft + t * pitchX;
+    ctx.beginPath();
+    ctx.moveTo(x, solTop);
+    ctx.lineTo(x + pitchX * 0.5, solTop - 8);
+    ctx.lineTo(x + pitchX, solTop);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x, solBot);
+    ctx.lineTo(x + pitchX * 0.5, solBot + 8);
+    ctx.lineTo(x + pitchX, solBot);
+    ctx.stroke();
+  }
+  // end caps
+  ctx.strokeStyle = '#64748b';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(solLeft, solTop); ctx.lineTo(solLeft, solBot); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(solRight, solTop); ctx.lineTo(solRight, solBot); ctx.stroke();
+
+  // ── Current direction labels ──
+  const dotR = 7;
+  ctx.fillStyle = state.I > 0.1 ? '#facc15' : '#374151';
+  ctx.strokeStyle = '#facc15';
+  ctx.lineWidth = 1;
+  // top = × (current into page), bottom = • (current out)
+  function drawCurrentSymbol(xc, yc, outward) {
+    ctx.beginPath();
+    ctx.arc(xc, yc, dotR, 0, 2 * Math.PI);
+    ctx.fillStyle = 'rgba(250,204,21,0.1)';
+    ctx.fill();
+    ctx.strokeStyle = '#facc15';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.strokeStyle = '#facc15';
+    ctx.lineWidth = 1.5;
+    if (outward) {
+      ctx.beginPath(); ctx.arc(xc, yc, 2.5, 0, 2 * Math.PI);
+      ctx.fillStyle = '#facc15'; ctx.fill();
+    } else {
+      const d = 3.5;
+      ctx.beginPath(); ctx.moveTo(xc - d, yc - d); ctx.lineTo(xc + d, yc + d); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(xc + d, yc - d); ctx.lineTo(xc - d, yc + d); ctx.stroke();
+    }
+  }
+  if (state.I > 0.05) {
+    for (let t = 0; t < turns; t += 3) {
+      const x = solLeft + (t + 0.5) * pitchX;
+      drawCurrentSymbol(x, solTop - 8, false);
+      drawCurrentSymbol(x, solBot + 8, true);
+    }
+  }
+
+  // ── Magnetic material cylinder ──
+  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, cylR);
+  grad.addColorStop(0, mat.color + '22');
+  grad.addColorStop(1, mat.color + '44');
+  ctx.save();
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, cylR, cylR, 0, 0, 2 * Math.PI);
+  ctx.fillStyle = grad;
+  ctx.fill();
+  ctx.strokeStyle = mat.color;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.restore();
+
+  // Material label
+  ctx.fillStyle = mat.color;
+  ctx.font = '600 13px "Segoe UI", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(mat.name, cx, solBot + 28);
+
+  // ── B field inside cylinder ──
+  if (showField) {
+    const innerLines = 4;
+    for (let k = 0; k < innerLines; k++) {
+      const yOff = (k - (innerLines - 1) / 2) * (cylR * 0.45);
+      const y = cy + yOff;
+      // clip to cylinder
+      const dx = Math.sqrt(Math.max(0, cylR * cylR - yOff * yOff));
+      // Color depends on material
+      const fColor = state.matKey === 'dia' ? '#f472b6' :
+                     state.matKey === 'ferro' ? '#fbbf24' :
+                     state.matKey === 'para' ? '#60a5fa' : '#94a3b8';
+      const alpha = 0.4 + 0.5 * Math.abs(state.H) / 5;
+      ctx.strokeStyle = fColor;
+      ctx.globalAlpha = alpha;
+      ctx.lineWidth = state.matKey === 'ferro' ? 2.5 : 1.5;
+      ctx.beginPath();
+      ctx.moveTo(cx - dx + 2, y);
+      ctx.lineTo(cx + dx - 2, y);
+      // arrowhead
+      if (state.I > 0.05) {
+        const ax = cx + dx * 0.5, ay = y;
+        ctx.moveTo(ax, ay); ctx.lineTo(ax - 7, ay - 3); ctx.moveTo(ax, ay); ctx.lineTo(ax - 7, ay + 3);
+      }
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
+    // B label inside
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = 'italic 12px serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('B', cx + cylR - 24, cy - cylR + 18);
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '10px sans-serif';
+    ctx.fillText('in', cx + cylR - 16, cy - cylR + 24);
+  }
+
+  // ── Microscopic magnetic moments ──
+  if (showMoments) {
+    const align = computeAlignment();
+    momentSeeds.forEach(seed => {
+      const px = cx + seed.x * cylR * 0.85;
+      const py = cy + seed.y * cylR * 0.85;
+      // angle: 0 = aligned right (along field), random when H=0
+      let angle;
+      const noise = (seed.phi0 - Math.PI) * (1 - Math.abs(align));
+      if (state.matKey === 'dia') {
+        angle = Math.PI + align * 0.3 + noise * 0.5;
+      } else if (state.matKey === 'ferro') {
+        angle = align < 0 ? Math.PI * (1 - Math.abs(align) * 0.95) + noise * 0.08
+                          : Math.PI * Math.abs(align) * 0.05 + noise * 0.08;
+        angle = align >= 0 ? noise * 0.05 : Math.PI + noise * 0.05;
+      } else {
+        angle = noise;
+      }
+      drawMomentArrow(ctx, px, py, angle, mat.color);
+    });
+  }
+
+  // ── Bound surface currents ──
+  if (showBound && state.matKey !== 'vacuum') {
+    const align = computeAlignment();
+    if (Math.abs(align) > 0.05) {
+      const n = 16;
+      const arrowLen = 10;
+      ctx.strokeStyle = state.matKey === 'dia' ? '#f472b6aa' : '#10b981aa';
+      ctx.lineWidth = 1.5;
+      for (let i = 0; i < n; i++) {
+        const theta = (2 * Math.PI * i / n);
+        const bx = cx + cylR * Math.cos(theta);
+        const by = cy + cylR * Math.sin(theta);
+        // tangent direction (CCW for positive magnetization)
+        const tx = -Math.sin(theta) * (state.matKey === 'dia' ? -1 : 1);
+        const ty =  Math.cos(theta) * (state.matKey === 'dia' ? -1 : 1);
+        const opacity = Math.abs(align);
+        ctx.globalAlpha = opacity * 0.8;
+        ctx.beginPath();
+        ctx.moveTo(bx - tx * arrowLen / 2, by - ty * arrowLen / 2);
+        ctx.lineTo(bx + tx * arrowLen / 2, by + ty * arrowLen / 2);
+        // arrowhead
+        const ex = bx + tx * arrowLen / 2, ey = by + ty * arrowLen / 2;
+        ctx.moveTo(ex, ey);
+        ctx.lineTo(ex - tx * 4 + ty * 3, ey - ty * 4 - tx * 3);
+        ctx.moveTo(ex, ey);
+        ctx.lineTo(ex - tx * 4 - ty * 3, ey - ty * 4 + tx * 3);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+
+      // Label Jm
+      ctx.fillStyle = state.matKey === 'dia' ? '#f472b6' : '#10b981';
+      ctx.font = 'italic 11px serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Jₘ', cx, cy - cylR - 10);
+    }
+  }
+
+  // ── μr label ──
+  const mat2 = materials[state.matKey];
+  ctx.fillStyle = '#e2e8f0';
+  ctx.font = '12px "Segoe UI", sans-serif';
+  ctx.textAlign = 'right';
+  ctx.fillText('μᵣ = ' + (mat2.type === 'ferro' ? '≫ 1' : mat2.mu_r.toFixed(3)), W - 12, 18);
+
+  // ── H₀ arrow (external field indicator) ──
+  if (Math.abs(state.H) > 0.1) {
+    const ay = solTop - 22;
+    const ax0 = cx - 60, ax1 = cx + 60;
+    ctx.strokeStyle = '#a78bfa';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    if (state.H > 0) {
+      ctx.moveTo(ax0, ay); ctx.lineTo(ax1, ay);
+      ctx.moveTo(ax1, ay); ctx.lineTo(ax1 - 8, ay - 4); ctx.moveTo(ax1, ay); ctx.lineTo(ax1 - 8, ay + 4);
+    } else {
+      ctx.moveTo(ax1, ay); ctx.lineTo(ax0, ay);
+      ctx.moveTo(ax0, ay); ctx.lineTo(ax0 + 8, ay - 4); ctx.moveTo(ax0, ay); ctx.lineTo(ax0 + 8, ay + 4);
+    }
+    ctx.stroke();
+    ctx.fillStyle = '#a78bfa';
+    ctx.font = 'italic 12px serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('H₀', cx, ay - 6);
+  }
+}
+
+function computeAlignment() {
+  // Returns -1..+1 alignment of moments with field
+  const H = state.H;
+  const mat = materials[state.matKey];
+  if (mat.type === 'ferro') {
+    return Math.tanh(H * 1.2) * 0.98;
+  } else if (state.matKey === 'dia') {
+    return -Math.tanh(H * 0.4) * 0.3;
+  } else if (state.matKey === 'para') {
+    return Math.tanh(H * 0.4) * 0.5;
+  }
+  return 0; // vacuum
+}
+
+function drawMomentArrow(ctx, x, y, angle, color) {
+  const len = 8;
+  const dx = Math.cos(angle) * len;
+  const dy = Math.sin(angle) * len;
+  ctx.strokeStyle = color + 'cc';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.moveTo(x - dx / 2, y - dy / 2);
+  ctx.lineTo(x + dx / 2, y + dy / 2);
+  // arrowhead
+  const ex = x + dx / 2, ey = y + dy / 2;
+  const nx = -Math.sin(angle), ny = Math.cos(angle);
+  ctx.moveTo(ex, ey);
+  ctx.lineTo(ex - dx * 0.4 + nx * 2.5, ey - dy * 0.4 + ny * 2.5);
+  ctx.moveTo(ex, ey);
+  ctx.lineTo(ex - dx * 0.4 - nx * 2.5, ey - dy * 0.4 - ny * 2.5);
+  ctx.stroke();
+}
+
+// ═══════════════════════════════════════════════════════
+// Panel B — B-H curve
+// ═══════════════════════════════════════════════════════
+function drawPanelB() {
+  const canvas = document.getElementById('canvasB');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const mat = materials[state.matKey];
+  const pad = { l: 60, r: 30, t: 24, b: 38 };
+  const plotW = W - pad.l - pad.r;
+  const plotH = H - pad.t - pad.b;
+  const ox = pad.l, oy = pad.t + plotH / 2; // origin
+  const Hmax = 5, Bmax = 1.2;
+
+  function hx(h) { return pad.l + (h + Hmax) / (2 * Hmax) * plotW; }
+  function by_(b) { return pad.t + plotH / 2 - b / Bmax * (plotH / 2); }
+
+  // Background grid
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.lineWidth = 1;
+  for (let g = -Hmax; g <= Hmax; g++) {
+    const x = hx(g);
+    ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, pad.t + plotH); ctx.stroke();
+  }
+  for (let g = -1; g <= 1; g += 0.5) {
+    const y = by_(g);
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + plotW, y); ctx.stroke();
+  }
+
+  // Axes
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+  ctx.lineWidth = 1.5;
+  // H axis
+  ctx.beginPath(); ctx.moveTo(pad.l, oy); ctx.lineTo(pad.l + plotW, oy); ctx.stroke();
+  // B axis
+  ctx.beginPath(); ctx.moveTo(hx(0), pad.t); ctx.lineTo(hx(0), pad.t + plotH); ctx.stroke();
+  // Axis labels
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = 'italic 12px serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('H', pad.l + plotW + 10, oy + 4);
+  ctx.fillText('B', hx(0), pad.t - 8);
+
+  // Tick labels
+  ctx.font = '10px sans-serif';
+  ctx.fillStyle = '#475569';
+  ctx.textAlign = 'center';
+  [-4, -2, 0, 2, 4].forEach(v => {
+    const x = hx(v);
+    ctx.fillText(v, x, oy + 14);
+  });
+  ctx.textAlign = 'right';
+  [-1, -0.5, 0.5, 1].forEach(v => {
+    ctx.fillText(v.toFixed(1), hx(0) - 5, by_(v) + 4);
+  });
+
+  if (mat.type === 'ferro') {
+    // ── Draw hysteresis loop ──
+    const loop = buildHysteresisLoop();
+
+    // Upper branch
+    ctx.beginPath();
+    ctx.strokeStyle = '#fbbf24';
+    ctx.lineWidth = 2;
+    loop.upper.forEach((p, i) => {
+      const x = hx(p.h), y = by_(p.b);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // Lower branch
+    ctx.beginPath();
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = 2;
+    loop.lower.forEach((p, i) => {
+      const x = hx(p.h), y = by_(p.b);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // Key points
+    // Saturation
+    const Bsat_y = by_(0.95);
+    const Bsat_x = hx(4.5);
+    dotLabel(ctx, Bsat_x, Bsat_y, '#fbbf24', '饱和 Bₛ', 'right');
+
+    // Remanence Br (H=0 on upper branch)
+    state.hysterDir = 1;
+    const Br_upper = getHysteresisB(0);
+    state.hysterDir = -1;
+    const Br_lower = getHysteresisB(0);
+    dotLabel(ctx, hx(0), by_(Br_upper), '#34d399', 'Br（剩磁）', 'left');
+    dotLabel(ctx, hx(0), by_(Br_lower), '#34d399', '', 'left');
+
+    // Coercivity Hc: find H where B≈0
+    // Upper branch B=0 at H ≈ -1.2 (Hc)
+    state.hysterDir = -1;
+    const Hc_approx = -1.2;
+    dotLabel(ctx, hx(Hc_approx), by_(0), '#a78bfa', 'Hc（矫顽力）', 'center');
+    dotLabel(ctx, hx(-Hc_approx), by_(0), '#a78bfa', '', 'center');
+
+    // Animate current point
+    const curDir = state.hysterDir;
+    state.hysterDir = state.hysterDir;
+    const curB = getHysteresisB(state.H);
+    const cx2 = hx(state.H), cy2 = by_(curB);
+    ctx.beginPath();
+    ctx.arc(cx2, cy2, 6, 0, 2 * Math.PI);
+    ctx.fillStyle = '#ef4444';
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Legend
+    ctx.fillStyle = '#94a3b8';
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('铁磁质磁滞回线', pad.l + 4, pad.t + 14);
+
+  } else {
+    // ── Linear B-H for para/dia/vacuum ──
+    const mu_r = mat.mu_r;
+    // Scale: slope in plot units
+    const slope = (mu_r - 1) * 0.1 + 1; // visual slope (1 = vacuum)
+    const slopePara  = 1.05, slopeDia = 0.95, slopeVac = 1.0;
+    const slopeMap = { vacuum: slopeVac, para: slopePara, dia: slopeDia };
+    const sVis = slopeMap[state.matKey] || 1;
+
+    ctx.beginPath();
+    ctx.strokeStyle = mat.color;
+    ctx.lineWidth = 2.5;
+    ctx.moveTo(hx(-Hmax), by_(-Bmax * sVis));
+    ctx.lineTo(hx(Hmax),  by_(Bmax * sVis));
+    ctx.stroke();
+
+    // Vacuum reference (dashed)
+    if (state.matKey !== 'vacuum') {
+      ctx.beginPath();
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 1;
+      ctx.moveTo(hx(-Hmax), by_(-Bmax));
+      ctx.lineTo(hx(Hmax),  by_(Bmax));
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#475569';
+      ctx.font = '10px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('真空参考', hx(1), by_(1.1));
+    }
+
+    // Legend
+    ctx.fillStyle = mat.color;
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(mat.name + '  (μᵣ = ' + mu_r.toFixed(3) + ')', pad.l + 4, pad.t + 14);
+
+    // Current point
+    const curH = state.H;
+    const curB = curH * sVis;
+    const dotX = hx(curH), dotY = by_(curB);
+    ctx.beginPath();
+    ctx.arc(dotX, dotY, 5, 0, 2 * Math.PI);
+    ctx.fillStyle = '#ef4444';
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+
+  // Axis unit labels
+  ctx.fillStyle = '#475569';
+  ctx.font = '10px sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('(×10³ A/m)', pad.l + plotW - 50, oy + 28);
+  ctx.textAlign = 'center';
+  ctx.fillText('(T)', hx(0) + 16, pad.t + 8);
+}
+
+function dotLabel(ctx, x, y, color, label, align) {
+  ctx.beginPath();
+  ctx.arc(x, y, 4, 0, 2 * Math.PI);
+  ctx.fillStyle = color;
+  ctx.fill();
+  if (label) {
+    ctx.fillStyle = color;
+    ctx.font = '10px sans-serif';
+    ctx.textAlign = align;
+    const offX = align === 'right' ? -8 : align === 'left' ? 8 : 0;
+    const offY = -7;
+    ctx.fillText(label, x + offX, y + offY);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// Main draw
+// ═══════════════════════════════════════════════════════
+function redrawAll() {
+  drawPanelA();
+  drawPanelB();
+}
+
+// ── Animation loop for subtle effects ──
+let animFrame;
+function animate() {
+  state.animT += 0.016;
+  // Subtle moment jitter when H≈0
+  if (Math.abs(state.H) < 0.5) {
+    redrawAll();
+  }
+  animFrame = requestAnimationFrame(animate);
+}
+
+// Init
+setMaterial('ferro');
+document.getElementById('slH').value = 0;
+document.getElementById('valH').textContent = '0.00';
+document.getElementById('valI').textContent = '2.00 A';
+updateResults();
+function resizeCanvas(){
+  const cA=document.getElementById('canvasA'),cB=document.getElementById('canvasB');
+  cA.width=cA.offsetWidth;cA.height=cA.offsetHeight;
+  cB.width=cB.offsetWidth;cB.height=cB.offsetHeight;
+  redrawAll();
+}
+window.addEventListener('resize',resizeCanvas);
+setTimeout(resizeCanvas,80);
+animate();
+</script>
+<!-- ── 实验报告生成器 ── -->
+<style>
+.report-fab {
+  position: fixed; bottom: 28px; right: 28px; z-index: 1000;
+}
+.report-fab-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  border: none; border-radius: 28px; padding: 12px 20px;
+  color: #fff; font-size: 13px; font-weight: 700;
+  font-family: "Microsoft YaHei", sans-serif;
+  cursor: pointer; letter-spacing: 0.5px;
+  box-shadow: 0 4px 20px rgba(52,211,153,0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.report-fab-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(52,211,153,0.55); }
+.report-fab-btn .rfb-icon { font-size: 17px; }
+
+.report-overlay {
+  position: fixed; inset: 0; z-index: 1200;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.report-overlay.open { display: flex; }
+.report-modal {
+  background: #0e0c24;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  width: min(760px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+  animation: slideUp 0.3s cubic-bezier(0.4,0,0.2,1) both;
+}
+@keyframes slideUp {
+  from { opacity:0; transform: translateY(30px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.rm-header {
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.rm-title { font-size: 17px; font-weight: 700; color: #fff; font-family: "Microsoft YaHei",sans-serif; }
+.rm-title span { color: #34d399; }
+.rm-close { font-size: 22px; color: rgba(255,255,255,0.4); cursor: pointer; line-height:1; transition: color 0.2s; }
+.rm-close:hover { color: #fff; }
+.rm-body { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; }
+.rm-field { display: flex; flex-direction: column; gap: 6px; }
+.rm-label { font-size: 12px; color: rgba(255,255,255,0.45); font-family: "Microsoft YaHei",sans-serif; letter-spacing: 0.5px; }
+.rm-label span { color: #f87171; }
+.rm-input, .rm-textarea {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 10px 14px;
+  color: #fff; font-size: 14px; font-family: "Microsoft YaHei",sans-serif;
+  outline: none; transition: border-color 0.2s; width: 100%;
+}
+.rm-input:focus, .rm-textarea:focus { border-color: rgba(52,211,153,0.5); }
+.rm-textarea { resize: vertical; min-height: 80px; line-height: 1.8; }
+.rm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.rm-section-title {
+  font-size: 12px; font-weight: 700; color: rgba(52,211,153,0.8);
+  letter-spacing: 1px; text-transform: uppercase;
+  border-bottom: 1px solid rgba(52,211,153,0.15);
+  padding-bottom: 8px; margin-top: 4px;
+  font-family: "Microsoft YaHei",sans-serif;
+}
+.rm-footer { padding: 16px 28px 24px; display: flex; gap: 12px; justify-content: flex-end; }
+.rm-btn {
+  padding: 10px 28px; border-radius: 12px; border: none; cursor: pointer;
+  font-size: 14px; font-weight: 700; font-family: "Microsoft YaHei",sans-serif;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.rm-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.rm-btn-cancel { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6); }
+.rm-btn-gen { background: linear-gradient(135deg,#10b981,#34d399); color: #fff; }
+.rm-btn-copy { background: linear-gradient(135deg,#6366f1,#818cf8); color: #fff; display:none; }
+
+.report-output {
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px; padding: 20px 24px; margin: 0 28px 24px;
+  font-family: "Microsoft YaHei", "Times New Roman", serif;
+  font-size: 13.5px; color: rgba(255,255,255,0.85);
+  line-height: 2; white-space: pre-wrap; display: none;
+  max-height: 340px; overflow-y: auto;
+}
+.report-output.show { display: block; }
+</style>
+
+
+<div class="report-overlay" id="reportOverlay" onclick="overlayClick(event)">
+  <div class="report-modal">
+    <div class="rm-header">
+      <div class="rm-title">实验报告 · <span>磁介质与位移电流</span></div>
+      <div class="rm-close" onclick="closeReport()">×</div>
+    </div>
+    <div class="rm-body">
+      <div class="rm-section-title">基本信息</div>
+      <div class="rm-row">
+        <div class="rm-field">
+          <div class="rm-label">姓名 <span>*</span></div>
+          <input class="rm-input" id="rName" placeholder="请输入姓名">
+        </div>
+        <div class="rm-field">
+          <div class="rm-label">学号 <span>*</span></div>
+          <input class="rm-input" id="rStuId" placeholder="请输入学号">
+        </div>
+      </div>
+      <div class="rm-row">
+        <div class="rm-field">
+          <div class="rm-label">实验日期</div>
+          <input class="rm-input" id="rDate" type="date">
+        </div>
+        <div class="rm-field">
+          <div class="rm-label">实验伙伴</div>
+          <input class="rm-input" id="rPartner" placeholder="可选">
+        </div>
+      </div>
+      <div class="rm-section-title">实验内容</div>
+      <div class="rm-field">
+        <div class="rm-label">实验目的</div>
+        <textarea class="rm-textarea" id="rPurpose" placeholder="描述本次实验的目的和预期目标……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验步骤与观察</div>
+        <textarea class="rm-textarea" id="rProcess" placeholder="描述你进行的操作步骤和实验过程中的观察……" style="min-height:100px"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验数据记录</div>
+        <textarea class="rm-textarea" id="rData" placeholder="记录关键数据、参数和仿真结果……"></textarea>
+      </div>
+      <div class="rm-section-title">分析与总结</div>
+      <div class="rm-field">
+        <div class="rm-label">结果分析</div>
+        <textarea class="rm-textarea" id="rAnalysis" placeholder="对实验现象和数据进行分析……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">误差分析与思考</div>
+        <textarea class="rm-textarea" id="rError" placeholder="分析可能的误差来源，以及对物理规律的思考……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验结论</div>
+        <textarea class="rm-textarea" id="rConclusion" placeholder="总结本次实验的结论……"></textarea>
+      </div>
+    </div>
+    <div class="report-output" id="reportOutput"></div>
+    <div class="rm-footer">
+      <button class="rm-btn rm-btn-cancel" onclick="closeReport()">取消</button>
+      <button class="rm-btn rm-btn-copy" id="rmCopyBtn" onclick="copyReport()">复制报告</button>
+      <button class="rm-btn rm-btn-gen" onclick="generateReport()">生成报告</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const EXP_NAME = '磁介质与位移电流';
+  const EXP_SEC  = '§3-8';
+  const STORE_KEY = 'phy26_report_' + EXP_SEC.replace(/[§\/]/g,'');
+
+  function loadSaved() {
+    const d = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+    if (d.name)       document.getElementById('rName').value      = d.name;
+    if (d.stuId)      document.getElementById('rStuId').value     = d.stuId;
+    if (d.date)       document.getElementById('rDate').value      = d.date;
+    if (d.partner)    document.getElementById('rPartner').value   = d.partner;
+    if (d.purpose)    document.getElementById('rPurpose').value   = d.purpose;
+    if (d.process)    document.getElementById('rProcess').value   = d.process;
+    if (d.data)       document.getElementById('rData').value      = d.data;
+    if (d.analysis)   document.getElementById('rAnalysis').value  = d.analysis;
+    if (d.error)      document.getElementById('rError').value     = d.error;
+    if (d.conclusion) document.getElementById('rConclusion').value= d.conclusion;
+  }
+
+  function saveDraft() {
+    const d = {
+      name:       document.getElementById('rName').value,
+      stuId:      document.getElementById('rStuId').value,
+      date:       document.getElementById('rDate').value,
+      partner:    document.getElementById('rPartner').value,
+      purpose:    document.getElementById('rPurpose').value,
+      process:    document.getElementById('rProcess').value,
+      data:       document.getElementById('rData').value,
+      analysis:   document.getElementById('rAnalysis').value,
+      error:      document.getElementById('rError').value,
+      conclusion: document.getElementById('rConclusion').value,
+    };
+    localStorage.setItem(STORE_KEY, JSON.stringify(d));
+  }
+
+  window.openReport = function() {
+    document.getElementById('reportOverlay').classList.add('open');
+    document.getElementById('reportOutput').classList.remove('show');
+    document.getElementById('rmCopyBtn').style.display = 'none';
+    const dateEl = document.getElementById('rDate');
+    if (!dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
+    loadSaved();
+    const _d = {
+      rPurpose:    '研究磁介质在外磁场中的磁化现象，理解磁化强度M与磁场H的关系，观察顺磁质、抗磁质和铁磁质的磁化特性，验证B=μ₀(H+M)=μ₀μᵣH的关系。',
+      rProcess:    '在螺线管中插入不同磁导率的磁介质，观察磁场的变化；改变外加磁场强度H，测量磁化强度M的变化；比较顺磁质（μᵣ>1）、抗磁质（μᵣ<1）和铁磁质（μᵣ>>1）的磁化特性；观察铁磁质的磁滞回线现象。',
+      rData:       '真空中螺线管（n=1000匝/m，I=1A）：H=nI=1000A/m，B₀=μ₀H=1.26mT；插入μᵣ=1000的铁磁质：B=μ₀μᵣH=1.26T（增大1000倍）；顺磁质（μᵣ=1.001）：B=1.261mT（略有增大）；抗磁质（μᵣ=0.999）：B=1.259mT（略有减小）。',
+      rAnalysis:   '磁介质的磁化机制：顺磁质中分子磁矩在外场中取向排列，增强磁场；抗磁质中感应磁矩与外场反向，削弱磁场；铁磁质中磁畴在外场中转向，磁场大幅增强，且存在磁滞现象（剩磁和矫顽力）。磁化强度M=χₘH，磁导率μᵣ=1+χₘ。',
+      rError:      '仿真中铁磁质使用简化的线性模型，忽略了实际铁磁质的非线性磁化曲线和磁滞效应；实际测量中温度变化会影响磁导率（居里温度以上铁磁性消失）；磁场的不均匀性会导致磁化不均匀。',
+      rConclusion: '磁介质在外磁场中发生磁化，B=μ₀μᵣH；顺磁质增强磁场（μᵣ>1），抗磁质削弱磁场（μᵣ<1），铁磁质大幅增强磁场（μᵣ>>1）且存在磁滞现象；铁磁质的磁滞回线反映了剩磁和矫顽力的特性。',
+    };
+    Object.entries(_d).forEach(([id, val]) => { const el = document.getElementById(id); if (el && !el.value) el.value = val; });
+  };
+
+  window.closeReport = function() {
+    saveDraft();
+    document.getElementById('reportOverlay').classList.remove('open');
+  };
+
+  window.overlayClick = function(e) {
+    if (e.target === document.getElementById('reportOverlay')) closeReport();
+  };
+
+  window.generateReport = function() {
+    const name       = document.getElementById('rName').value.trim();
+    const stuId      = document.getElementById('rStuId').value.trim();
+    const date       = document.getElementById('rDate').value || '—';
+    const partner    = document.getElementById('rPartner').value.trim() || '—';
+    const purpose    = document.getElementById('rPurpose').value.trim() || '（未填写）';
+    const process    = document.getElementById('rProcess').value.trim() || '（未填写）';
+    const data       = document.getElementById('rData').value.trim() || '（未填写）';
+    const analysis   = document.getElementById('rAnalysis').value.trim() || '（未填写）';
+    const error      = document.getElementById('rError').value.trim() || '（未填写）';
+    const conclusion = document.getElementById('rConclusion').value.trim() || '（未填写）';
+
+    if (!name || !stuId) { alert('请填写姓名和学号'); return; }
+    saveDraft();
+
+    const divider = '─'.repeat(40);
+    const report = [
+      '普通物理（卓越班）下册 · 电磁学',
+      `实验报告：${EXP_NAME}（${EXP_SEC}）`,
+      divider,
+      `姓　　名：${name}　　　学　　号：${stuId}`,
+      `实验日期：${date}　　　实验伙伴：${partner}`,
+      divider,
+      '',
+      '一、实验目的',
+      purpose,
+      '',
+      '二、实验步骤与观察',
+      process,
+      '',
+      '三、实验数据记录',
+      data,
+      '',
+      '四、结果分析',
+      analysis,
+      '',
+      '五、误差分析与思考',
+      error,
+      '',
+      '六、实验结论',
+      conclusion,
+      '',
+      divider,
+      `生成时间：${new Date().toLocaleString('zh-CN')}`,
+      '本报告由 NUSEP26 普通物理（卓越班）实验仿真平台生成',
+    ].join('\n');
+
+    const out = document.getElementById('reportOutput');
+    out.textContent = report;
+    out.classList.add('show');
+    document.getElementById('rmCopyBtn').style.display = 'inline-flex';
+    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+
+  window.copyReport = function() {
+    const text = document.getElementById('reportOutput').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('rmCopyBtn');
+      const orig = btn.textContent;
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => btn.textContent = orig, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      const btn = document.getElementById('rmCopyBtn');
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => btn.textContent = '复制报告', 2000);
+    });
+  };
+
+  ['rName','rStuId','rDate','rPartner','rPurpose','rProcess','rData','rAnalysis','rError','rConclusion']
+    .forEach(id => document.getElementById(id).addEventListener('input', saveDraft));
+})();
+</script>
+
+</body>
+</html>

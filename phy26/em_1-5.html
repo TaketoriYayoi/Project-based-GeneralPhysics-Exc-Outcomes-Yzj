@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1-5 等势面 电势梯度 — 电磁学</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Times New Roman", "Microsoft YaHei", "PingFang SC", serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh; color: #fff;
+    }
+    :lang(zh), .zh { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; }
+    canvas#particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+
+    .topbar {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; gap: 14px;
+      padding: 18px 36px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      background: rgba(15,12,41,0.7); backdrop-filter: blur(12px);
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .back-btn { color: rgba(255,255,255,0.5); font-size: 14px; cursor: pointer; text-decoration: none; transition: color .2s; }
+    .back-btn:hover { color: #818cf8; }
+    .topbar-title-wrap { display: flex; flex-direction: column; gap: 2px; }
+    .topbar-title { font-size: 16px; font-weight: 700; letter-spacing: 1px; }
+    .topbar-course { font-size: 11px; color: rgba(255,255,255,0.38); letter-spacing: 1px; }
+    .topbar-sub { margin-left: auto; font-size: 12px; color: rgba(255,255,255,0.3); }
+
+    .tabs { display: flex; gap: 10px; margin-bottom: 32px; font-family: "Microsoft YaHei", sans-serif; flex-wrap: wrap; }
+    .tab {
+      padding: 9px 22px; border-radius: 10px; font-size: 14px; font-weight: 600;
+      cursor: pointer; border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.5);
+      transition: all .2s;
+    }
+    .tab.active {
+      background: linear-gradient(135deg,#6366f1,#818cf8);
+      border-color: transparent; color: #fff;
+      box-shadow: 0 4px 16px rgba(99,102,241,0.4);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .page { position: relative; z-index: 10; max-width: 860px; margin: 0 auto; padding: 36px 24px 80px; }
+
+    .card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 16px; padding: 28px 32px; margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 16px; font-weight: 700; color: #818cf8;
+      margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .card-title::before {
+      content: ""; display: inline-block;
+      width: 4px; height: 18px; border-radius: 2px;
+      background: linear-gradient(#6366f1,#818cf8); flex-shrink: 0;
+    }
+    .card p { font-size: 15px; color: rgba(255,255,255,0.8); line-height: 2; }
+    .card p + p { margin-top: 10px; }
+    .hl       { color: #fbbf24; font-weight: 600; }
+    .hl-blue  { color: #38bdf8; font-weight: 600; }
+    .hl-green { color: #34d399; font-weight: 600; }
+    .hl-red   { color: #f87171; font-weight: 600; }
+
+    .katex { color: #e2e8f0; font-size: 1.05em; }
+    .katex-display { margin: 14px 0; }
+    .katex-display > .katex { color: #93c5fd; }
+
+    .prop-list { list-style: none; margin-top: 10px; display: flex; flex-direction: column; gap: 12px; }
+    .prop-item {
+      display: flex; gap: 14px; align-items: flex-start;
+      background: rgba(255,255,255,0.03); border-radius: 10px; padding: 14px 18px;
+      border-left: 3px solid #6366f1;
+    }
+    .prop-item:nth-child(2) { border-left-color: #38bdf8; }
+    .prop-item:nth-child(3) { border-left-color: #34d399; }
+    .prop-item:nth-child(4) { border-left-color: #f59e0b; }
+    .prop-num {
+      min-width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700;
+      background: linear-gradient(135deg,#6366f1,#818cf8); color: #fff;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .prop-item:nth-child(2) .prop-num { background: linear-gradient(135deg,#0ea5e9,#38bdf8); }
+    .prop-item:nth-child(3) .prop-num { background: linear-gradient(135deg,#10b981,#34d399); }
+    .prop-item:nth-child(4) .prop-num { background: linear-gradient(135deg,#f59e0b,#fbbf24); }
+    .prop-body { font-size: 14.5px; color: rgba(255,255,255,0.78); line-height: 1.9; }
+    .prop-body strong { color: #fff; font-family: "Microsoft YaHei", sans-serif; }
+
+    .demo-box {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px; padding: 24px; margin-bottom: 20px;
+    }
+    .demo-title {
+      font-size: 15px; font-weight: 700; color: #c084fc; margin-bottom: 16px;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+
+    .note-box {
+      background: rgba(251,191,36,0.06); border: 1px solid rgba(251,191,36,0.2);
+      border-radius: 12px; padding: 16px 20px; margin-top: 14px;
+      font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.9;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .note-box .note-label { font-weight: 700; color: #fbbf24; margin-bottom: 4px; }
+
+    .grad-box {
+      background: rgba(99,102,241,0.06); border: 1px solid rgba(99,102,241,0.25);
+      border-radius: 12px; padding: 18px 22px; margin-top: 16px;
+      font-size: 14.5px; color: rgba(255,255,255,0.78); line-height: 2;
+    }
+  </style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+
+<div class="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">§1-5 &nbsp;等势面 &nbsp;电势梯度</div>
+    <span class="topbar-course">普通物理（卓越班）下册 · 电磁学</span>
+  </div>
+  <div class="topbar-sub">NUSEP26 · 普通物理（卓）下</div>
+</div>
+
+<div class="page">
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(0)">1-5-1 &nbsp;等势面</div>
+    <div class="tab"        onclick="switchTab(1)">1-5-2 &nbsp;电势梯度</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- Tab 0: 1-5-1 等势面                         -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="tab-panel active" id="panel-0">
+
+    <div class="card">
+      <div class="card-title">等势面的定义与规定</div>
+      <p>电场中<span class="hl">电势相等的点组成的曲面</span>称为<span class="hl">等势面</span>。为了用等势面直观表示电场中电势的分布，规定：<span class="hl-green">相邻等势面之间的电势差相等</span>。</p>
+      <p>在此规定下，等势面的<span class="hl-blue">密集程度</span>直接反映电场的强弱——等势面越密集的区域，单位距离内电势变化越大，场强越强；等势面越稀疏的区域，场强越弱。</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">等势面的基本性质</div>
+      <ul class="prop-list">
+        <li class="prop-item">
+          <div class="prop-num">1</div>
+          <div class="prop-body">
+            <strong>与电场线正交</strong><br>
+            等势面与电场线处处垂直。若电场线与等势面不垂直，则 $\vec{E}$ 在等势面内存在切向分量，沿等势面移动电荷时电场力就会做功，这与等势面上各点电势相等矛盾。
+          </div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">2</div>
+          <div class="prop-body">
+            <strong>沿等势面运动时电场力不做功</strong><br>
+            电荷 $q$ 沿等势面从 $a$ 移到 $b$，因 $V_a=V_b$，故
+            $$W_{ab}=q(V_a-V_b)=0$$
+            等势面是"无摩擦的静电轨道"——沿它移动电荷，静电场力始终不做功。
+          </div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">3</div>
+          <div class="prop-body">
+            <strong>电场线指向电势降低的方向</strong><br>
+            电场线从高电势等势面穿向低电势等势面，即 $\vec{E}$ 的方向是电势减小最快的方向。
+          </div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">4</div>
+          <div class="prop-body">
+            <strong>任意两等势面不相交</strong><br>
+            若两等势面相交，交线上的点将有两个不同的电势值，与电场单值性矛盾。
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="demo-box">
+      <div class="demo-title">▶ 等势面与电场线（交互切换场景）</div>
+      <canvas id="equipCanvas" width="680" height="300"
+        style="border-radius:10px;max-width:100%;display:block;margin:0 auto;"></canvas>
+      <div style="text-align:center;margin-top:12px;">
+        <label style="font-family:'Microsoft YaHei',sans-serif;font-size:13px;color:rgba(255,255,255,0.5);">
+          场景：
+          <select id="equipScene" style="margin-left:8px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:5px 14px;color:#fff;font-size:13px;cursor:pointer;">
+            <option value="point_pos">单正点电荷</option>
+            <option value="dipole">电偶极子（+−）</option>
+            <option value="quadrupole">电四极子（+−+−）</option>
+            <option value="uniform">匀强电场（平行板）</option>
+          </select>
+        </label>
+      </div>
+      <div style="text-align:center;margin-top:8px;font-size:12px;color:rgba(255,255,255,0.32);font-family:'Microsoft YaHei',sans-serif;">
+        金色实线为电场线，彩色虚线为等势面；两者处处正交
+      </div>
+    </div>
+
+  </div><!-- /panel-0 -->
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- Tab 1: 1-5-2 电势梯度                       -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="panel-1">
+
+    <div class="card">
+      <div class="card-title">从方向导数到电势梯度</div>
+      <p>在电场中沿方向 $\hat{l}$ 移动微小距离 $\mathrm{d}l$，电势变化 $\mathrm{d}V$，则 $\vec{E}$ 在该方向的分量为</p>
+      $$E_l = -\frac{\partial V}{\partial l}$$
+      <p>负号表明<span class="hl">电场线指向电势下降的方向</span>。将此推广到三维：在直角坐标系中，$\vec{E}$ 的三个分量分别为</p>
+      $$E_x = -\frac{\partial V}{\partial x},\quad E_y = -\frac{\partial V}{\partial y},\quad E_z = -\frac{\partial V}{\partial z}$$
+      <p>用梯度算符 $\nabla=\hat{x}\dfrac{\partial}{\partial x}+\hat{y}\dfrac{\partial}{\partial y}+\hat{z}\dfrac{\partial}{\partial z}$ 写成矢量形式：</p>
+      $$\boxed{\vec{E} = -\nabla V = -\operatorname{grad}\,V}$$
+      <p>$\nabla V$ 称为<span class="hl">电势梯度</span>，其方向是电势增加最快的方向，大小等于电势沿该方向的变化率。$\vec{E}$ 与 $\nabla V$ 大小相等、方向相反。</p>
+      <div class="note-box">
+        <div class="note-label">物理意义</div>
+        电势梯度描述电势场在空间中的"陡峭程度"。等势面越密集的地方，$|\nabla V|$ 越大，$|\vec{E}|$ 越大；等势面越稀疏，场强越弱。这与等势面密疏反映场强的结论完全自洽。
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">例1 &nbsp;平行板电容器</div>
+      <p>两板间距为 $d$，板间电压为 $U$（高电势板取 $z=d$，低电势板 $z=0$，则 $V(z)=Uz/d$）。</p>
+      <p>由电势梯度公式：</p>
+      $$E_x=-\frac{\partial V}{\partial x}=0,\quad E_y=-\frac{\partial V}{\partial y}=0,\quad E_z=-\frac{\partial V}{\partial z}=-\frac{U}{d}$$
+      <p>故 $\vec{E}=-\dfrac{U}{d}\hat{z}$，即匀强电场从高电势板指向低电势板，大小 $E=U/d$。这与高斯定理结果 $E=\sigma/\varepsilon_0$ 一致（$U=\sigma d/\varepsilon_0$）。</p>
+      <div class="demo-box" style="margin-top:18px;margin-bottom:0;">
+        <div class="demo-title">▶ 平行板：等势面（水平彩线）与场强（竖直箭头）</div>
+        <canvas id="capCanvas" width="620" height="220"
+          style="border-radius:10px;max-width:100%;display:block;margin:0 auto;"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">例2 &nbsp;点电荷 $q$ 产生的场（场点坐标 $(x,y,z)$）</div>
+      <p>点电荷置于原点，电势 $V=\dfrac{q}{4\pi\varepsilon_0 r}$，其中 $r=\sqrt{x^2+y^2+z^2}$。</p>
+      <p>对 $x$ 求偏导（$y,z$ 同理）：</p>
+      $$\frac{\partial V}{\partial x}=\frac{q}{4\pi\varepsilon_0}\cdot\left(-\frac{x}{r^3}\right)$$
+      <p>因此</p>
+      $$E_x=-\frac{\partial V}{\partial x}=\frac{q}{4\pi\varepsilon_0}\cdot\frac{x}{r^3}$$
+      <p>类似地 $E_y=\dfrac{q}{4\pi\varepsilon_0}\cdot\dfrac{y}{r^3}$，$E_z=\dfrac{q}{4\pi\varepsilon_0}\cdot\dfrac{z}{r^3}$。合矢量：</p>
+      $$\vec{E}=\frac{q}{4\pi\varepsilon_0 r^3}(x\hat{x}+y\hat{y}+z\hat{z})=\frac{q}{4\pi\varepsilon_0 r^2}\hat{r}$$
+      <p>与库仑定律结果完全一致，验证了 $\vec{E}=-\nabla V$ 的正确性。</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">引申：散度算符与高斯定律的微分形式</div>
+      <p>将 $\vec{E}=-\nabla V$ 代入高斯定律 $\oint_S\vec{E}\cdot\mathrm{d}\vec{S}=\rho/\varepsilon_0$，利用高斯散度定理（面积分化为体积分），可得<span class="hl">真空中高斯定律的微分形式</span>：</p>
+      $$\nabla\cdot\vec{E} = \frac{\rho}{\varepsilon_0}$$
+      <p>其中 $\nabla\cdot\vec{E}=\dfrac{\partial E_x}{\partial x}+\dfrac{\partial E_y}{\partial y}+\dfrac{\partial E_z}{\partial z}$ 为电场的<span class="hl">散度</span>，描述场线在该点的"发散程度"。</p>
+      <p>将 $\vec{E}=-\nabla V$ 代入，得<span class="hl-blue">泊松方程</span>：</p>
+      $$\nabla^2 V = -\frac{\rho}{\varepsilon_0}$$
+      <p>在无源区域（$\rho=0$）退化为<span class="hl-green">拉普拉斯方程</span> $\nabla^2 V=0$，是静电学边值问题的核心方程。</p>
+      <div class="grad-box">
+        <strong style="color:#818cf8;">三个方程的对应关系</strong><br>
+        $\nabla\times\vec{E}=\vec{0}$ &nbsp;（环路定理微分形式，静电场无旋）<br>
+        $\nabla\cdot\vec{E}=\rho/\varepsilon_0$ &nbsp;（高斯定律微分形式，静电场有源）<br>
+        $\vec{E}=-\nabla V$ &nbsp;（场强与电势的关系，由无旋性保证）
+      </div>
+    </div>
+
+  </div><!-- /panel-1 -->
+
+</div><!-- /page -->
+
+<script>
+function switchTab(idx){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
+  document.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',i===idx));
+}
+
+// ── 粒子背景 ──
+(function(){
+  const canvas=document.getElementById('particles');
+  const ctx=canvas.getContext('2d');
+  let W,H,pts=[];
+  function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
+  window.addEventListener('resize',resize); resize();
+  const COLORS=['#818cf8','#38bdf8','#c084fc','#34d399'];
+  function spawn(){ return {x:Math.random()*W,y:H+10,r:Math.random()*2.5+0.5,speed:Math.random()*0.5+0.15,color:COLORS[Math.random()*COLORS.length|0],op:Math.random()*0.15+0.04}; }
+  for(let i=0;i<50;i++){const p=spawn();p.y=Math.random()*H;pts.push(p);}
+  function draw(){ctx.clearRect(0,0,W,H);pts.forEach((p,i)=>{p.y-=p.speed;if(p.y<-10)pts[i]=spawn();ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.color;ctx.globalAlpha=p.op;ctx.fill();});ctx.globalAlpha=1;requestAnimationFrame(draw);}
+  draw();
+})();
+
+// ── 通用箭头 ──
+function drawArrow(ctx,x1,y1,x2,y2,col,lw){
+  const dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy);
+  if(len<3) return;
+  const ux=dx/len,uy=dy/len,h=9;
+  ctx.save();
+  ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=lw; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2-ux*h*0.6,y2-uy*h*0.6); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x2,y2);
+  ctx.lineTo(x2-h*ux+h*0.42*uy,y2-h*uy-h*0.42*ux);
+  ctx.lineTo(x2-h*ux-h*0.42*uy,y2-h*uy+h*0.42*ux);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+// ── 等势面演示 ──
+(function(){
+  const canvas=document.getElementById('equipCanvas');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+
+  // Charge configs for each scene
+  const scenes={
+    point_pos:   [{x:W/2,y:H/2,q:1}],
+    dipole:      [{x:W/2-70,y:H/2,q:1},{x:W/2+70,y:H/2,q:-1}],
+    quadrupole:  [{x:W/2-80,y:H/2-80,q:1},{x:W/2+80,y:H/2-80,q:-1},
+                  {x:W/2+80,y:H/2+80,q:1},{x:W/2-80,y:H/2+80,q:-1}],
+    uniform:     null
+  };
+
+  function V(x,y,charges){
+    let v=0;
+    charges.forEach(c=>{
+      const r=Math.sqrt((x-c.x)**2+(y-c.y)**2)||0.5;
+      v+=c.q/r;
+    });
+    return v;
+  }
+  function Ex(x,y,charges){
+    let e=0;
+    charges.forEach(c=>{
+      const dx=x-c.x,dy=y-c.y,r3=Math.pow(dx*dx+dy*dy,1.5)||1e-9;
+      e+=c.q*dx/r3;
+    });
+    return e;
+  }
+  function Ey(x,y,charges){
+    let e=0;
+    charges.forEach(c=>{
+      const dx=x-c.x,dy=y-c.y,r3=Math.pow(dx*dx+dy*dy,1.5)||1e-9;
+      e+=c.q*dy/r3;
+    });
+    return e;
+  }
+
+  // marching-squares contour
+  function drawContours(ctx,charges,levels,GW,GH){
+    const grid=[];
+    for(let j=0;j<GH;j++){
+      grid.push([]);
+      for(let i=0;i<GW;i++) grid[j].push(V(i/GW*W,j/GH*H,charges));
+    }
+    const palette=['#f87171','#fb923c','#fbbf24','#34d399','#38bdf8','#818cf8','#c084fc'];
+    levels.forEach((lv,li)=>{
+      const col=palette[li%palette.length];
+      ctx.save(); ctx.strokeStyle=col; ctx.lineWidth=1.3; ctx.setLineDash([5,3]); ctx.globalAlpha=0.7;
+      for(let j=0;j<GH-1;j++){
+        for(let i=0;i<GW-1;i++){
+          const v00=grid[j][i],v10=grid[j][i+1],v01=grid[j+1][i],v11=grid[j+1][i+1];
+          const x0=i/GW*W,x1=(i+1)/GW*W,y0=j/GH*H,y1=(j+1)/GH*H;
+          const pts=[];
+          if((v00-lv)*(v10-lv)<0){ const t=(lv-v00)/(v10-v00); pts.push([x0+t*(x1-x0),y0]); }
+          if((v01-lv)*(v11-lv)<0){ const t=(lv-v01)/(v11-v01); pts.push([x0+t*(x1-x0),y1]); }
+          if((v00-lv)*(v01-lv)<0){ const t=(lv-v00)/(v01-v00); pts.push([x0,y0+t*(y1-y0)]); }
+          if((v10-lv)*(v11-lv)<0){ const t=(lv-v10)/(v11-v10); pts.push([x1,y0+t*(y1-y0)]); }
+          if(pts.length>=2){ ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]); ctx.lineTo(pts[1][0],pts[1][1]); ctx.stroke(); }
+        }
+      }
+      ctx.restore();
+    });
+  }
+
+  // field line tracer
+  function traceFieldLine(ctx,sx,sy,charges,col){
+    let x=sx,y=sy;
+    ctx.save(); ctx.strokeStyle=col; ctx.lineWidth=1.1; ctx.setLineDash([]); ctx.globalAlpha=0.55;
+    ctx.beginPath(); ctx.moveTo(x,y);
+    let arX=x,arY=y,arPlaced=false;
+    for(let s=0;s<800;s++){
+      const ex=Ex(x,y,charges),ey=Ey(x,y,charges),en=Math.sqrt(ex*ex+ey*ey)||1;
+      x+=1.8*ex/en; y+=1.8*ey/en;
+      if(x<0||x>W||y<0||y>H) break;
+      let nearNeg=false;
+      charges.forEach(c=>{ if(c.q<0&&Math.sqrt((x-c.x)**2+(y-c.y)**2)<16) nearNeg=true; });
+      if(nearNeg) break;
+      ctx.lineTo(x,y);
+      if(!arPlaced&&s===120){ arX=x; }
+      if(!arPlaced&&s===121){
+        ctx.stroke(); ctx.restore();
+        ctx.save(); ctx.strokeStyle=col; ctx.lineWidth=1.1; ctx.setLineDash([]); ctx.globalAlpha=0.55;
+        drawArrow(ctx,arX,arY,x,y,col,1.1);
+        ctx.restore();
+        ctx.save(); ctx.strokeStyle=col; ctx.lineWidth=1.1; ctx.setLineDash([]); ctx.globalAlpha=0.55;
+        ctx.beginPath(); ctx.moveTo(x,y);
+        arPlaced=true;
+      }
+    }
+    ctx.stroke(); ctx.restore();
+  }
+
+  function drawCharge(ctx,c){
+    ctx.save();
+    const col=c.q>0?'#f87171':'#60a5fa';
+    const g=ctx.createRadialGradient(c.x-4,c.y-4,2,c.x,c.y,17);
+    g.addColorStop(0,'rgba(255,255,255,0.35)'); g.addColorStop(1,col);
+    ctx.beginPath(); ctx.arc(c.x,c.y,17,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.fillStyle='#fff'; ctx.font='bold 14px Times New Roman'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(c.q>0?'+':'\u2212',c.x,c.y);
+    ctx.restore();
+  }
+
+  function drawScene(name){
+    ctx.clearRect(0,0,W,H);
+    ctx.save(); ctx.fillStyle='rgba(255,255,255,0.012)'; ctx.fillRect(0,0,W,H); ctx.restore();
+
+    if(name==='uniform'){
+      // plates
+      ctx.save();
+      ctx.strokeStyle='rgba(248,113,113,0.7)'; ctx.lineWidth=4;
+      ctx.beginPath(); ctx.moveTo(50,40); ctx.lineTo(W-50,40); ctx.stroke();
+      ctx.strokeStyle='rgba(96,165,250,0.7)';
+      ctx.beginPath(); ctx.moveTo(50,H-40); ctx.lineTo(W-50,H-40); ctx.stroke();
+      // charge labels
+      ctx.font='bold 12px Times New Roman'; ctx.textAlign='center';
+      ctx.fillStyle='rgba(248,113,113,0.8)';
+      for(let i=1;i<=7;i++) ctx.fillText('+',50+(W-100)*i/8,30);
+      ctx.fillStyle='rgba(96,165,250,0.8)';
+      for(let i=1;i<=7;i++) ctx.fillText('\u2212',50+(W-100)*i/8,H-24);
+      ctx.restore();
+      // equipotential lines
+      const nEq=8;
+      const palette=['#f87171','#fb923c','#fbbf24','#a3e635','#34d399','#38bdf8','#818cf8','#c084fc'];
+      for(let i=1;i<=nEq;i++){
+        const y=40+(H-80)*i/(nEq+1);
+        ctx.save(); ctx.strokeStyle=palette[i-1]; ctx.lineWidth=1.3; ctx.setLineDash([5,3]); ctx.globalAlpha=0.7;
+        ctx.beginPath(); ctx.moveTo(50,y); ctx.lineTo(W-50,y); ctx.stroke(); ctx.restore();
+      }
+      // field arrows
+      for(let i=1;i<=7;i++){
+        const ax=50+(W-100)*i/8;
+        drawArrow(ctx,ax,55,ax,H-55,'rgba(251,191,36,0.7)',1.5);
+      }
+      ctx.save(); ctx.fillStyle='rgba(251,191,36,0.6)'; ctx.font='italic bold 13px Times New Roman';
+      ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.fillText('E',W-40,H/2); ctx.restore();
+      return;
+    }
+
+    const charges=scenes[name];
+    // contour levels
+    let levels;
+    if(name==='point_pos')   levels=[-0.08,-0.04,-0.02,0.02,0.04,0.08,0.16,0.32];
+    else if(name==='dipole') levels=[-0.04,-0.02,-0.01,0.01,0.02,0.04];
+    else                     levels=[-0.03,-0.015,-0.007,0.007,0.015,0.03];
+    drawContours(ctx,charges,levels,110,90);
+
+    // field lines
+    const nFL=name==='point_pos'?14:10;
+    charges.filter(c=>c.q>0).forEach(c=>{
+      for(let k=0;k<nFL;k++){
+        const a=(2*Math.PI/nFL)*k;
+        traceFieldLine(ctx,c.x+17*Math.cos(a),c.y+17*Math.sin(a),charges,'rgba(251,191,36,0.85)');
+      }
+    });
+
+    charges.forEach(c=>drawCharge(ctx,c));
+  }
+
+  drawScene('point_pos');
+  document.getElementById('equipScene').addEventListener('change',function(){ drawScene(this.value); });
+})();
+
+// ── 平行板电容器示意图 ──
+(function(){
+  const canvas=document.getElementById('capCanvas');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  ctx.save(); ctx.fillStyle='rgba(255,255,255,0.012)'; ctx.fillRect(0,0,W,H); ctx.restore();
+
+  const y1=45, y2=H-45; // plate positions
+  const nEq=6, nArrow=7;
+  const palette=['#f87171','#fb923c','#fbbf24','#34d399','#38bdf8','#818cf8'];
+
+  // plates
+  ctx.save();
+  ctx.strokeStyle='rgba(248,113,113,0.75)'; ctx.lineWidth=4; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(55,y1); ctx.lineTo(W-55,y1); ctx.stroke();
+  ctx.strokeStyle='rgba(96,165,250,0.75)';
+  ctx.beginPath(); ctx.moveTo(55,y2); ctx.lineTo(W-55,y2); ctx.stroke();
+  // labels
+  ctx.font='13px "Microsoft YaHei",sans-serif'; ctx.textAlign='center';
+  ctx.fillStyle='rgba(248,113,113,0.85)'; ctx.fillText('+σ  (高电势 V = U)', W/2, y1-14);
+  ctx.fillStyle='rgba(96,165,250,0.85)'; ctx.fillText('-σ  (低电势 V = 0)', W/2, y2+20);
+  ctx.restore();
+
+  // equipotential lines with V labels
+  for(let i=1;i<=nEq;i++){
+    const y=y1+(y2-y1)*i/(nEq+1);
+    const vFrac=(nEq+1-i)/(nEq+1);
+    ctx.save(); ctx.strokeStyle=palette[i-1]; ctx.lineWidth=1.3; ctx.setLineDash([5,3]); ctx.globalAlpha=0.75;
+    ctx.beginPath(); ctx.moveTo(55,y); ctx.lineTo(W-55,y); ctx.stroke();
+    ctx.setLineDash([]); ctx.fillStyle=palette[i-1]; ctx.font='italic 12px Times New Roman';
+    ctx.textAlign='left'; ctx.textBaseline='middle'; ctx.globalAlpha=0.8;
+    ctx.fillText('V = '+vFrac.toFixed(2)+'U', W-50, y);
+    ctx.restore();
+  }
+
+  // E arrows
+  for(let i=1;i<=nArrow;i++){
+    const ax=55+(W-110)*i/(nArrow+1);
+    drawArrow(ctx,ax,y1+18,ax,y2-18,'rgba(251,191,36,0.72)',1.6);
+  }
+  // E label and formula
+  ctx.save();
+  ctx.fillStyle='rgba(251,191,36,0.7)'; ctx.font='italic bold 13px Times New Roman';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('E = U/d', W/2, y1-3);
+  ctx.restore();
+})();
+</script>
+
+<!-- ── 笔记工具栏 ── -->
+<style>
+.note-fab {
+  position: fixed; bottom: 28px; right: 28px; z-index: 1000;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+}
+.fab-main {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 22px; box-shadow: 0 4px 20px rgba(99,102,241,0.5);
+  transition: transform 0.2s, box-shadow 0.2s;
+  color: #fff;
+}
+.fab-main:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(99,102,241,0.65); }
+.fab-main.active { background: linear-gradient(135deg, #7c3aed, #a78bfa); transform: rotate(45deg); }
+.fab-menu {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+  opacity: 0; pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.fab-menu.open { opacity: 1; pointer-events: all; transform: translateY(0); }
+.fab-item {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(15,12,41,0.92); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px; padding: 9px 16px 9px 12px;
+  cursor: pointer; white-space: nowrap;
+  backdrop-filter: blur(12px);
+  transition: border-color 0.2s, background 0.2s;
+  font-family: "Microsoft YaHei", sans-serif;
+}
+.fab-item:hover { border-color: rgba(129,140,248,0.4); background: rgba(99,102,241,0.15); }
+.fab-item .fi-icon { font-size: 17px; }
+.fab-item .fi-label { font-size: 13px; color: rgba(255,255,255,0.8); }
+.fab-item.starred .fi-label { color: #fbbf24; }
+.fab-item.starred { border-color: rgba(251,191,36,0.35); }
+.fab-item.read-done .fi-label { color: #34d399; }
+.fab-item.read-done { border-color: rgba(52,211,153,0.35); }
+.note-drawer {
+  position: fixed; bottom: 0; right: 0; left: 0; z-index: 999;
+  background: rgba(10,8,30,0.96);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(20px);
+  padding: 20px 28px 28px;
+  transform: translateY(100%);
+  transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
+}
+.note-drawer.open { transform: translateY(0); }
+.drawer-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.drawer-title { font-size: 14px; font-weight: 700; color: #a5b4fc; font-family: "Microsoft YaHei",sans-serif; letter-spacing: 1px; }
+.drawer-close { font-size: 20px; color: rgba(255,255,255,0.4); cursor: pointer; transition: color 0.2s; line-height: 1; }
+.drawer-close:hover { color: #fff; }
+.drawer-textarea {
+  width: 100%; height: 120px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; padding: 12px 16px;
+  color: #fff; font-size: 14px; font-family: "Microsoft YaHei",sans-serif;
+  resize: vertical; outline: none; line-height: 1.8;
+  transition: border-color 0.2s;
+}
+.drawer-textarea:focus { border-color: rgba(129,140,248,0.5); }
+.drawer-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+.drawer-hint { font-size: 11px; color: rgba(255,255,255,0.25); font-family: "Microsoft YaHei",sans-serif; }
+.drawer-save {
+  background: linear-gradient(135deg, #6366f1, #818cf8); border: none;
+  color: #fff; font-size: 13px; font-weight: 600; padding: 8px 22px; border-radius: 10px;
+  cursor: pointer; font-family: "Microsoft YaHei",sans-serif; transition: opacity 0.2s;
+}
+.drawer-save:hover { opacity: 0.85; }
+.phy-toast {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: rgba(15,12,41,0.95); border: 1px solid rgba(129,140,248,0.3);
+  border-radius: 24px; padding: 10px 22px;
+  font-size: 13px; color: rgba(255,255,255,0.85); font-family: "Microsoft YaHei",sans-serif;
+  z-index: 1100; opacity: 0;
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none; white-space: nowrap;
+}
+.phy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+
+<div class="note-fab">
+  <div class="fab-menu" id="fabMenu">
+    <div class="fab-item" id="fabStar" onclick="toggleStar()">
+      <span class="fi-icon">☆</span>
+      <span class="fi-label">收藏此节</span>
+    </div>
+    <div class="fab-item" id="fabRead" onclick="toggleRead()">
+      <span class="fi-icon">○</span>
+      <span class="fi-label">标记已读</span>
+    </div>
+    <div class="fab-item" onclick="openDrawer()">
+      <span class="fi-icon">📝</span>
+      <span class="fi-label">我的笔记</span>
+    </div>
+  </div>
+  <button class="fab-main" id="fabBtn" onclick="toggleFab()" title="工具">✦</button>
+</div>
+
+<div class="note-drawer" id="noteDrawer">
+  <div class="drawer-header">
+    <div class="drawer-title">📝 我的笔记 · §1-5</div>
+    <div class="drawer-close" onclick="closeDrawer()">×</div>
+  </div>
+  <textarea class="drawer-textarea" id="drawerTA" placeholder="在此记录你的理解、疑问或总结……"></textarea>
+  <div class="drawer-footer">
+    <span class="drawer-hint">自动保存到本地，刷新不丢失</span>
+    <button class="drawer-save" onclick="saveNote()">保存</button>
+  </div>
+</div>
+
+<div class="phy-toast" id="phyToast"></div>
+
+<script>
+(function(){
+  const PID = '1-5';
+  const SK  = 'phy26_note_' + PID;
+  const STK = 'phy26_star_' + PID;
+  const RDK = 'phy26_read_' + PID;
+  let fabOpen = false;
+
+  function showToast(msg) {
+    const t = document.getElementById('phyToast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  window.toggleFab = function() {
+    fabOpen = !fabOpen;
+    document.getElementById('fabMenu').classList.toggle('open', fabOpen);
+    document.getElementById('fabBtn').classList.toggle('active', fabOpen);
+  };
+
+  window.toggleStar = function() {
+    const starred = localStorage.getItem(STK) === '1';
+    if (starred) { localStorage.removeItem(STK); showToast('已取消收藏'); }
+    else { localStorage.setItem(STK, '1'); showToast('⭐ 已收藏此节'); }
+    refreshStarUI();
+  };
+
+  window.toggleRead = function() {
+    const read = localStorage.getItem(RDK) === '1';
+    if (read) { localStorage.removeItem(RDK); showToast('已取消已读标记'); }
+    else { localStorage.setItem(RDK, '1'); showToast('✓ 已标记为已读'); }
+    refreshReadUI();
+  };
+
+  function refreshStarUI() {
+    const starred = localStorage.getItem(STK) === '1';
+    const el = document.getElementById('fabStar');
+    el.querySelector('.fi-icon').textContent = starred ? '★' : '☆';
+    el.querySelector('.fi-label').textContent = starred ? '已收藏' : '收藏此节';
+    el.classList.toggle('starred', starred);
+  }
+
+  function refreshReadUI() {
+    const read = localStorage.getItem(RDK) === '1';
+    const el = document.getElementById('fabRead');
+    el.querySelector('.fi-icon').textContent = read ? '✓' : '○';
+    el.querySelector('.fi-label').textContent = read ? '已读' : '标记已读';
+    el.classList.toggle('read-done', read);
+  }
+
+  window.openDrawer = function() {
+    document.getElementById('drawerTA').value = localStorage.getItem(SK) || '';
+    document.getElementById('noteDrawer').classList.add('open');
+    document.getElementById('fabMenu').classList.remove('open');
+    document.getElementById('fabBtn').classList.remove('active');
+    fabOpen = false;
+    setTimeout(() => document.getElementById('drawerTA').focus(), 350);
+  };
+
+  window.closeDrawer = function() {
+    document.getElementById('noteDrawer').classList.remove('open');
+  };
+
+  window.saveNote = function() {
+    const val = document.getElementById('drawerTA').value.trim();
+    if (val) { localStorage.setItem(SK, val); showToast('✓ 笔记已保存'); }
+    else { localStorage.removeItem(SK); showToast('笔记已清空'); }
+    closeDrawer();
+  };
+
+  let saveTimer;
+  document.getElementById('drawerTA').addEventListener('input', function() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      const val = this.value.trim();
+      if (val) localStorage.setItem(SK, val);
+    }, 1500);
+  });
+
+  refreshStarUI(); refreshReadUI();
+
+  if (localStorage.getItem(SK)) {
+    const noteItem = document.querySelector('.fab-item:last-of-type .fi-icon');
+    if (noteItem) noteItem.textContent = '📋';
+  }
+})();
+</script>
+</body>
+</html>

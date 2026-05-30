@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>4-3 自感和互感 — 电磁学</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Times New Roman","Microsoft YaHei","PingFang SC",serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;color:#fff}
+    canvas#particles{position:fixed;inset:0;pointer-events:none;z-index:0}
+    .topbar{position:relative;z-index:10;display:flex;align-items:center;gap:14px;padding:18px 36px;border-bottom:1px solid rgba(255,255,255,0.07);background:rgba(15,12,41,0.7);backdrop-filter:blur(12px);font-family:"Microsoft YaHei",sans-serif}
+    .back-btn{color:rgba(255,255,255,0.5);font-size:14px;cursor:pointer;text-decoration:none;transition:color .2s}.back-btn:hover{color:#fbbf24}
+    .topbar-title{font-size:16px;font-weight:700;letter-spacing:1px}
+    .topbar-sub{margin-left:auto;font-size:12px;color:rgba(255,255,255,0.3)}
+    .tabs{display:flex;gap:10px;margin-bottom:32px;font-family:"Microsoft YaHei",sans-serif;flex-wrap:wrap}
+    .tab{padding:9px 22px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.5);transition:all .2s}
+    .tab.active{background:linear-gradient(135deg,#f59e0b,#fbbf24);border-color:transparent;color:#1a1200;box-shadow:0 4px 16px rgba(251,191,36,0.4)}
+    .tab-panel{display:none}.tab-panel.active{display:block}
+    .page{position:relative;z-index:10;max-width:860px;margin:0 auto;padding:36px 24px 80px}
+    .card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:16px;padding:28px 32px;margin-bottom:20px}
+    .card-title{font-size:16px;font-weight:700;color:#fbbf24;margin-bottom:14px;display:flex;align-items:center;gap:8px;font-family:"Microsoft YaHei",sans-serif}
+    .card-title::before{content:"";display:inline-block;width:4px;height:18px;border-radius:2px;background:linear-gradient(#f59e0b,#fbbf24);flex-shrink:0}
+    .card p{font-size:15px;color:rgba(255,255,255,0.8);line-height:2}.card p+p{margin-top:10px}
+    .hl{color:#fbbf24;font-weight:600}.hl-blue{color:#38bdf8;font-weight:600}.hl-green{color:#34d399;font-weight:600}.hl-red{color:#f87171;font-weight:600}.hl-purple{color:#c084fc;font-weight:600}
+    .katex{color:#e2e8f0;font-size:1.05em}.katex-display{margin:14px 0}.katex-display>.katex{color:#fde68a}
+    .prop-list{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:12px}
+    .prop-item{display:flex;gap:14px;align-items:flex-start;background:rgba(255,255,255,0.03);border-radius:10px;padding:14px 18px;border-left:3px solid #f59e0b}
+    .prop-item:nth-child(2){border-left-color:#38bdf8}.prop-item:nth-child(3){border-left-color:#34d399}.prop-item:nth-child(4){border-left-color:#f87171}.prop-item:nth-child(5){border-left-color:#c084fc}
+    .prop-num{min-width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#1a1200;font-family:"Microsoft YaHei",sans-serif}
+    .prop-item:nth-child(2) .prop-num{background:linear-gradient(135deg,#0ea5e9,#38bdf8);color:#fff}.prop-item:nth-child(3) .prop-num{background:linear-gradient(135deg,#10b981,#34d399);color:#fff}.prop-item:nth-child(4) .prop-num{background:linear-gradient(135deg,#ef4444,#f87171);color:#fff}.prop-item:nth-child(5) .prop-num{background:linear-gradient(135deg,#7c3aed,#c084fc);color:#fff}
+    .prop-body{font-size:14.5px;color:rgba(255,255,255,0.78);line-height:1.9}.prop-body strong{color:#fff;font-family:"Microsoft YaHei",sans-serif}
+    .note-box{background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);border-radius:12px;padding:16px 20px;margin-top:14px;font-size:14px;color:rgba(255,255,255,0.7);line-height:1.9;font-family:"Microsoft YaHei",sans-serif}
+    .note-box .note-label{font-weight:700;color:#fbbf24;margin-bottom:4px;display:block}
+    .green-box{background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.2);border-radius:12px;padding:16px 20px;margin-top:14px;font-size:14px;color:rgba(255,255,255,0.75);line-height:1.9;font-family:"Microsoft YaHei",sans-serif}
+    .green-box .note-label{font-weight:700;color:#34d399;margin-bottom:4px;display:block}
+    .blue-box{background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.2);border-radius:12px;padding:16px 20px;margin-top:14px;font-size:14px;color:rgba(255,255,255,0.75);line-height:1.9;font-family:"Microsoft YaHei",sans-serif}
+    .blue-box .note-label{font-weight:700;color:#38bdf8;margin-bottom:4px;display:block}
+    .eg-block{background:rgba(251,191,36,0.04);border:1px solid rgba(251,191,36,0.15);border-radius:14px;padding:24px 28px;margin-bottom:20px}
+    .eg-title{font-size:15px;font-weight:700;color:#fbbf24;margin-bottom:14px;font-family:"Microsoft YaHei",sans-serif;display:flex;align-items:center;gap:8px}
+    .eg-title::before{content:"";display:inline-block;width:4px;height:16px;background:linear-gradient(#f59e0b,#fbbf24);border-radius:2px;flex-shrink:0}
+    .eg-block p{font-size:14.5px;color:rgba(255,255,255,0.8);line-height:2}.eg-block p+p{margin-top:8px}
+    .sol-steps{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+    .sol-step{background:rgba(255,255,255,0.025);border-left:3px solid #f59e0b;border-radius:0 8px 8px 0;padding:12px 16px;font-size:14.5px;color:rgba(255,255,255,0.78);line-height:2}
+    .sol-step:nth-child(2){border-left-color:#38bdf8}.sol-step:nth-child(3){border-left-color:#34d399}.sol-step:nth-child(4){border-left-color:#f87171}.sol-step:nth-child(5){border-left-color:#c084fc}.sol-step:nth-child(6){border-left-color:#fbbf24}
+    .sol-step strong{color:#fff;font-family:"Microsoft YaHei",sans-serif}
+    .ans-box{background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:10px;padding:12px 18px;margin-top:12px;font-size:14.5px;color:rgba(255,255,255,0.85);line-height:2}
+    .ans-box .ans-label{color:#fbbf24;font-weight:700;font-family:"Microsoft YaHei",sans-serif}
+    canvas.demo-canvas{display:block;margin:18px auto 0;background:rgba(0,0,0,0.25);border-radius:12px;border:1px solid rgba(255,255,255,0.07)}
+    .demo-label{text-align:center;font-size:12.5px;color:rgba(255,255,255,0.35);font-family:"Microsoft YaHei",sans-serif;margin-top:8px}
+    .sim-ctrl{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+    .sim-btn{padding:7px 20px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:13px;font-family:"Microsoft YaHei",sans-serif;cursor:pointer;transition:all .2s}
+    .sim-btn:hover{background:rgba(245,158,11,0.25);border-color:rgba(251,191,36,0.5);color:#fff}
+    .sim-btn.active{background:linear-gradient(135deg,#f59e0b,#fbbf24);border-color:transparent;color:#1a1200;box-shadow:0 2px 10px rgba(251,191,36,0.4)}
+    .slider-row{display:flex;align-items:center;gap:14px;margin-top:14px;font-family:"Microsoft YaHei",sans-serif;font-size:13px;color:rgba(255,255,255,0.65)}
+    .slider-row input[type=range]{flex:1;accent-color:#fbbf24}
+    .slider-val{min-width:60px;text-align:right;color:#fbbf24;font-weight:600}
+    .cmp-table{width:100%;border-collapse:collapse;margin-top:14px;font-family:"Microsoft YaHei",sans-serif;font-size:13.5px}
+    .cmp-table th{background:rgba(245,158,11,0.18);color:#fbbf24;padding:10px 14px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.1)}
+    .cmp-table td{padding:9px 14px;border-bottom:1px solid rgba(255,255,255,0.05);color:rgba(255,255,255,0.78)}
+    .cmp-table tr:hover td{background:rgba(255,255,255,0.03)}
+    .readout-row{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap}
+    .readout{flex:1;min-width:120px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px 16px;text-align:center}
+    .readout-val{font-size:22px;font-weight:800;color:#fbbf24;font-family:"Times New Roman",serif}
+    .readout-label{font-size:11px;color:rgba(255,255,255,0.35);font-family:"Microsoft YaHei",sans-serif;margin-top:4px;letter-spacing:1px}
+  </style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">§4-3 &nbsp;自感和互感</div>
+    <span class="topbar-course">普通物理（卓越班）下册 · 电磁学</span>
+  </div>
+  <div class="topbar-sub">NUSEP26 · 普通物理（卓）下</div>
+</div>
+
+<div class="page">
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(0)">自感</div>
+    <div class="tab" onclick="switchTab(1)">互感</div>
+    <div class="tab" onclick="switchTab(2)">仿真：RL 电路</div>
+    <div class="tab" onclick="switchTab(3)">例题</div>
+  </div>
+
+  <!-- ══ Tab 0：自感 ══ -->
+  <div class="tab-panel active" id="panel-0">
+    <div class="card">
+      <div class="card-title">自感现象与自感系数</div>
+      <p>当线圈中电流变化时，其自身产生的磁通量也随之变化，从而在线圈中激发<span class="hl">自感电动势</span>，这一现象称为<span class="hl">自感</span>。</p>
+      <p>定义<span class="hl">自感系数</span>（自感量）$L$：</p>
+      $$L = \frac{\Psi}{I}$$
+      <p>其中 $\Psi = N\Phi_m$ 为全磁通（磁通量链接）。自感系数 $L$ 的单位为<span class="hl-blue">亨利（H）</span>，$1\,\text{H} = 1\,\text{Wb}\cdot\text{A}^{-1}$。</p>
+      <div class="note-box">
+        <span class="note-label">物理意义</span>
+        $L$ 描述线圈的<strong>电磁惯性</strong>大小——$L$ 越大，电流变化时产生的自感电动势越大，电流越难以改变。$L$ 只与线圈的几何形状、匝数和磁介质有关，与电流大小无关（线性介质中）。
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">自感电动势</div>
+      <p>由法拉第定律，自感电动势为：</p>
+      $$\varepsilon_L = -\frac{d\Psi}{dt} = -L\frac{dI}{dt}$$
+      <p>负号体现楞次定律：自感电动势总是<span class="hl">阻碍</span>电流的变化。</p>
+      <ul class="prop-list">
+        <li class="prop-item"><span class="prop-num">↑</span><div class="prop-body"><strong>电流增大</strong>：$dI/dt > 0$，$\varepsilon_L < 0$，自感电动势阻碍电流增大（方向与电流反向）</div></li>
+        <li class="prop-item"><span class="prop-num">↓</span><div class="prop-body"><strong>电流减小</strong>：$dI/dt < 0$，$\varepsilon_L > 0$，自感电动势维持电流（方向与电流同向）</div></li>
+        <li class="prop-item"><span class="prop-num">X</span><div class="prop-body"><strong>感抗</strong>：在交流电路中，$X_L = \omega L$，频率越高感抗越大，自感线圈对高频电流有阻碍作用</div></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">典型线圈的自感系数</div>
+      <table class="cmp-table">
+        <thead><tr><th>线圈类型</th><th>自感系数 $L$</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>长直螺线管</td><td>$L = \mu_0 n^2 V = \mu_0 \dfrac{N^2}{l} S$</td><td>$n$ 为匝密度，$V=Sl$ 为体积</td></tr>
+          <tr><td>同轴电缆（单位长度）</td><td>$L = \dfrac{\mu}{2\pi}\ln\dfrac{R_2}{R_1}$</td><td>$R_1$、$R_2$ 为内外半径，$\mu$ 为介质磁导率</td></tr>
+          <tr><td>环形螺线管</td><td>$L = \dfrac{\mu N^2 S}{2\pi R}$</td><td>$R$ 为环半径，$S$ 为截面积</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ Tab 1：互感 ══ -->
+  <div class="tab-panel" id="panel-1">
+    <div class="card">
+      <div class="card-title">互感现象与互感系数</div>
+      <p>当线圈 1 中电流 $I_1$ 变化时，其磁场穿过线圈 2，在线圈 2 中激发<span class="hl">互感电动势</span>，反之亦然。</p>
+      <p>定义<span class="hl">互感系数</span> $M$：</p>
+      $$M = \frac{\Psi_{21}}{I_1} = \frac{\Psi_{12}}{I_2}$$
+      <p>其中 $\Psi_{21}$ 是线圈 1 的电流 $I_1$ 在线圈 2 中产生的全磁通，$\Psi_{12}$ 反之。互感系数 $M$ 的单位也是<span class="hl-blue">亨利（H）</span>，且 $M_{12} = M_{21} = M$（互易定理）。</p>
+      <div class="blue-box">
+        <span class="note-label">互感电动势</span>
+        $$\varepsilon_{21} = -M\frac{dI_1}{dt}, \qquad \varepsilon_{12} = -M\frac{dI_2}{dt}$$
+        互感电动势的方向同样由楞次定律确定。
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">耦合系数与互感的上限</div>
+      <p>对于两个线圈，互感系数满足：</p>
+      $$M \leq \sqrt{L_1 L_2}$$
+      <p>定义<span class="hl">耦合系数</span> $k = \dfrac{M}{\sqrt{L_1 L_2}}$，$0 \leq k \leq 1$。</p>
+      <ul class="prop-list">
+        <li class="prop-item"><span class="prop-num">1</span><div class="prop-body"><strong>全耦合</strong>（$k=1$）：两线圈完全套合，磁通量全部互链，$M = \sqrt{L_1 L_2}$。例如两同轴螺线管体积相同时。</div></li>
+        <li class="prop-item"><span class="prop-num">0</span><div class="prop-body"><strong>零耦合</strong>（$k=0$）：两线圈磁场完全正交，互不影响，$M = 0$。</div></li>
+      </ul>
+      <div class="green-box">
+        <span class="note-label">两同轴螺线管（$V_1 = V_2$）</span>
+        $M = \mu_0 n_1 n_2 V_2$，当 $V_1 = V_2$ 时 $M = \sqrt{L_1 L_2}$，达到全耦合。
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">自感的串联等效</div>
+      <p>两线圈串联时，需考虑互感的影响（顺接或反接）：</p>
+      <table class="cmp-table">
+        <thead><tr><th>连接方式</th><th>等效自感</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td><span class="hl">顺接</span>（磁场同向）</td><td>$L = L_1 + L_2 + 2M$</td><td>互感增强总自感</td></tr>
+          <tr><td><span class="hl-red">反接</span>（磁场反向）</td><td>$L = L_1 + L_2 - 2M$</td><td>互感削弱总自感</td></tr>
+          <tr><td>无互感串联</td><td>$L = L_1 + L_2$</td><td>$M=0$ 时退化为普通串联</td></tr>
+        </tbody>
+      </table>
+      <div class="note-box">
+        <span class="note-label">测量互感的方法</span>
+        顺接测得 $L_+$，反接测得 $L_-$，则 $M = \dfrac{L_+ - L_-}{4}$。
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Tab 2：仿真 RL 电路 ══ -->
+  <div class="tab-panel" id="panel-2">
+    <div class="card">
+      <div class="card-title">RL 电路充放电仿真</div>
+      <p>电源 $\varepsilon$、电阻 $R$、电感 $L$ 串联。接通电源后，电流按指数规律上升：</p>
+      $$I(t) = \frac{\varepsilon}{R}\!\left(1 - e^{-t/\tau}\right), \quad \tau = \frac{L}{R}$$
+      <p>$\tau$ 称为<span class="hl">时间常数</span>，$\tau$ 越大，电流上升越慢（电感的"惯性"越强）。</p>
+      <div class="slider-row">
+        <span>$L$ =</span>
+        <input type="range" id="slL" min="0.1" max="5" step="0.1" value="1" oninput="updateRL()">
+        <span class="slider-val" id="valL">1.0 H</span>
+      </div>
+      <div class="slider-row">
+        <span>$R$ =</span>
+        <input type="range" id="slR" min="0.5" max="10" step="0.5" value="2" oninput="updateRL()">
+        <span class="slider-val" id="valR">2.0 Ω</span>
+      </div>
+      <div class="slider-row">
+        <span>$\varepsilon$ =</span>
+        <input type="range" id="slE" min="1" max="20" step="1" value="10" oninput="updateRL()">
+        <span class="slider-val" id="valE">10 V</span>
+      </div>
+      <div class="sim-ctrl">
+        <button class="sim-btn active" id="btnCharge" onclick="setMode('charge')">充电（接通）</button>
+        <button class="sim-btn" id="btnDischarge" onclick="setMode('discharge')">放电（断开）</button>
+        <button class="sim-btn" onclick="resetRL()">重置</button>
+      </div>
+      <div class="readout-row">
+        <div class="readout"><div class="readout-val" id="roI">0.00</div><div class="readout-label">电流 I (A)</div></div>
+        <div class="readout"><div class="readout-val" id="roUL">0.00</div><div class="readout-label">自感电压 U_L (V)</div></div>
+        <div class="readout"><div class="readout-val" id="roTau">0.50</div><div class="readout-label">时间常数 τ (s)</div></div>
+      </div>
+      <canvas id="rlCanvas" class="demo-canvas" width="620" height="260"></canvas>
+      <div class="demo-label">蓝线：电流 $I(t)$；橙线：自感电压 $U_L(t)$；虚线：稳态电流 $I_0 = \varepsilon/R$</div>
+    </div>
+  </div>
+
+  <!-- ══ Tab 3：例题 ══ -->
+  <div class="tab-panel" id="panel-3">
+    <div class="eg-block">
+      <div class="eg-title">例题 1：同轴电缆的自感（单位长度）</div>
+      <p>一电缆由两个无限长同轴圆筒状导体组成，内筒半径 $R_1$，外筒半径 $R_2$，其间充满磁导率为 $\mu$ 的磁介质。电流 $I$ 在内筒流去，在外筒流回，求单位长度的自感 $L$。</p>
+      <div class="sol-steps">
+        <div class="sol-step"><strong>求磁场分布</strong>：由安培环路定理，两柱面之间（$R_1 < r < R_2$）：$B = \dfrac{\mu I}{2\pi r}$；$r < R_1$ 或 $r > R_2$ 处 $B = 0$。</div>
+        <div class="sol-step"><strong>求磁通量</strong>：取单位长度 $l=1$，面元 $dS = l\,dr = dr$：$$\Phi_m = \int_{R_1}^{R_2} B\,dr = \int_{R_1}^{R_2}\frac{\mu I}{2\pi r}\,dr = \frac{\mu I}{2\pi}\ln\frac{R_2}{R_1}$$</div>
+        <div class="sol-step"><strong>求自感</strong>：$L = \dfrac{\Phi_m}{I} = \dfrac{\mu}{2\pi}\ln\dfrac{R_2}{R_1}$（单位长度）</div>
+      </div>
+      <div class="ans-box"><span class="ans-label">结果：</span>$L = \dfrac{\mu}{2\pi}\ln\dfrac{R_2}{R_1}$（H/m）。磁导率 $\mu$ 越大、半径比 $R_2/R_1$ 越大，自感越大。</div>
+    </div>
+
+    <div class="eg-block">
+      <div class="eg-title">例题 2：两同轴螺线管的互感与自感</div>
+      <p>两同轴长直细螺线管，参数分别为：半径 $R_1 < R_2$，匝数 $N_1, N_2$，长度均为 $l$，求自感 $L_1, L_2$ 和互感 $M$。</p>
+      <div class="sol-steps">
+        <div class="sol-step"><strong>自感 $L_1$</strong>：内管磁场 $B_1 = \mu_0 n_1 I_1$（$n_1 = N_1/l$），全磁通 $\Psi_1 = N_1 B_1 S_1 = \mu_0 n_1^2 \pi R_1^2 l \cdot I_1$，故 $L_1 = \mu_0 n_1^2 V_1$（$V_1 = \pi R_1^2 l$）</div>
+        <div class="sol-step"><strong>自感 $L_2$</strong>：同理，$L_2 = \mu_0 n_2^2 V_2$（$V_2 = \pi R_2^2 l$）</div>
+        <div class="sol-step"><strong>互感 $M$</strong>：内管电流 $I_1$ 产生的磁场 $B_1 = \mu_0 n_1 I_1$ 穿过外管截面 $S_1$（注意只穿过内管面积），$\Psi_{21} = N_2 B_1 S_1 = \mu_0 n_1 n_2 \pi R_1^2 l \cdot I_1$，故 $M = \mu_0 n_1 n_2 V_1$</div>
+        <div class="sol-step"><strong>特殊情形</strong>：若 $R_1 = R_2$（$V_1 = V_2 = V$），则 $M = \mu_0 n_1 n_2 V = \sqrt{L_1 L_2}$，达到全耦合 $k=1$。</div>
+      </div>
+      <div class="ans-box"><span class="ans-label">结果：</span>$L_1 = \mu_0 n_1^2 V_1$，$L_2 = \mu_0 n_2^2 V_2$，$M = \mu_0 n_1 n_2 V_1$（内管体积决定互感）。</div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<!-- Particle BG -->
+<script>
+(function(){
+  const cv=document.getElementById('particles'),cx=cv.getContext('2d');
+  let W,H,pts=[];
+  function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  for(let i=0;i<90;i++)pts.push({x:Math.random()*2000,y:Math.random()*1200,vx:(Math.random()-.5)*0.3,vy:(Math.random()-.5)*0.3,r:Math.random()*1.6+0.4,a:Math.random()*0.5+0.1});
+  (function frame(){cx.clearRect(0,0,W,H);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle=`rgba(251,191,36,${p.a*0.5})`;cx.fill();});requestAnimationFrame(frame);})();
+})();
+</script>
+
+<script>
+function switchTab(i){
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',j===i));
+  document.querySelectorAll('.tab-panel').forEach((p,j)=>p.classList.toggle('active',j===i));
+  if(i===2){resetRL();drawRL();}
+}
+</script>
+
+<!-- RL Circuit Simulation -->
+<script>
+let rlL=1,rlR=2,rlE=10,rlMode='charge',rlT=0,rlRAF=null;
+
+function updateRL(){
+  rlL=parseFloat(document.getElementById('slL').value);
+  rlR=parseFloat(document.getElementById('slR').value);
+  rlE=parseFloat(document.getElementById('slE').value);
+  document.getElementById('valL').textContent=rlL.toFixed(1)+' H';
+  document.getElementById('valR').textContent=rlR.toFixed(1)+' Ω';
+  document.getElementById('valE').textContent=rlE.toFixed(0)+' V';
+  document.getElementById('roTau').textContent=(rlL/rlR).toFixed(2);
+  drawRL();
+}
+
+function setMode(m){
+  rlMode=m;rlT=0;
+  document.getElementById('btnCharge').classList.toggle('active',m==='charge');
+  document.getElementById('btnDischarge').classList.toggle('active',m==='discharge');
+  if(rlRAF){cancelAnimationFrame(rlRAF);rlRAF=null;}
+  animateRL();
+}
+
+function resetRL(){
+  rlT=0;
+  if(rlRAF){cancelAnimationFrame(rlRAF);rlRAF=null;}
+  drawRL();
+}
+
+function animateRL(){
+  rlT+=0.04;
+  drawRL();
+  if(rlT<5*rlL/rlR+0.5) rlRAF=requestAnimationFrame(animateRL);
+}
+
+function drawRL(){
+  const cv=document.getElementById('rlCanvas');if(!cv)return;
+  const ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  const tau=rlL/rlR, I0=rlE/rlR;
+  const tMax=5*tau+0.2, pad={l:52,r:20,t:20,b:36};
+  const gW=W-pad.l-pad.r, gH=H-pad.t-pad.b;
+
+  // Grid
+  ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;
+  for(let i=0;i<=5;i++){
+    const y=pad.t+gH*i/5;
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+gW,y);ctx.stroke();
+  }
+  for(let i=0;i<=5;i++){
+    const x=pad.l+gW*i/5;
+    ctx.beginPath();ctx.moveTo(x,pad.t);ctx.lineTo(x,pad.t+gH);ctx.stroke();
+  }
+
+  // Axes
+  ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,pad.t+gH);ctx.lineTo(pad.l+gW,pad.t+gH);ctx.stroke();
+
+  // Axis labels
+  ctx.fillStyle='rgba(255,255,255,0.35)';ctx.font='11px Times New Roman';ctx.textAlign='right';
+  for(let i=0;i<=5;i++){
+    const val=(I0*i/5).toFixed(2);
+    const y=pad.t+gH*(1-i/5);
+    ctx.fillText(val,pad.l-4,y+4);
+  }
+  ctx.textAlign='center';
+  for(let i=0;i<=5;i++){
+    const val=(tMax*i/5).toFixed(2);
+    const x=pad.l+gW*i/5;
+    ctx.fillText(val+'s',x,pad.t+gH+14);
+  }
+
+  // Steady-state dashed line
+  ctx.strokeStyle='rgba(251,191,36,0.3)';ctx.lineWidth=1;ctx.setLineDash([5,4]);
+  const yI0=pad.t+gH*(1-1);
+  ctx.beginPath();ctx.moveTo(pad.l,yI0);ctx.lineTo(pad.l+gW,yI0);ctx.stroke();
+  ctx.setLineDash([]);
+
+  // I(t) curve
+  ctx.strokeStyle='rgba(56,189,248,0.9)';ctx.lineWidth=2.5;
+  ctx.beginPath();
+  for(let px=0;px<=gW;px++){
+    const t=tMax*px/gW;
+    const I=rlMode==='charge'?I0*(1-Math.exp(-t/tau)):I0*Math.exp(-t/tau);
+    const y=pad.t+gH*(1-I/I0);
+    px===0?ctx.moveTo(pad.l+px,y):ctx.lineTo(pad.l+px,y);
+  }
+  ctx.stroke();
+
+  // U_L(t) curve
+  ctx.strokeStyle='rgba(251,191,36,0.8)';ctx.lineWidth=2;
+  ctx.beginPath();
+  for(let px=0;px<=gW;px++){
+    const t=tMax*px/gW;
+    const UL=rlMode==='charge'?rlE*Math.exp(-t/tau):-rlE*Math.exp(-t/tau);
+    const y=pad.t+gH*(1-UL/rlE*0.5+0.5);
+    px===0?ctx.moveTo(pad.l+px,y):ctx.lineTo(pad.l+px,y);
+  }
+  ctx.stroke();
+
+  // Current time marker
+  const tCur=Math.min(rlT,tMax);
+  const ICur=rlMode==='charge'?I0*(1-Math.exp(-tCur/tau)):I0*Math.exp(-tCur/tau);
+  const ULCur=rlMode==='charge'?rlE*Math.exp(-tCur/tau):-rlE*Math.exp(-tCur/tau);
+  const xCur=pad.l+gW*tCur/tMax;
+  const yCur=pad.t+gH*(1-ICur/I0);
+  ctx.fillStyle='rgba(56,189,248,1)';ctx.beginPath();ctx.arc(xCur,yCur,5,0,Math.PI*2);ctx.fill();
+
+  // Readouts
+  document.getElementById('roI').textContent=ICur.toFixed(3);
+  document.getElementById('roUL').textContent=ULCur.toFixed(3);
+  document.getElementById('roTau').textContent=tau.toFixed(3);
+
+  // Legend
+  ctx.font='12px "Microsoft YaHei"';ctx.textAlign='left';
+  ctx.fillStyle='rgba(56,189,248,0.9)';ctx.fillText('I(t)',pad.l+8,pad.t+16);
+  ctx.fillStyle='rgba(251,191,36,0.8)';ctx.fillText('U_L(t)',pad.l+44,pad.t+16);
+}
+
+window.addEventListener('DOMContentLoaded',function(){updateRL();});
+</script>
+
+<!-- ── 笔记工具栏 ── -->
+<style>
+.note-fab{position:fixed;bottom:28px;right:28px;z-index:1000;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.fab-main{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#fbbf24);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 20px rgba(251,191,36,0.5);transition:transform .2s,box-shadow .2s;color:#1a1200}
+.fab-main:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(251,191,36,0.65)}
+.fab-main.active{background:linear-gradient(135deg,#d97706,#f59e0b);transform:rotate(45deg)}
+.fab-menu{display:flex;flex-direction:column;align-items:flex-end;gap:8px;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .2s,transform .2s}
+.fab-menu.open{opacity:1;pointer-events:all;transform:translateY(0)}
+.fab-item{display:flex;align-items:center;gap:10px;background:rgba(15,12,41,0.92);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:9px 16px 9px 12px;cursor:pointer;white-space:nowrap;backdrop-filter:blur(12px);transition:border-color .2s,background .2s;font-family:"Microsoft YaHei",sans-serif}
+.fab-item:hover{border-color:rgba(251,191,36,0.4);background:rgba(245,158,11,0.15)}
+.fab-item .fi-icon{font-size:17px}.fab-item .fi-label{font-size:13px;color:rgba(255,255,255,0.8)}
+.fab-item.starred .fi-label{color:#fbbf24}.fab-item.starred{border-color:rgba(251,191,36,0.35)}
+.fab-item.read-done .fi-label{color:#34d399}.fab-item.read-done{border-color:rgba(52,211,153,0.35)}
+.note-drawer{position:fixed;bottom:0;right:0;left:0;z-index:999;background:rgba(10,8,30,0.96);border-top:1px solid rgba(255,255,255,0.1);backdrop-filter:blur(20px);padding:20px 28px 28px;transform:translateY(100%);transition:transform .32s cubic-bezier(0.4,0,0.2,1)}
+.note-drawer.open{transform:translateY(0)}
+.drawer-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.drawer-title{font-size:14px;font-weight:700;color:#fbbf24;font-family:"Microsoft YaHei",sans-serif;letter-spacing:1px}
+.drawer-close{font-size:20px;color:rgba(255,255,255,0.4);cursor:pointer;transition:color .2s;line-height:1}
+.drawer-close:hover{color:#fff}
+.drawer-textarea{width:100%;height:120px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 16px;color:#fff;font-size:14px;font-family:"Microsoft YaHei",sans-serif;resize:vertical;outline:none;line-height:1.8;transition:border-color .2s}
+.drawer-textarea:focus{border-color:rgba(251,191,36,0.5)}
+.drawer-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.drawer-hint{font-size:11px;color:rgba(255,255,255,0.25);font-family:"Microsoft YaHei",sans-serif}
+.drawer-save{background:linear-gradient(135deg,#f59e0b,#fbbf24);border:none;color:#1a1200;font-size:13px;font-weight:700;padding:8px 22px;border-radius:10px;cursor:pointer;font-family:"Microsoft YaHei",sans-serif;transition:opacity .2s}
+.drawer-save:hover{opacity:0.85}
+.phy-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(15,12,41,0.95);border:1px solid rgba(251,191,36,0.3);border-radius:24px;padding:10px 22px;font-size:13px;color:rgba(255,255,255,0.85);font-family:"Microsoft YaHei",sans-serif;z-index:1100;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap}
+.phy-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+
+<div class="note-fab">
+  <div class="fab-menu" id="fabMenu">
+    <div class="fab-item" id="fabStar" onclick="toggleStar()"><span class="fi-icon">☆</span><span class="fi-label">收藏此节</span></div>
+    <div class="fab-item" id="fabRead" onclick="toggleRead()"><span class="fi-icon">○</span><span class="fi-label">标记已读</span></div>
+    <div class="fab-item" onclick="openDrawer()"><span class="fi-icon">📝</span><span class="fi-label">我的笔记</span></div>
+  </div>
+  <button class="fab-main" id="fabBtn" onclick="toggleFab()" title="工具">✦</button>
+</div>
+
+<div class="note-drawer" id="noteDrawer">
+  <div class="drawer-header">
+    <div class="drawer-title">📝 我的笔记 · §4-3</div>
+    <div class="drawer-close" onclick="closeDrawer()">×</div>
+  </div>
+  <textarea class="drawer-textarea" id="drawerTA" placeholder="在此记录你的理解、疑问或总结……"></textarea>
+  <div class="drawer-footer">
+    <span class="drawer-hint">自动保存到本地，刷新不丢失</span>
+    <button class="drawer-save" onclick="saveNote()">保存</button>
+  </div>
+</div>
+<div class="phy-toast" id="phyToast"></div>
+
+<script>
+(function(){
+  const PID='4-3',SK='phy26_note_'+PID,STK='phy26_star_'+PID,RDK='phy26_read_'+PID;
+  let fabOpen=false;
+  function showToast(msg){const t=document.getElementById('phyToast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
+  window.toggleFab=function(){fabOpen=!fabOpen;document.getElementById('fabMenu').classList.toggle('open',fabOpen);document.getElementById('fabBtn').classList.toggle('active',fabOpen);};
+  window.toggleStar=function(){const s=localStorage.getItem(STK)==='1';if(s){localStorage.removeItem(STK);showToast('已取消收藏');}else{localStorage.setItem(STK,'1');showToast('已收藏此节');}refreshStarUI();};
+  window.toggleRead=function(){const r=localStorage.getItem(RDK)==='1';if(r){localStorage.removeItem(RDK);showToast('已取消已读标记');}else{localStorage.setItem(RDK,'1');showToast('已标记为已读');}refreshReadUI();};
+  function refreshStarUI(){const s=localStorage.getItem(STK)==='1';const el=document.getElementById('fabStar');el.querySelector('.fi-icon').textContent=s?'★':'☆';el.querySelector('.fi-label').textContent=s?'已收藏':'收藏此节';el.classList.toggle('starred',s);}
+  function refreshReadUI(){const r=localStorage.getItem(RDK)==='1';const el=document.getElementById('fabRead');el.querySelector('.fi-icon').textContent=r?'✓':'○';el.querySelector('.fi-label').textContent=r?'已读':'标记已读';el.classList.toggle('read-done',r);}
+  window.openDrawer=function(){document.getElementById('drawerTA').value=localStorage.getItem(SK)||'';document.getElementById('noteDrawer').classList.add('open');document.getElementById('fabMenu').classList.remove('open');document.getElementById('fabBtn').classList.remove('active');fabOpen=false;setTimeout(()=>document.getElementById('drawerTA').focus(),350);};
+  window.closeDrawer=function(){document.getElementById('noteDrawer').classList.remove('open');};
+  window.saveNote=function(){const val=document.getElementById('drawerTA').value.trim();if(val){localStorage.setItem(SK,val);showToast('笔记已保存');}else{localStorage.removeItem(SK);showToast('笔记已清空');}closeDrawer();};
+  let saveTimer;document.getElementById('drawerTA').addEventListener('input',function(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{const val=this.value.trim();if(val)localStorage.setItem(SK,val);},1500);});
+  refreshStarUI();refreshReadUI();
+})();
+</script>
+</body>
+</html>

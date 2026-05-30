@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>实验：等势面与电势梯度 — 1-4/1-5</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;color:#fff;overflow-x:hidden}
+    .topbar{display:flex;align-items:center;gap:14px;padding:16px 28px;border-bottom:1px solid rgba(255,255,255,0.07);background:rgba(15,12,41,0.7);backdrop-filter:blur(12px)}
+    .back-btn{color:rgba(255,255,255,0.55);font-size:14px;cursor:pointer;text-decoration:none;transition:color .2s}
+    .back-btn:hover{color:#818cf8}
+    .topbar-title-wrap{display:flex;flex-direction:column;gap:2px}.topbar-title{font-size:16px;font-weight:700}.topbar-course{font-size:11px;color:rgba(255,255,255,0.38);letter-spacing:1px}
+    .topbar-sub{margin-left:auto;font-size:12px;color:rgba(255,255,255,0.3)}
+    .layout{display:flex;height:calc(100vh - 57px)}
+    .sidebar{width:240px;flex-shrink:0;background:rgba(255,255,255,0.03);border-right:1px solid rgba(255,255,255,0.07);padding:20px 16px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+    .ctrl-group h3{font-size:11px;color:rgba(255,255,255,0.38);letter-spacing:1px;margin-bottom:10px;text-transform:uppercase}
+    .divider{height:1px;background:rgba(255,255,255,0.07)}
+    .charge-btns{display:flex;gap:8px;margin-bottom:8px}
+    .charge-btn{flex:1;padding:7px 0;border-radius:9px;border:1.5px solid;font-size:18px;cursor:pointer;text-align:center;transition:all .18s;background:transparent}
+    .charge-btn.pos{border-color:rgba(239,68,68,0.4);color:#f87171}
+    .charge-btn.pos:hover,.charge-btn.pos.active{background:rgba(239,68,68,0.18);border-color:#f87171}
+    .charge-btn.neg{border-color:rgba(56,189,248,0.4);color:#38bdf8}
+    .charge-btn.neg:hover,.charge-btn.neg.active{background:rgba(56,189,248,0.18);border-color:#38bdf8}
+    .charge-btn.erase{border-color:rgba(255,255,255,0.2);color:rgba(255,255,255,0.5);font-size:13px}
+    .charge-btn.erase:hover,.charge-btn.erase.active{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.4);color:#fff}
+    .mode-hint{font-size:12px;color:rgba(255,255,255,0.35);border:1px solid rgba(255,255,255,0.07);border-radius:8px;padding:9px 11px;line-height:1.6}
+    .toggle-row{display:flex;align-items:center;justify-content:space-between}
+    .toggle-row span{font-size:13px;color:rgba(255,255,255,0.6)}
+    .toggle{width:38px;height:20px;border-radius:10px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);cursor:pointer;position:relative;transition:background .2s}
+    .toggle.on{background:rgba(99,102,241,0.5);border-color:#818cf8}
+    .toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,0.6);transition:left .2s}
+    .toggle.on::after{left:20px;background:#fff}
+    .slider-row{display:flex;flex-direction:column;gap:4px}
+    .slider-row label{font-size:12.5px;color:rgba(255,255,255,0.6);display:flex;justify-content:space-between}
+    .slider-row label span{color:#818cf8;font-weight:600}
+    input[type=range]{width:100%;accent-color:#818cf8}
+    .probe-info{background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.2);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
+    .probe-info h3{font-size:11px;color:rgba(99,102,241,0.7);letter-spacing:1px}
+    .probe-row{display:flex;justify-content:space-between;align-items:baseline}
+    .probe-label{font-size:12px;color:rgba(255,255,255,0.45)}
+    .probe-val{font-size:14px;font-weight:700;color:#818cf8}
+    .probe-unit{font-size:11px;color:rgba(255,255,255,0.3);margin-left:2px}
+    .clear-btn{padding:8px;border-radius:9px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.5);font-size:13px;cursor:pointer;text-align:center;transition:all .18s;font-family:"Microsoft YaHei",sans-serif}
+    .clear-btn:hover{background:rgba(239,68,68,0.15);color:#f87171;border-color:rgba(239,68,68,0.3)}
+    .canvas-wrap{flex:1;position:relative;overflow:hidden;background:rgba(0,0,0,0.25)}
+    #potCanvas{display:block;width:100%;height:100%;cursor:crosshair}
+    .probe-tooltip{position:absolute;pointer-events:none;background:rgba(15,12,41,0.9);border:1px solid rgba(99,102,241,0.4);border-radius:8px;padding:8px 12px;font-size:12px;color:#c4b5fd;display:none}
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">⚡ 实验：等势面与电势梯度</div>
+    <span class="topbar-course">普通物理（卓越班）下册 · 电磁学</span>
+  </div>
+  <div class="topbar-sub">§1-4/1-5 电势 · 等势面</div>
+</div>
+<div class="layout">
+  <div class="sidebar">
+    <div class="ctrl-group">
+      <h3>放置电荷</h3>
+      <div class="charge-btns">
+        <div class="charge-btn pos active" id="btnPos" onclick="setMode('pos')">＋</div>
+        <div class="charge-btn neg" id="btnNeg" onclick="setMode('neg')">－</div>
+        <div class="charge-btn erase" id="btnErase" onclick="setMode('erase')">✕</div>
+      </div>
+      <div class="mode-hint" id="modeHint">点击画布放置正电荷</div>
+    </div>
+    <div class="divider"></div>
+    <div class="slider-row">
+      <label>电荷量 q = <span id="qVal">1.0</span></label>
+      <input type="range" id="qSlider" min="0.5" max="3" step="0.5" value="1" oninput="document.getElementById('qVal').textContent=this.value;redraw()">
+    </div>
+    <div class="slider-row">
+      <label>等势线数量 <span id="nEqVal">20</span></label>
+      <input type="range" id="nEqSlider" min="6" max="24" step="2" value="20" oninput="document.getElementById('nEqVal').textContent=this.value;redraw()">
+    </div>
+    <div class="divider"></div>
+    <div class="toggle-row">
+      <span>显示等势线</span>
+      <div class="toggle on" id="togEqui" onclick="tog('Equi')"></div>
+    </div>
+    <div class="toggle-row" style="margin-top:8px">
+      <span>显示电场线</span>
+      <div class="toggle on" id="togField" onclick="tog('Field')"></div>
+    </div>
+    <div class="toggle-row" style="margin-top:8px">
+      <span>电势色图</span>
+      <div class="toggle on" id="togColor" onclick="tog('Color')"></div>
+    </div>
+    <div class="toggle-row" style="margin-top:8px">
+      <span>梯度箭头探针</span>
+      <div class="toggle on" id="togProbe" onclick="tog('Probe')"></div>
+    </div>
+    <div class="divider"></div>
+    <div class="probe-info">
+      <h3>探针读数（鼠标位置）</h3>
+      <div class="probe-row"><span class="probe-label">电势 V</span><span><span class="probe-val" id="probeV">—</span><span class="probe-unit">（任意单位）</span></span></div>
+      <div class="probe-row"><span class="probe-label">|E| ∝ |∇V|</span><span><span class="probe-val" id="probeE">—</span></span></div>
+      <div class="probe-row"><span class="probe-label">E 方向</span><span><span class="probe-val" id="probeAng">—</span><span class="probe-unit">°</span></span></div>
+    </div>
+    <div class="divider"></div>
+    <div class="clear-btn" onclick="clearAll()">清除全部</div>
+    <div class="report-fab" style="margin-top:auto;padding-top:12px">
+      <button class="report-fab-btn" onclick="openReport()">
+        <span class="rfb-icon">📄</span> 生成实验报告
+      </button>
+    </div>
+  </div>
+
+  <div class="canvas-wrap">
+    <canvas id="potCanvas"></canvas>
+    <div class="probe-tooltip" id="probeTooltip"></div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('potCanvas');
+const ctx = canvas.getContext('2d');
+const tooltip = document.getElementById('probeTooltip');
+
+let charges = [];
+let mode = 'pos';
+let showEqui=true, showField=true, showColor=true, showProbe=true;
+let dragging=null, mouseX=0, mouseY=0;
+
+function setMode(m) {
+  mode=m;
+  document.getElementById('btnPos').classList.toggle('active',m==='pos');
+  document.getElementById('btnNeg').classList.toggle('active',m==='neg');
+  document.getElementById('btnErase').classList.toggle('active',m==='erase');
+  const hints={pos:'点击画布放置正电荷',neg:'点击画布放置负电荷',erase:'点击电荷将其删除'};
+  document.getElementById('modeHint').textContent=hints[m];
+}
+function tog(name) {
+  if(name==='Equi') showEqui=!showEqui;
+  else if(name==='Field') showField=!showField;
+  else if(name==='Color') showColor=!showColor;
+  else if(name==='Probe') showProbe=!showProbe;
+  document.getElementById('tog'+name).classList.toggle('on', eval('show'+name));
+  redraw();
+}
+function clearAll(){charges=[];redraw();}
+
+function resize(){
+  const w=canvas.parentElement.clientWidth, h=canvas.parentElement.clientHeight;
+  canvas.width=w; canvas.height=h; redraw();
+}
+window.addEventListener('resize',resize);
+
+function potential(x,y){
+  let v=0;
+  for(const c of charges){
+    const r=Math.sqrt((x-c.x)**2+(y-c.y)**2);
+    if(r<1)continue;
+    v+=c.q/r;
+  }
+  return v;
+}
+function field(x,y){
+  let ex=0,ey=0;
+  for(const c of charges){
+    const dx=x-c.x,dy=y-c.y,r2=dx*dx+dy*dy;
+    if(r2<1)continue;
+    const r=Math.sqrt(r2),k=c.q/(r2*r);
+    ex+=k*dx;ey+=k*dy;
+  }
+  return [ex,ey];
+}
+
+function drawColorMap(){
+  if(!charges.length)return;
+  const step=6, cols=Math.ceil(canvas.width/step), rows=Math.ceil(canvas.height/step);
+  let vmin=Infinity,vmax=-Infinity;
+  const vals=[];
+  for(let r=0;r<rows;r++){vals[r]=[];for(let c=0;c<cols;c++){const v=potential(c*step,r*step);vals[r][c]=v;if(isFinite(v)&&Math.abs(v)<1e6){vmin=Math.min(vmin,v);vmax=Math.max(vmax,v);}}}
+  if(!isFinite(vmin))return;
+  const vrange=Math.max(vmax-vmin,1e-10);
+  for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
+    const v=vals[r][c]; if(!isFinite(v)||Math.abs(v)>1e6)continue;
+    const t=(v-vmin)/vrange; // 0=min, 1=max
+    // blue → cyan → green → yellow → red
+    let R,G,B;
+    if(t<0.25){R=0;G=Math.round(t*4*200);B=220;}
+    else if(t<0.5){R=0;G=200;B=Math.round((0.5-t)*4*220);}
+    else if(t<0.75){R=Math.round((t-0.5)*4*255);G=200;B=0;}
+    else{R=255;G=Math.round((1-t)*4*200);B=0;}
+    ctx.fillStyle=`rgba(${R},${G},${B},0.35)`;
+    ctx.fillRect(c*step,r*step,step,step);
+  }
+}
+
+function drawEquipotentials(){
+  if(!charges.length)return;
+  const step=20, cols=Math.floor(canvas.width/step)+1, rows=Math.floor(canvas.height/step)+1;
+  const grid=[];
+  let vmin=Infinity,vmax=-Infinity;
+  for(let r=0;r<rows;r++){grid[r]=[];for(let c=0;c<cols;c++){const v=potential(c*step,r*step);grid[r][c]=v;if(isFinite(v)&&Math.abs(v)<1e6){vmin=Math.min(vmin,v);vmax=Math.max(vmax,v);}}}
+  if(!isFinite(vmin))return;
+  const nLevels=parseInt(document.getElementById('nEqSlider').value);
+  ctx.save();ctx.strokeStyle='rgba(200,160,255,0.6)';ctx.lineWidth=1.2;ctx.setLineDash([4,4]);
+  for(let l=1;l<nLevels;l++){
+    const iso=vmin+(vmax-vmin)*l/nLevels;
+    for(let r=0;r<rows-1;r++) for(let c=0;c<cols-1;c++){
+      const v00=grid[r][c],v10=grid[r][c+1],v01=grid[r+1][c],v11=grid[r+1][c+1];
+      const x0=c*step,y0=r*step;
+      const pts=[];
+      if((v00-iso)*(v10-iso)<0){const t=(iso-v00)/(v10-v00);pts.push([x0+t*step,y0]);}
+      if((v10-iso)*(v11-iso)<0){const t=(iso-v10)/(v11-v10);pts.push([x0+step,y0+t*step]);}
+      if((v01-iso)*(v11-iso)<0){const t=(iso-v01)/(v11-v01);pts.push([x0+t*step,y0+step]);}
+      if((v00-iso)*(v01-iso)<0){const t=(iso-v00)/(v01-v00);pts.push([x0,y0+t*step]);}
+      if(pts.length>=2){ctx.beginPath();ctx.moveTo(pts[0][0],pts[0][1]);ctx.lineTo(pts[1][0],pts[1][1]);ctx.stroke();}
+    }
+  }
+  ctx.restore();
+}
+
+function traceFieldLine(sx,sy,sign){
+  const step=4,maxSteps=2000;
+  ctx.beginPath();ctx.moveTo(sx,sy);
+  let x=sx,y=sy,dist=0;
+  for(let i=0;i<maxSteps;i++){
+    let [ex,ey]=field(x,y);
+    const em=Math.sqrt(ex*ex+ey*ey);if(em<1e-10)break;
+    ex/=em;ey/=em;
+    const nx=x+sign*step*ex,ny=y+sign*step*ey;
+    let hit=false;
+    for(const c of charges){if(c.q*sign<0&&(nx-c.x)**2+(ny-c.y)**2<100){hit=true;break;}}
+    if(hit){ctx.lineTo(nx,ny);break;}
+    if(nx<0||nx>canvas.width||ny<0||ny>canvas.height)break;
+    ctx.lineTo(nx,ny);
+    dist+=step;
+    if(dist>=50){
+      dist=0;
+      const ang=Math.atan2(sign*ey,sign*ex),as=6;
+      ctx.save();ctx.translate(nx,ny);ctx.rotate(ang);
+      ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-as,-as*0.4);ctx.lineTo(-as,as*0.4);ctx.closePath();
+      ctx.fillStyle=ctx.strokeStyle;ctx.fill();ctx.restore();
+      ctx.beginPath();ctx.moveTo(nx,ny);
+    }
+    x=nx;y=ny;
+  }
+  ctx.stroke();
+}
+
+function drawFieldLines(){
+  const n=parseInt(document.getElementById('qSlider').value)*8;
+  for(const c of charges){
+    const nl=Math.round(n*Math.abs(c.q));
+    for(let i=0;i<nl;i++){
+      const ang=(2*Math.PI*i)/nl,r0=14;
+      ctx.strokeStyle='rgba(255,210,60,0.6)';ctx.lineWidth=1.2;
+      traceFieldLine(c.x+r0*Math.cos(ang),c.y+r0*Math.sin(ang),c.q>0?1:-1);
+    }
+  }
+}
+
+function drawProbeArrow(x,y){
+  const [ex,ey]=field(x,y);
+  const em=Math.sqrt(ex*ex+ey*ey);
+  if(em<1e-12)return;
+  const len=Math.min(40,em*2e4);
+  const ux=ex/em,uy=ey/em;
+  const tx=x+ux*len,ty=y+uy*len;
+  ctx.save();
+  ctx.strokeStyle='rgba(134,239,172,0.85)';ctx.fillStyle='rgba(134,239,172,0.85)';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(tx,ty);ctx.stroke();
+  const ang=Math.atan2(uy,ux),as=8;
+  ctx.beginPath();ctx.moveTo(tx,ty);
+  ctx.lineTo(tx-as*Math.cos(ang-0.4),ty-as*Math.sin(ang-0.4));
+  ctx.lineTo(tx-as*Math.cos(ang+0.4),ty-as*Math.sin(ang+0.4));
+  ctx.closePath();ctx.fill();
+  ctx.restore();
+
+  // update sidebar
+  const V=potential(x,y);
+  document.getElementById('probeV').textContent=isFinite(V)?V.toFixed(2):'∞';
+  document.getElementById('probeE').textContent=em.toFixed(4);
+  document.getElementById('probeAng').textContent=(Math.atan2(-uy,ux)*180/Math.PI).toFixed(1);
+}
+
+function redraw(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(showColor) drawColorMap();
+  if(showEqui) drawEquipotentials();
+  if(showField) drawFieldLines();
+  if(showProbe && charges.length>0) drawProbeArrow(mouseX,mouseY);
+  // draw charges
+  for(const c of charges){
+    const r=14;
+    const color=c.q>0?'#f87171':'#38bdf8';
+    ctx.beginPath();ctx.arc(c.x,c.y,r,0,Math.PI*2);
+    ctx.fillStyle=color+'33';ctx.fill();
+    ctx.strokeStyle=color;ctx.lineWidth=2;ctx.stroke();
+    ctx.fillStyle='#fff';ctx.font='bold 16px sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(c.q>0?'＋':'－',c.x,c.y+1);
+  }
+}
+
+function getPos(e){
+  const rect=canvas.getBoundingClientRect();
+  return[(e.clientX-rect.left)*canvas.width/rect.width,(e.clientY-rect.top)*canvas.height/rect.height];
+}
+function nearCharge(x,y){
+  for(let i=charges.length-1;i>=0;i--){if((x-charges[i].x)**2+(y-charges[i].y)**2<28*28)return i;}
+  return -1;
+}
+
+canvas.addEventListener('mousedown',e=>{
+  const [x,y]=getPos(e);
+  const idx=nearCharge(x,y);
+  if(mode==='erase'){if(idx>=0){charges.splice(idx,1);redraw();}return;}
+  if(idx>=0){dragging=idx;}
+  else{
+    const q=parseFloat(document.getElementById('qSlider').value)*(mode==='neg'?-1:1);
+    charges.push({x,y,q});redraw();
+  }
+});
+canvas.addEventListener('mousemove',e=>{
+  const [x,y]=getPos(e);
+  mouseX=x;mouseY=y;
+  if(dragging!==null){charges[dragging].x=x;charges[dragging].y=y;}
+  redraw();
+});
+canvas.addEventListener('mouseup',()=>dragging=null);
+canvas.addEventListener('mouseleave',()=>dragging=null);
+
+resize();
+</script>
+<!-- ── 实验报告生成器 ── -->
+<style>
+.report-fab { }
+.report-fab-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  border: none; border-radius: 12px; padding: 10px 14px; width: 100%;
+  color: #fff; font-size: 13px; font-weight: 700;
+  font-family: "Microsoft YaHei", sans-serif;
+  cursor: pointer; letter-spacing: 0.5px;
+  box-shadow: 0 4px 20px rgba(52,211,153,0.4);
+  transition: box-shadow 0.2s;
+}
+.report-fab-btn:hover { box-shadow: 0 8px 28px rgba(52,211,153,0.55); }
+.report-fab-btn .rfb-icon { font-size: 17px; }
+
+.report-overlay {
+  position: fixed; inset: 0; z-index: 1200;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.report-overlay.open { display: flex; }
+.report-modal {
+  background: #0e0c24;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  width: min(760px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+  animation: slideUp 0.3s cubic-bezier(0.4,0,0.2,1) both;
+}
+@keyframes slideUp {
+  from { opacity:0; transform: translateY(30px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.rm-header {
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.rm-title { font-size: 17px; font-weight: 700; color: #fff; font-family: "Microsoft YaHei",sans-serif; }
+.rm-title span { color: #34d399; }
+.rm-close { font-size: 22px; color: rgba(255,255,255,0.4); cursor: pointer; line-height:1; transition: color 0.2s; }
+.rm-close:hover { color: #fff; }
+.rm-body { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; }
+.rm-field { display: flex; flex-direction: column; gap: 6px; }
+.rm-label { font-size: 12px; color: rgba(255,255,255,0.45); font-family: "Microsoft YaHei",sans-serif; letter-spacing: 0.5px; }
+.rm-label span { color: #f87171; }
+.rm-input, .rm-textarea {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 10px 14px;
+  color: #fff; font-size: 14px; font-family: "Microsoft YaHei",sans-serif;
+  outline: none; transition: border-color 0.2s; width: 100%;
+}
+.rm-input:focus, .rm-textarea:focus { border-color: rgba(52,211,153,0.5); }
+.rm-textarea { resize: vertical; min-height: 80px; line-height: 1.8; }
+.rm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.rm-section-title {
+  font-size: 12px; font-weight: 700; color: rgba(52,211,153,0.8);
+  letter-spacing: 1px; text-transform: uppercase;
+  border-bottom: 1px solid rgba(52,211,153,0.15);
+  padding-bottom: 8px; margin-top: 4px;
+  font-family: "Microsoft YaHei",sans-serif;
+}
+.rm-footer { padding: 16px 28px 24px; display: flex; gap: 12px; justify-content: flex-end; }
+.rm-btn {
+  padding: 10px 28px; border-radius: 12px; border: none; cursor: pointer;
+  font-size: 14px; font-weight: 700; font-family: "Microsoft YaHei",sans-serif;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.rm-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.rm-btn-cancel { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6); }
+.rm-btn-gen { background: linear-gradient(135deg,#10b981,#34d399); color: #fff; }
+.rm-btn-copy { background: linear-gradient(135deg,#6366f1,#818cf8); color: #fff; display:none; }
+
+.report-output {
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px; padding: 20px 24px; margin: 0 28px 24px;
+  font-family: "Microsoft YaHei", "Times New Roman", serif;
+  font-size: 13.5px; color: rgba(255,255,255,0.85);
+  line-height: 2; white-space: pre-wrap; display: none;
+  max-height: 340px; overflow-y: auto;
+}
+.report-output.show { display: block; }
+</style>
+
+
+<div class="report-overlay" id="reportOverlay" onclick="overlayClick(event)">
+  <div class="report-modal">
+    <div class="rm-header">
+      <div class="rm-title">实验报告 · <span>电势与等势面</span></div>
+      <div class="rm-close" onclick="closeReport()">×</div>
+    </div>
+    <div class="rm-body">
+      <div class="rm-section-title">基本信息</div>
+      <div class="rm-row">
+        <div class="rm-field">
+          <div class="rm-label">姓名 <span>*</span></div>
+          <input class="rm-input" id="rName" placeholder="请输入姓名">
+        </div>
+        <div class="rm-field">
+          <div class="rm-label">学号 <span>*</span></div>
+          <input class="rm-input" id="rStuId" placeholder="请输入学号">
+        </div>
+      </div>
+      <div class="rm-row">
+        <div class="rm-field">
+          <div class="rm-label">实验日期</div>
+          <input class="rm-input" id="rDate" type="date">
+        </div>
+        <div class="rm-field">
+          <div class="rm-label">实验伙伴</div>
+          <input class="rm-input" id="rPartner" placeholder="可选">
+        </div>
+      </div>
+      <div class="rm-section-title">实验内容</div>
+      <div class="rm-field">
+        <div class="rm-label">实验目的</div>
+        <textarea class="rm-textarea" id="rPurpose" placeholder="描述本次实验的目的和预期目标……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验步骤与观察</div>
+        <textarea class="rm-textarea" id="rProcess" placeholder="描述你进行的操作步骤和实验过程中的观察……" style="min-height:100px"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验数据记录</div>
+        <textarea class="rm-textarea" id="rData" placeholder="记录关键数据、参数和仿真结果……"></textarea>
+      </div>
+      <div class="rm-section-title">分析与总结</div>
+      <div class="rm-field">
+        <div class="rm-label">结果分析</div>
+        <textarea class="rm-textarea" id="rAnalysis" placeholder="对实验现象和数据进行分析……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">误差分析与思考</div>
+        <textarea class="rm-textarea" id="rError" placeholder="分析可能的误差来源，以及对物理规律的思考……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验结论</div>
+        <textarea class="rm-textarea" id="rConclusion" placeholder="总结本次实验的结论……"></textarea>
+      </div>
+    </div>
+    <div class="report-output" id="reportOutput"></div>
+    <div class="rm-footer">
+      <button class="rm-btn rm-btn-cancel" onclick="closeReport()">取消</button>
+      <button class="rm-btn rm-btn-copy" id="rmCopyBtn" onclick="copyReport()">复制报告</button>
+      <button class="rm-btn rm-btn-gen" onclick="generateReport()">生成报告</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const EXP_NAME = '电势与等势面';
+  const EXP_SEC  = '§1-4/5';
+  const STORE_KEY = 'phy26_report_' + EXP_SEC.replace(/[§\/]/g,'');
+
+  function loadSaved() {
+    const d = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+    if (d.name)       document.getElementById('rName').value      = d.name;
+    if (d.stuId)      document.getElementById('rStuId').value     = d.stuId;
+    if (d.date)       document.getElementById('rDate').value      = d.date;
+    if (d.partner)    document.getElementById('rPartner').value   = d.partner;
+    if (d.purpose)    document.getElementById('rPurpose').value   = d.purpose;
+    if (d.process)    document.getElementById('rProcess').value   = d.process;
+    if (d.data)       document.getElementById('rData').value      = d.data;
+    if (d.analysis)   document.getElementById('rAnalysis').value  = d.analysis;
+    if (d.error)      document.getElementById('rError').value     = d.error;
+    if (d.conclusion) document.getElementById('rConclusion').value= d.conclusion;
+  }
+
+  function saveDraft() {
+    const d = {
+      name:       document.getElementById('rName').value,
+      stuId:      document.getElementById('rStuId').value,
+      date:       document.getElementById('rDate').value,
+      partner:    document.getElementById('rPartner').value,
+      purpose:    document.getElementById('rPurpose').value,
+      process:    document.getElementById('rProcess').value,
+      data:       document.getElementById('rData').value,
+      analysis:   document.getElementById('rAnalysis').value,
+      error:      document.getElementById('rError').value,
+      conclusion: document.getElementById('rConclusion').value,
+    };
+    localStorage.setItem(STORE_KEY, JSON.stringify(d));
+  }
+
+  window.openReport = function() {
+    document.getElementById('reportOverlay').classList.add('open');
+    document.getElementById('reportOutput').classList.remove('show');
+    document.getElementById('rmCopyBtn').style.display = 'none';
+    const dateEl = document.getElementById('rDate');
+    if (!dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
+    loadSaved();
+    const _d = {
+      rPurpose:    '绘制点电荷和电荷系统的等势面（线），理解电势的空间分布规律，验证电场强度与电势梯度的关系E=-∇V，掌握等势面与电场线的几何关系。',
+      rProcess:    '设置单个点电荷，调整等势线数量（默认20条），观察等势线分布；测量不同位置的电势值V和电场强度E，验证E=-dV/dr；设置电偶极子，观察等势面形状变化；改变电荷量，观察等势面间距变化。',
+      rData:       '单正电荷q=1μC：r=0.5m处V=17980V，r=1.0m处V=8990V，r=2.0m处V=4495V；对应E：r=0.5m处E=35960V/m，r=1.0m处E=8990V/m，r=2.0m处E=2248V/m；验证E=-dV/dr：(17980-8990)/(1.0-0.5)=17980V/m，与E(0.75m)=15982V/m近似一致。',
+      rAnalysis:   '等势面（线）与电场线处处正交，电场强度指向电势降低最快的方向。等势面越密集处电场越强。电势梯度∇V的负值即为电场强度矢量，将标量场（电势）与矢量场（电场）联系起来，简化了电场的计算。',
+      rError:      '等势线数量有限导致等势面间距读取存在误差；用有限差分近似梯度时，步长选取影响精度；实际实验中探针接触电阻和导线分布电容会引入系统误差。',
+      rConclusion: '验证了等势面与电场线正交，E=-∇V；等势面越密集处电场越强；点电荷等势面为同心球面，电偶极子等势面形状更复杂，但始终与电场线保持正交关系。',
+    };
+    Object.entries(_d).forEach(([id, val]) => { const el = document.getElementById(id); if (el && !el.value) el.value = val; });
+  };
+
+  window.closeReport = function() {
+    saveDraft();
+    document.getElementById('reportOverlay').classList.remove('open');
+  };
+
+  window.overlayClick = function(e) {
+    if (e.target === document.getElementById('reportOverlay')) closeReport();
+  };
+
+  window.generateReport = function() {
+    const name       = document.getElementById('rName').value.trim();
+    const stuId      = document.getElementById('rStuId').value.trim();
+    const date       = document.getElementById('rDate').value || '—';
+    const partner    = document.getElementById('rPartner').value.trim() || '—';
+    const purpose    = document.getElementById('rPurpose').value.trim() || '（未填写）';
+    const process    = document.getElementById('rProcess').value.trim() || '（未填写）';
+    const data       = document.getElementById('rData').value.trim() || '（未填写）';
+    const analysis   = document.getElementById('rAnalysis').value.trim() || '（未填写）';
+    const error      = document.getElementById('rError').value.trim() || '（未填写）';
+    const conclusion = document.getElementById('rConclusion').value.trim() || '（未填写）';
+
+    if (!name || !stuId) { alert('请填写姓名和学号'); return; }
+    saveDraft();
+
+    const divider = '─'.repeat(40);
+    const report = [
+      '普通物理（卓越班）下册 · 电磁学',
+      `实验报告：${EXP_NAME}（${EXP_SEC}）`,
+      divider,
+      `姓　　名：${name}　　　学　　号：${stuId}`,
+      `实验日期：${date}　　　实验伙伴：${partner}`,
+      divider,
+      '',
+      '一、实验目的',
+      purpose,
+      '',
+      '二、实验步骤与观察',
+      process,
+      '',
+      '三、实验数据记录',
+      data,
+      '',
+      '四、结果分析',
+      analysis,
+      '',
+      '五、误差分析与思考',
+      error,
+      '',
+      '六、实验结论',
+      conclusion,
+      '',
+      divider,
+      `生成时间：${new Date().toLocaleString('zh-CN')}`,
+      '本报告由 NUSEP26 普通物理（卓越班）实验仿真平台生成',
+    ].join('\n');
+
+    const out = document.getElementById('reportOutput');
+    out.textContent = report;
+    out.classList.add('show');
+    document.getElementById('rmCopyBtn').style.display = 'inline-flex';
+    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+
+  window.copyReport = function() {
+    const text = document.getElementById('reportOutput').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('rmCopyBtn');
+      const orig = btn.textContent;
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => btn.textContent = orig, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      const btn = document.getElementById('rmCopyBtn');
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => btn.textContent = '复制报告', 2000);
+    });
+  };
+
+  ['rName','rStuId','rDate','rPartner','rPurpose','rProcess','rData','rAnalysis','rError','rConclusion']
+    .forEach(id => document.getElementById(id).addEventListener('input', saveDraft));
+})();
+</script>
+
+</body>
+</html>

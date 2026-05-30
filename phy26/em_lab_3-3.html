@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>实验：毕奥-萨伐尔定律 — 3-3</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;color:#fff;overflow-x:hidden}
+    .topbar{display:flex;align-items:center;gap:14px;padding:16px 28px;border-bottom:1px solid rgba(255,255,255,0.07);background:rgba(15,12,41,0.7);backdrop-filter:blur(12px)}
+    .back-btn{color:rgba(255,255,255,0.55);font-size:14px;cursor:pointer;text-decoration:none;transition:color .2s}
+    .back-btn:hover{color:#34d399}
+    .topbar-title-wrap{display:flex;flex-direction:column;gap:2px}.topbar-title{font-size:16px;font-weight:700}.topbar-course{font-size:11px;color:rgba(255,255,255,0.38);letter-spacing:1px}
+    .topbar-sub{margin-left:auto;font-size:12px;color:rgba(255,255,255,0.3)}
+    .layout{display:flex;height:calc(100vh - 57px)}
+    .sidebar{width:250px;flex-shrink:0;background:rgba(255,255,255,0.03);border-right:1px solid rgba(255,255,255,0.07);padding:20px 16px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+    .ctrl-group h3{font-size:11px;color:rgba(255,255,255,0.38);letter-spacing:1px;margin-bottom:10px;text-transform:uppercase}
+    .divider{height:1px;background:rgba(255,255,255,0.07)}
+    .wire-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+    .wire-btn{padding:8px 4px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);font-size:11.5px;cursor:pointer;text-align:center;color:rgba(255,255,255,0.45);transition:all .18s;font-family:"Microsoft YaHei",sans-serif}
+    .wire-btn.active{background:rgba(52,211,153,0.15);border-color:rgba(52,211,153,0.4);color:#34d399}
+    .wire-btn:hover:not(.active){background:rgba(255,255,255,0.05)}
+    .slider-row{display:flex;flex-direction:column;gap:4px;margin-bottom:6px}
+    .slider-row label{font-size:12.5px;color:rgba(255,255,255,0.6);display:flex;justify-content:space-between}
+    .slider-row label span{color:#34d399;font-weight:600}
+    input[type=range]{width:100%;accent-color:#34d399}
+    .toggle-row{display:flex;align-items:center;justify-content:space-between}
+    .toggle-row span{font-size:13px;color:rgba(255,255,255,0.6)}
+    .toggle{width:38px;height:20px;border-radius:10px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);cursor:pointer;position:relative;transition:background .2s}
+    .toggle.on{background:rgba(52,211,153,0.5);border-color:#34d399}
+    .toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,0.6);transition:left .2s}
+    .toggle.on::after{left:20px;background:#fff}
+    .result-panel{background:rgba(52,211,153,0.05);border:1px solid rgba(52,211,153,0.2);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px}
+    .result-panel h3{font-size:11px;color:rgba(52,211,153,0.7);letter-spacing:1px}
+    .result-row{display:flex;justify-content:space-between;align-items:baseline}
+    .result-label{font-size:12px;color:rgba(255,255,255,0.45)}
+    .result-value{font-size:14px;font-weight:700;color:#34d399}
+    .result-unit{font-size:11px;color:rgba(255,255,255,0.3);margin-left:2px}
+    .canvas-wrap{flex:1;position:relative;overflow:hidden;background:rgba(0,0,0,0.25)}
+    #bsCanvas{display:block;width:100%;height:100%}
+    .formula-bar{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:10px 20px;font-size:12px;color:rgba(255,255,255,0.5);white-space:nowrap}
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">⚡ 实验：毕奥-萨伐尔定律</div>
+    <span class="topbar-course">普通物理（卓越班）下册 · 电磁学</span>
+  </div>
+  <div class="topbar-sub">§3-3 磁场分布</div>
+</div>
+<div class="layout">
+  <div class="sidebar">
+    <div class="ctrl-group">
+      <h3>电流形状</h3>
+      <div class="wire-grid">
+        <div class="wire-btn active" onclick="setWire(this,'straight')">无限长直导线</div>
+        <div class="wire-btn" onclick="setWire(this,'loop')">圆形电流环</div>
+        <div class="wire-btn" onclick="setWire(this,'solenoid')">螺线管</div>
+        <div class="wire-btn" onclick="setWire(this,'two')">双平行导线</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="slider-row">
+      <label>电流 I = <span id="Ival">3</span> A</label>
+      <input type="range" id="Islider" min="1" max="10" step="1" value="3" oninput="update()">
+    </div>
+    <div class="slider-row" id="rowR" style="display:none">
+      <label>线圈半径 R = <span id="Rval">1</span></label>
+      <input type="range" id="Rslider" min="1" max="3" step="0.5" value="1" oninput="update()">
+    </div>
+    <div class="slider-row" id="rowN" style="display:none">
+      <label>匝数/长度 n = <span id="Nval">5</span></label>
+      <input type="range" id="Nslider" min="2" max="12" step="1" value="5" oninput="update()">
+    </div>
+    <div class="slider-row" id="rowD" style="display:none">
+      <label>导线间距 d = <span id="Dval">2</span></label>
+      <input type="range" id="Dslider" min="1" max="5" step="1" value="2" oninput="update()">
+    </div>
+    <div class="divider"></div>
+    <div class="toggle-row">
+      <span>显示磁场线</span>
+      <div class="toggle on" id="togB" onclick="tog('B')"></div>
+    </div>
+    <div class="toggle-row" style="margin-top:8px">
+      <span>场强色图</span>
+      <div class="toggle on" id="togCol" onclick="tog('Col')"></div>
+    </div>
+    <div class="toggle-row" style="margin-top:8px">
+      <span>显示电流方向</span>
+      <div class="toggle on" id="togI" onclick="tog('I')"></div>
+    </div>
+    <div class="divider"></div>
+    <div class="result-panel">
+      <h3>特征场强</h3>
+      <div class="result-row"><span class="result-label">中心处 B</span><span><span class="result-value" id="resB">—</span><span class="result-unit">μT</span></span></div>
+      <div class="result-row"><span class="result-label">公式</span><span class="result-value" id="resFormula" style="font-size:12px">—</span></div>
+    </div>
+    <div class="report-fab" style="margin-top:auto;padding-top:12px">
+      <button class="report-fab-btn" onclick="openReport()">
+        <span class="rfb-icon">📄</span> 生成实验报告
+      </button>
+    </div>
+  </div>
+
+  <div class="canvas-wrap">
+    <canvas id="bsCanvas"></canvas>
+    <div class="formula-bar" id="fbar">dB = μ₀I dl×r̂ / (4πr²)</div>
+  </div>
+</div>
+
+<script>
+const canvas=document.getElementById('bsCanvas');
+const ctx=canvas.getContext('2d');
+const mu0=4*Math.PI*1e-7;
+
+let wireType='straight', showB=true, showCol=true, showI=true;
+
+function setWire(el,type){
+  document.querySelectorAll('.wire-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  wireType=type;
+  document.getElementById('rowR').style.display=type==='loop'?'flex':'none';
+  document.getElementById('rowN').style.display=type==='solenoid'?'flex':'none';
+  document.getElementById('rowD').style.display=type==='two'?'flex':'none';
+  update();
+}
+function tog(name){
+  if(name==='B')showB=!showB;
+  else if(name==='Col')showCol=!showCol;
+  else if(name==='I')showI=!showI;
+  document.getElementById('tog'+name).classList.toggle('on',eval('show'+name));
+  update();
+}
+
+function resize(){
+  canvas.width=canvas.parentElement.clientWidth;
+  canvas.height=canvas.parentElement.clientHeight;
+  update();
+}
+window.addEventListener('resize',resize);
+
+// Magnetic field at point (x,y) for each wire type
+// Returns [Bx, By] (2D in-plane components, z is into screen for straight wire -> circular field)
+function Bfield(x,y){
+  const I=parseInt(document.getElementById('Islider').value);
+  const W=canvas.width,H=canvas.height;
+  const cx=W/2,cy=H/2;
+  const scale=60; // 1 unit = 60px
+
+  if(wireType==='straight'){
+    // infinite straight wire along z at center; B is azimuthal in xy plane
+    const dx=x-cx,dy=y-cy;
+    const r2=dx*dx+dy*dy; if(r2<1)return[0,0];
+    const r=Math.sqrt(r2);
+    const Bmag=mu0*I/(2*Math.PI*(r/scale));
+    // azimuthal: Bx = -dy/r, By = dx/r
+    return[-Bmag*dy/r, Bmag*dx/r];
+  } else if(wireType==='loop'){
+    // approximate: circular loop in z=0 plane, we show field in xz plane
+    // simplified dipole model for 2D visualization
+    const R=parseFloat(document.getElementById('Rslider').value)*scale;
+    const dx=x-cx,dy=y-cy;
+    const r=Math.sqrt(dx*dx+dy*dy);
+    if(r<5)return[0,mu0*I/(2*R/scale)]; // center
+    // dipole approximation
+    const m=mu0*I*Math.PI*(R/scale)**2; // magnetic moment
+    const r_m=r/scale;
+    const theta=Math.atan2(-dy,dx); // angle from x-axis
+    const Br=2*m*Math.cos(theta)/(4*Math.PI*r_m**3);
+    const Bt=-m*Math.sin(theta)/(4*Math.PI*r_m**3);
+    const Bx=Br*Math.cos(theta)-Bt*Math.sin(theta);
+    const By=-(Br*Math.sin(theta)+Bt*Math.cos(theta));
+    return[Bx,By];
+  } else if(wireType==='solenoid'){
+    // solenoid: uniform field inside, nearly zero outside
+    const n=parseInt(document.getElementById('Nslider').value);
+    const solenoidH=140, solenoidW=200;
+    const inX=Math.abs(x-cx)<solenoidW/2, inY=Math.abs(y-cy)<solenoidH/2;
+    const B0=mu0*n*I/0.1; // n turns per 0.1m (rough)
+    if(inX&&inY) return[B0,0];
+    // outside fringe field - weak
+    const dx=x-cx, dy=y-cy;
+    const r=Math.sqrt(dx*dx+dy*dy)+1;
+    return[B0*30*dx/r**2, B0*30*dy/r**2];
+  } else { // two wires
+    const d=parseInt(document.getElementById('Dslider').value)*scale/2;
+    const wires=[{x:cx-d,y:cy,I:I},{x:cx+d,y:cy,I:-I}];
+    let bx=0,by=0;
+    for(const w of wires){
+      const dx=x-w.x,dy=y-w.y;
+      const r2=dx*dx+dy*dy;if(r2<4)continue;
+      const r=Math.sqrt(r2);
+      const Bmag=mu0*w.I/(2*Math.PI*(r/scale));
+      bx+=-Bmag*dy/r; by+=Bmag*dx/r;
+    }
+    return[bx,by];
+  }
+}
+
+function drawColorMap(){
+  const step=8,W=canvas.width,H=canvas.height;
+  const cols=Math.ceil(W/step),rows=Math.ceil(H/step);
+  let bmax=0;
+  const bvals=[];
+  for(let r=0;r<rows;r++){bvals[r]=[];for(let c=0;c<cols;c++){const[bx,by]=Bfield(c*step,r*step);const bm=Math.sqrt(bx*bx+by*by);bvals[r][c]=bm;bmax=Math.max(bmax,bm);}}
+  if(bmax===0)return;
+  for(let r=0;r<rows;r++) for(let c=0;c<cols;c++){
+    const t=Math.min(bvals[r][c]/bmax,1);
+    const R=Math.round(t*200),G=Math.round(t*80),B=Math.round((1-t)*255);
+    ctx.fillStyle=`rgba(${R},${G},${B},${0.12+t*0.25})`;
+    ctx.fillRect(c*step,r*step,step,step);
+  }
+}
+
+function traceBLine(sx,sy,sign){
+  const step=4,maxSteps=800;
+  ctx.beginPath();ctx.moveTo(sx,sy);
+  let x=sx,y=sy,dist=0;
+  const W=canvas.width,H=canvas.height;
+  for(let i=0;i<maxSteps;i++){
+    const[bx,by]=Bfield(x,y);
+    const bm=Math.sqrt(bx*bx+by*by);if(bm<1e-20)break;
+    const nx=x+sign*step*bx/bm, ny=y+sign*step*by/bm;
+    if(nx<5||nx>W-5||ny<5||ny>H-5)break;
+    ctx.lineTo(nx,ny);
+    dist+=step;
+    if(dist>=60){
+      dist=0;
+      const ang=Math.atan2(sign*by,sign*bx),as=6;
+      ctx.save();ctx.translate(nx,ny);ctx.rotate(ang);
+      ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-as,-as*0.4);ctx.lineTo(-as,as*0.4);
+      ctx.closePath();ctx.fillStyle=ctx.strokeStyle;ctx.fill();ctx.restore();
+      ctx.beginPath();ctx.moveTo(nx,ny);
+    }
+    x=nx;y=ny;
+    // detect closed loop
+    if(i>50&&(x-sx)**2+(y-sy)**2<step*step*4)break;
+  }
+  ctx.stroke();
+}
+
+function drawFieldLines(){
+  const W=canvas.width,H=canvas.height,cx=W/2,cy=H/2;
+  ctx.strokeStyle='rgba(52,211,153,0.65)';ctx.lineWidth=1.3;
+
+  if(wireType==='straight'||wireType==='two'){
+    // seed circles around wire(s)
+    const seeds=wireType==='straight'?[[cx,cy]]:[[cx-parseInt(document.getElementById('Dslider').value)*30,cy],[cx+parseInt(document.getElementById('Dslider').value)*30,cy]];
+    for(const[wx,wy] of seeds){
+      for(let r=40;r<=220;r+=40){
+        for(let i=0;i<1;i++){traceBLine(wx+r,wy,1);}
+      }
+    }
+  } else if(wireType==='loop'){
+    const nSeeds=12;
+    for(let i=0;i<nSeeds;i++){
+      const ang=2*Math.PI*i/nSeeds,r=30;
+      traceBLine(cx+r*Math.cos(ang),cy+r*Math.sin(ang),1);
+    }
+  } else if(wireType==='solenoid'){
+    for(let dy=-80;dy<=80;dy+=40){
+      traceBLine(cx-80,cy+dy,1);
+    }
+  }
+}
+
+function drawWire(){
+  const W=canvas.width,H=canvas.height,cx=W/2,cy=H/2;
+  const I=parseInt(document.getElementById('Islider').value);
+
+  if(wireType==='straight'){
+    // dot (current out of page)
+    ctx.beginPath();ctx.arc(cx,cy,12,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,150,50,0.3)';ctx.fill();
+    ctx.strokeStyle='rgba(255,150,50,0.8)';ctx.lineWidth=2;ctx.stroke();
+    if(showI){
+      ctx.fillStyle='rgba(255,150,50,0.9)';ctx.font='bold 14px sans-serif';
+      ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('⊙',cx,cy+1);
+    }
+    ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='12px "Microsoft YaHei"';
+    ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(`I = ${I} A`,cx,cy+18);
+  } else if(wireType==='loop'){
+    const R=parseFloat(document.getElementById('Rslider').value)*60;
+    ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);
+    ctx.strokeStyle='rgba(255,150,50,0.7)';ctx.lineWidth=3;ctx.stroke();
+    if(showI){
+      // current direction arrow
+      const ax=cx+R,ay=cy;
+      ctx.fillStyle='rgba(255,150,50,0.9)';ctx.font='16px sans-serif';
+      ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('↑',ax,ay);
+    }
+    ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='12px "Microsoft YaHei"';
+    ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(`I = ${I} A, R = ${document.getElementById('Rslider').value}`,cx,cy+R+8);
+  } else if(wireType==='solenoid'){
+    const n=parseInt(document.getElementById('Nslider').value);
+    const sw=200,sh=140;
+    // draw coil loops
+    for(let i=0;i<n;i++){
+      const lx=cx-sw/2+(i+0.5)*sw/n, wr=sw/n/2;
+      ctx.beginPath();ctx.ellipse(lx,cy,wr,sh/2,0,0,Math.PI*2);
+      ctx.strokeStyle='rgba(255,150,50,0.5)';ctx.lineWidth=2;ctx.stroke();
+    }
+    // inside uniform B arrow
+    for(let xi=-60;xi<=60;xi+=40){
+      const ax=cx+xi;
+      ctx.strokeStyle='rgba(52,211,153,0.7)';ctx.fillStyle='rgba(52,211,153,0.7)';ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(ax-15,cy);ctx.lineTo(ax+15,cy);ctx.stroke();
+      ctx.beginPath();ctx.moveTo(ax+15,cy);ctx.lineTo(ax+8,cy-5);ctx.lineTo(ax+8,cy+5);ctx.closePath();ctx.fill();
+    }
+    ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='12px "Microsoft YaHei"';
+    ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(`螺线管 n=${n}匝, I=${I}A`,cx,cy+sh/2+10);
+  } else {
+    const d=parseInt(document.getElementById('Dslider').value)*30;
+    for(let s=0;s<2;s++){
+      const wx=cx+[-d,d][s];
+      ctx.beginPath();ctx.arc(wx,cy,10,0,Math.PI*2);
+      ctx.fillStyle=s===0?'rgba(255,150,50,0.3)':'rgba(56,189,248,0.3)';ctx.fill();
+      ctx.strokeStyle=s===0?'rgba(255,150,50,0.7)':'rgba(56,189,248,0.7)';ctx.lineWidth=2;ctx.stroke();
+      if(showI){
+        ctx.fillStyle=s===0?'rgba(255,150,50,0.9)':'rgba(56,189,248,0.9)';
+        ctx.font='bold 12px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(s===0?'⊙':'⊗',wx,cy+1);
+      }
+      ctx.fillStyle='rgba(255,255,255,0.35)';ctx.font='11px "Microsoft YaHei"';
+      ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(`I${s+1}`,wx,cy+14);
+    }
+  }
+}
+
+function computeB(){
+  const I=parseInt(document.getElementById('Islider').value);
+  if(wireType==='straight'){
+    const r=0.05; // 5cm
+    const B=mu0*I/(2*Math.PI*r);
+    document.getElementById('resB').textContent=(B*1e6).toFixed(1);
+    document.getElementById('resFormula').textContent='B = μ₀I/2πr';
+    document.getElementById('fbar').textContent=`B = μ₀I/(2πr), r=5cm: B = ${(B*1e6).toFixed(1)} μT`;
+  } else if(wireType==='loop'){
+    const R=parseFloat(document.getElementById('Rslider').value)*0.06;
+    const B=mu0*I/(2*R);
+    document.getElementById('resB').textContent=(B*1e6).toFixed(1);
+    document.getElementById('resFormula').textContent='B = μ₀I/2R（中心）';
+    document.getElementById('fbar').textContent=`圆形电流环中心: B = μ₀I/(2R) = ${(B*1e6).toFixed(1)} μT`;
+  } else if(wireType==='solenoid'){
+    const n=parseInt(document.getElementById('Nslider').value)/0.2; // turns/m
+    const B=mu0*n*I;
+    document.getElementById('resB').textContent=(B*1e6).toFixed(1);
+    document.getElementById('resFormula').textContent='B = μ₀nI（内部）';
+    document.getElementById('fbar').textContent=`螺线管内: B = μ₀nI = ${(B*1e6).toFixed(1)} μT`;
+  } else {
+    const d=parseInt(document.getElementById('Dslider').value)*0.03;
+    const B=mu0*I/(Math.PI*d);
+    document.getElementById('resB').textContent=(B*1e6).toFixed(1);
+    document.getElementById('resFormula').textContent='B_中心 = μ₀I/πd';
+    document.getElementById('fbar').textContent=`双导线中点: B = μ₀I/(πd) = ${(B*1e6).toFixed(1)} μT`;
+  }
+}
+
+function update(){
+  if(!canvas.width)return;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(showCol)drawColorMap();
+  if(showB)drawFieldLines();
+  drawWire();
+  computeB();
+}
+
+resize();
+</script>
+<!-- ── 实验报告生成器 ── -->
+<style>
+.report-fab { }
+.report-fab-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  border: none; border-radius: 12px; padding: 10px 14px; width: 100%;
+  color: #fff; font-size: 13px; font-weight: 700;
+  font-family: "Microsoft YaHei", sans-serif;
+  cursor: pointer; letter-spacing: 0.5px;
+  box-shadow: 0 4px 20px rgba(52,211,153,0.4);
+  transition: box-shadow 0.2s;
+}
+.report-fab-btn:hover { box-shadow: 0 8px 28px rgba(52,211,153,0.55); }
+.report-fab-btn .rfb-icon { font-size: 17px; }
+
+.report-overlay {
+  position: fixed; inset: 0; z-index: 1200;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.report-overlay.open { display: flex; }
+.report-modal {
+  background: #0e0c24;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  width: min(760px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+  animation: slideUp 0.3s cubic-bezier(0.4,0,0.2,1) both;
+}
+@keyframes slideUp {
+  from { opacity:0; transform: translateY(30px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.rm-header {
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.rm-title { font-size: 17px; font-weight: 700; color: #fff; font-family: "Microsoft YaHei",sans-serif; }
+.rm-title span { color: #34d399; }
+.rm-close { font-size: 22px; color: rgba(255,255,255,0.4); cursor: pointer; line-height:1; transition: color 0.2s; }
+.rm-close:hover { color: #fff; }
+.rm-body { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; }
+.rm-field { display: flex; flex-direction: column; gap: 6px; }
+.rm-label { font-size: 12px; color: rgba(255,255,255,0.45); font-family: "Microsoft YaHei",sans-serif; letter-spacing: 0.5px; }
+.rm-label span { color: #f87171; }
+.rm-input, .rm-textarea {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 10px 14px;
+  color: #fff; font-size: 14px; font-family: "Microsoft YaHei",sans-serif;
+  outline: none; transition: border-color 0.2s; width: 100%;
+}
+.rm-input:focus, .rm-textarea:focus { border-color: rgba(52,211,153,0.5); }
+.rm-textarea { resize: vertical; min-height: 80px; line-height: 1.8; }
+.rm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.rm-section-title {
+  font-size: 12px; font-weight: 700; color: rgba(52,211,153,0.8);
+  letter-spacing: 1px; text-transform: uppercase;
+  border-bottom: 1px solid rgba(52,211,153,0.15);
+  padding-bottom: 8px; margin-top: 4px;
+  font-family: "Microsoft YaHei",sans-serif;
+}
+.rm-footer { padding: 16px 28px 24px; display: flex; gap: 12px; justify-content: flex-end; }
+.rm-btn {
+  padding: 10px 28px; border-radius: 12px; border: none; cursor: pointer;
+  font-size: 14px; font-weight: 700; font-family: "Microsoft YaHei",sans-serif;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.rm-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.rm-btn-cancel { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6); }
+.rm-btn-gen { background: linear-gradient(135deg,#10b981,#34d399); color: #fff; }
+.rm-btn-copy { background: linear-gradient(135deg,#6366f1,#818cf8); color: #fff; display:none; }
+
+.report-output {
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px; padding: 20px 24px; margin: 0 28px 24px;
+  font-family: "Microsoft YaHei", "Times New Roman", serif;
+  font-size: 13.5px; color: rgba(255,255,255,0.85);
+  line-height: 2; white-space: pre-wrap; display: none;
+  max-height: 340px; overflow-y: auto;
+}
+.report-output.show { display: block; }
+</style>
+
+
+<div class="report-overlay" id="reportOverlay" onclick="overlayClick(event)">
+  <div class="report-modal">
+    <div class="rm-header">
+      <div class="rm-title">实验报告 · <span>毕奥-萨伐尔定律</span></div>
+      <div class="rm-close" onclick="closeReport()">×</div>
+    </div>
+    <div class="rm-body">
+      <div class="rm-section-title">基本信息</div>
+      <div class="rm-row">
+        <div class="rm-field">
+          <div class="rm-label">姓名 <span>*</span></div>
+          <input class="rm-input" id="rName" placeholder="请输入姓名">
+        </div>
+        <div class="rm-field">
+          <div class="rm-label">学号 <span>*</span></div>
+          <input class="rm-input" id="rStuId" placeholder="请输入学号">
+        </div>
+      </div>
+      <div class="rm-row">
+        <div class="rm-field">
+          <div class="rm-label">实验日期</div>
+          <input class="rm-input" id="rDate" type="date">
+        </div>
+        <div class="rm-field">
+          <div class="rm-label">实验伙伴</div>
+          <input class="rm-input" id="rPartner" placeholder="可选">
+        </div>
+      </div>
+      <div class="rm-section-title">实验内容</div>
+      <div class="rm-field">
+        <div class="rm-label">实验目的</div>
+        <textarea class="rm-textarea" id="rPurpose" placeholder="描述本次实验的目的和预期目标……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验步骤与观察</div>
+        <textarea class="rm-textarea" id="rProcess" placeholder="描述你进行的操作步骤和实验过程中的观察……" style="min-height:100px"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验数据记录</div>
+        <textarea class="rm-textarea" id="rData" placeholder="记录关键数据、参数和仿真结果……"></textarea>
+      </div>
+      <div class="rm-section-title">分析与总结</div>
+      <div class="rm-field">
+        <div class="rm-label">结果分析</div>
+        <textarea class="rm-textarea" id="rAnalysis" placeholder="对实验现象和数据进行分析……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">误差分析与思考</div>
+        <textarea class="rm-textarea" id="rError" placeholder="分析可能的误差来源，以及对物理规律的思考……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验结论</div>
+        <textarea class="rm-textarea" id="rConclusion" placeholder="总结本次实验的结论……"></textarea>
+      </div>
+    </div>
+    <div class="report-output" id="reportOutput"></div>
+    <div class="rm-footer">
+      <button class="rm-btn rm-btn-cancel" onclick="closeReport()">取消</button>
+      <button class="rm-btn rm-btn-copy" id="rmCopyBtn" onclick="copyReport()">复制报告</button>
+      <button class="rm-btn rm-btn-gen" onclick="generateReport()">生成报告</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const EXP_NAME = '毕奥-萨伐尔定律';
+  const EXP_SEC  = '§3-3';
+  const STORE_KEY = 'phy26_report_' + EXP_SEC.replace(/[§\/]/g,'');
+
+  function loadSaved() {
+    const d = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+    if (d.name)       document.getElementById('rName').value      = d.name;
+    if (d.stuId)      document.getElementById('rStuId').value     = d.stuId;
+    if (d.date)       document.getElementById('rDate').value      = d.date;
+    if (d.partner)    document.getElementById('rPartner').value   = d.partner;
+    if (d.purpose)    document.getElementById('rPurpose').value   = d.purpose;
+    if (d.process)    document.getElementById('rProcess').value   = d.process;
+    if (d.data)       document.getElementById('rData').value      = d.data;
+    if (d.analysis)   document.getElementById('rAnalysis').value  = d.analysis;
+    if (d.error)      document.getElementById('rError').value     = d.error;
+    if (d.conclusion) document.getElementById('rConclusion').value= d.conclusion;
+  }
+
+  function saveDraft() {
+    const d = {
+      name:       document.getElementById('rName').value,
+      stuId:      document.getElementById('rStuId').value,
+      date:       document.getElementById('rDate').value,
+      partner:    document.getElementById('rPartner').value,
+      purpose:    document.getElementById('rPurpose').value,
+      process:    document.getElementById('rProcess').value,
+      data:       document.getElementById('rData').value,
+      analysis:   document.getElementById('rAnalysis').value,
+      error:      document.getElementById('rError').value,
+      conclusion: document.getElementById('rConclusion').value,
+    };
+    localStorage.setItem(STORE_KEY, JSON.stringify(d));
+  }
+
+  window.openReport = function() {
+    document.getElementById('reportOverlay').classList.add('open');
+    document.getElementById('reportOutput').classList.remove('show');
+    document.getElementById('rmCopyBtn').style.display = 'none';
+    const dateEl = document.getElementById('rDate');
+    if (!dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
+    loadSaved();
+    const _d = {
+      rPurpose:    '验证毕奥-萨伐尔定律，研究电流元产生磁场的规律，计算不同形状载流导线在空间各点产生的磁感应强度，理解磁场的叠加计算方法。',
+      rProcess:    '将载流导线分割为电流元，计算每个电流元在场点产生的dB=μ₀Idl×r̂/(4πr²)；对所有电流元的贡献进行矢量积分，得到总磁场B；分别计算有限长直导线、圆形线圈轴线上的B，与解析公式对比；改变场点位置，观察B的空间分布。',
+      rData:       '有限长直导线（L=20cm，I=1A，场点在中垂线上d=5cm处）：B≈7.27μT；无限长直导线（同参数）：B=μ₀I/(2πd)=4μT；圆形线圈（R=5cm，I=1A）轴线x=3cm处：B=μ₀IR²/(2(R²+x²)^(3/2))=9.24μT；圆心处B=μ₀I/(2R)=12.6μT。',
+      rAnalysis:   '毕奥-萨伐尔定律dB=μ₀Idl×r̂/(4πr²)是磁场计算的基本定律，dB的大小与电流元Idl和sinθ成正比，与距离r²成反比，方向垂直于Idl和r̂所在平面。有限长导线端部效应使B小于无限长导线的值。',
+      rError:      '数值积分的精度取决于电流元的划分数量，划分越细精度越高但计算量越大；实际导线有一定截面积，点电流元模型在近场处不准确；测量仪器的空间分辨率限制了近场测量精度。',
+      rConclusion: '验证了毕奥-萨伐尔定律：电流元产生的磁场dB∝Idlsinθ/r²，方向由右手定则确定；有限长导线的磁场小于无限长导线；圆形线圈轴线上磁场在圆心处最强，沿轴线向两侧递减。',
+    };
+    Object.entries(_d).forEach(([id, val]) => { const el = document.getElementById(id); if (el && !el.value) el.value = val; });
+  };
+
+  window.closeReport = function() {
+    saveDraft();
+    document.getElementById('reportOverlay').classList.remove('open');
+  };
+
+  window.overlayClick = function(e) {
+    if (e.target === document.getElementById('reportOverlay')) closeReport();
+  };
+
+  window.generateReport = function() {
+    const name       = document.getElementById('rName').value.trim();
+    const stuId      = document.getElementById('rStuId').value.trim();
+    const date       = document.getElementById('rDate').value || '—';
+    const partner    = document.getElementById('rPartner').value.trim() || '—';
+    const purpose    = document.getElementById('rPurpose').value.trim() || '（未填写）';
+    const process    = document.getElementById('rProcess').value.trim() || '（未填写）';
+    const data       = document.getElementById('rData').value.trim() || '（未填写）';
+    const analysis   = document.getElementById('rAnalysis').value.trim() || '（未填写）';
+    const error      = document.getElementById('rError').value.trim() || '（未填写）';
+    const conclusion = document.getElementById('rConclusion').value.trim() || '（未填写）';
+
+    if (!name || !stuId) { alert('请填写姓名和学号'); return; }
+    saveDraft();
+
+    const divider = '─'.repeat(40);
+    const report = [
+      '普通物理（卓越班）下册 · 电磁学',
+      `实验报告：${EXP_NAME}（${EXP_SEC}）`,
+      divider,
+      `姓　　名：${name}　　　学　　号：${stuId}`,
+      `实验日期：${date}　　　实验伙伴：${partner}`,
+      divider,
+      '',
+      '一、实验目的',
+      purpose,
+      '',
+      '二、实验步骤与观察',
+      process,
+      '',
+      '三、实验数据记录',
+      data,
+      '',
+      '四、结果分析',
+      analysis,
+      '',
+      '五、误差分析与思考',
+      error,
+      '',
+      '六、实验结论',
+      conclusion,
+      '',
+      divider,
+      `生成时间：${new Date().toLocaleString('zh-CN')}`,
+      '本报告由 NUSEP26 普通物理（卓越班）实验仿真平台生成',
+    ].join('\n');
+
+    const out = document.getElementById('reportOutput');
+    out.textContent = report;
+    out.classList.add('show');
+    document.getElementById('rmCopyBtn').style.display = 'inline-flex';
+    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+
+  window.copyReport = function() {
+    const text = document.getElementById('reportOutput').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('rmCopyBtn');
+      const orig = btn.textContent;
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => btn.textContent = orig, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      const btn = document.getElementById('rmCopyBtn');
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => btn.textContent = '复制报告', 2000);
+    });
+  };
+
+  ['rName','rStuId','rDate','rPartner','rPurpose','rProcess','rData','rAnalysis','rError','rConclusion']
+    .forEach(id => document.getElementById(id).addEventListener('input', saveDraft));
+})();
+</script>
+
+</body>
+</html>

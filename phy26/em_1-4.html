@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>1-4 静电场的环路定理 电势 — 电磁学</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Times New Roman", "Microsoft YaHei", "PingFang SC", serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh; color: #fff;
+    }
+    :lang(zh), .zh { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; }
+    canvas#particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+
+    .topbar {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; gap: 14px;
+      padding: 18px 36px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      background: rgba(15,12,41,0.7); backdrop-filter: blur(12px);
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .back-btn { color: rgba(255,255,255,0.5); font-size: 14px; cursor: pointer; text-decoration: none; transition: color .2s; }
+    .back-btn:hover { color: #818cf8; }
+    .topbar-title-wrap { display: flex; flex-direction: column; gap: 2px; }
+    .topbar-title { font-size: 16px; font-weight: 700; letter-spacing: 1px; }
+    .topbar-course { font-size: 11px; color: rgba(255,255,255,0.38); letter-spacing: 1px; }
+    .topbar-sub { margin-left: auto; font-size: 12px; color: rgba(255,255,255,0.3); }
+
+    .tabs { display: flex; gap: 10px; margin-bottom: 32px; font-family: "Microsoft YaHei", sans-serif; flex-wrap: wrap; }
+    .tab {
+      padding: 9px 22px; border-radius: 10px; font-size: 14px; font-weight: 600;
+      cursor: pointer; border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.5);
+      transition: all .2s;
+    }
+    .tab.active {
+      background: linear-gradient(135deg,#6366f1,#818cf8);
+      border-color: transparent; color: #fff;
+      box-shadow: 0 4px 16px rgba(99,102,241,0.4);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .page { position: relative; z-index: 10; max-width: 860px; margin: 0 auto; padding: 36px 24px 80px; }
+
+    .card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 16px; padding: 28px 32px; margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 16px; font-weight: 700; color: #818cf8;
+      margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .card-title::before {
+      content: ""; display: inline-block;
+      width: 4px; height: 18px; border-radius: 2px;
+      background: linear-gradient(#6366f1,#818cf8); flex-shrink: 0;
+    }
+    .card p { font-size: 15px; color: rgba(255,255,255,0.8); line-height: 2; }
+    .card p + p { margin-top: 10px; }
+    .hl       { color: #fbbf24; font-weight: 600; }
+    .hl-blue  { color: #38bdf8; font-weight: 600; }
+    .hl-green { color: #34d399; font-weight: 600; }
+    .hl-red   { color: #f87171; font-weight: 600; }
+
+    .katex { color: #e2e8f0; font-size: 1.05em; }
+    .katex-display { margin: 14px 0; }
+    .katex-display > .katex { color: #93c5fd; }
+
+    .prop-list { list-style: none; margin-top: 10px; display: flex; flex-direction: column; gap: 12px; }
+    .prop-item {
+      display: flex; gap: 14px; align-items: flex-start;
+      background: rgba(255,255,255,0.03); border-radius: 10px; padding: 14px 18px;
+      border-left: 3px solid #6366f1;
+    }
+    .prop-item:nth-child(2) { border-left-color: #38bdf8; }
+    .prop-item:nth-child(3) { border-left-color: #34d399; }
+    .prop-item:nth-child(4) { border-left-color: #f59e0b; }
+    .prop-num {
+      min-width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700;
+      background: linear-gradient(135deg,#6366f1,#818cf8); color: #fff;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .prop-item:nth-child(2) .prop-num { background: linear-gradient(135deg,#0ea5e9,#38bdf8); }
+    .prop-item:nth-child(3) .prop-num { background: linear-gradient(135deg,#10b981,#34d399); }
+    .prop-item:nth-child(4) .prop-num { background: linear-gradient(135deg,#f59e0b,#fbbf24); }
+    .prop-body { font-size: 14.5px; color: rgba(255,255,255,0.78); line-height: 1.9; }
+    .prop-body strong { color: #fff; font-family: "Microsoft YaHei", sans-serif; }
+
+    .demo-box {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px; padding: 24px; margin-bottom: 20px;
+    }
+    .demo-title {
+      font-size: 15px; font-weight: 700; color: #c084fc; margin-bottom: 16px;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+
+    .coming-soon {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 18px; padding: 72px 24px;
+      background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.1);
+      border-radius: 16px; text-align: center;
+    }
+    .coming-soon .cs-icon { font-size: 48px; opacity: 0.4; }
+    .coming-soon .cs-text {
+      font-size: 15px; color: rgba(255,255,255,0.35);
+      font-family: "Microsoft YaHei", sans-serif; line-height: 1.8;
+    }
+
+    /* 标注盒 */
+    .note-box {
+      background: rgba(251,191,36,0.06); border: 1px solid rgba(251,191,36,0.2);
+      border-radius: 12px; padding: 16px 20px; margin-top: 14px;
+      font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.9;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .note-box .note-label {
+      font-weight: 700; color: #fbbf24; margin-bottom: 4px;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+  </style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+
+<div class="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">§1-4 &nbsp;静电场的环路定理 &nbsp;电势</div>
+    <span class="topbar-course">普通物理（卓越班）下册 · 电磁学</span>
+  </div>
+  <div class="topbar-sub">NUSEP26 · 普通物理（卓）下</div>
+</div>
+
+<div class="page">
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(0)">1-4-1 &nbsp;环路定理</div>
+    <div class="tab"        onclick="switchTab(1)">1-4-2 &nbsp;电势能</div>
+    <div class="tab"        onclick="switchTab(2)">1-4-3 &nbsp;电势与电势差</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- Tab 0: 1-4-1 静电场的环路定理               -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="tab-panel active" id="panel-0">
+
+    <div class="card">
+      <div class="card-title">静电场力做的功</div>
+      <p>在场源点电荷 $q > 0$ 产生的电场中，试探电荷 $q_0$ 从 $a$ 点沿任意路径 $L$ 移动到 $b$ 点。沿路径的功元为</p>
+      $$\mathrm{d}W = q_0\,E\,\mathrm{d}r$$
+      <p>其中 $\mathrm{d}r$ 是位移在径向（$\vec{r}$ 方向）的分量。对全程积分：</p>
+      $$W_{ab} = \int_a^b \mathrm{d}W = \frac{qq_0}{4\pi\varepsilon_0}\left(\frac{1}{r_a} - \frac{1}{r_b}\right)$$
+      <p>结果只与起点 $r_a$、终点 $r_b$ 有关，<span class="hl">与路径形状无关</span>。这是静电场力为保守力的直接证明。</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">静电场的环路定理</div>
+      <p>由功与路径无关，可以推出：静电场中电场强度沿任意<span class="hl">闭合路径</span> $l$ 的线积分（环流）恒为零：</p>
+      $$\oint_l \vec{E}\cdot\mathrm{d}\vec{l} = 0$$
+      <ul class="prop-list" style="margin-top:16px;">
+        <li class="prop-item">
+          <div class="prop-num">含义</div>
+          <div class="prop-body">
+            <strong>静电场是保守场（无旋场）</strong><br>
+            环流为零等价于微分形式 $\nabla\times\vec{E}=\vec{0}$，说明电场线不构成闭合回路，静电场力对电荷做功不依赖于路径，可以引入<span class="hl">电势</span>这一标量场。
+          </div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">对比</div>
+          <div class="prop-body">
+            <strong>与高斯定理的对比</strong><br>
+            高斯定理（$\oint_S\vec{E}\cdot\mathrm{d}\vec{S}=\sum q_i/\varepsilon_0$）描述静电场是<span class="hl-blue">有源场</span>（散度不为零）；环路定理描述静电场是<span class="hl-green">无旋场</span>（旋度为零）。两者共同完整地刻画了静电场的数学结构。
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="demo-box">
+      <div class="demo-title">▶ 路径无关演示</div>
+      <canvas id="pathCanvas" width="680" height="260"
+        style="border-radius:10px;max-width:100%;display:block;margin:0 auto;"></canvas>
+      <div style="text-align:center;margin-top:10px;font-size:12.5px;color:rgba(255,255,255,0.38);font-family:'Microsoft YaHei',sans-serif;">
+        三条不同路径 $L_1,L_2,L_3$ 连接 $a\to b$，静电场力做的功相同，均为 $\dfrac{qq_0}{4\pi\varepsilon_0}\!\left(\dfrac{1}{r_a}-\dfrac{1}{r_b}\right)$
+      </div>
+    </div>
+
+  </div><!-- /panel-0 -->
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- Tab 1: 1-4-2 电势能                         -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="panel-1">
+
+    <div class="card">
+      <div class="card-title">电势能的定义</div>
+      <p>静电场力是保守力，可以引入对应的<span class="hl">势能</span>——电势能（electric potential energy）。静电场力将试探电荷 $q_0$ 从 $a$ 移到 $b$ 所做的功，等于电势能的<span class="hl-red">减少量</span>：</p>
+      $$W_{ab} = E_{pa} - E_{pb} = -(E_{pb} - E_{pa})$$
+      <p>其中 $E_{pa}$、$E_{pb}$ 分别是 $q_0$ 在 $a$、$b$ 点的电势能，单位为 <span class="hl-green">焦耳（J）</span>。</p>
+      <div class="note-box">
+        <div class="note-label">符号说明</div>
+        电势能是<strong>可正可负</strong>的标量。正值表示系统有"弹性势能式"储能，外力将两者分开时做正功；负值表示两者相互吸引，需要外力做功才能将其分开。
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">电势能的计算</div>
+      <p>将 $W_{ab} = E_{pa} - E_{pb}$ 改写，选定<span class="hl">参考点</span>（通常取无穷远处 $E_{p,\infty}=0$），则 $a$ 点的电势能为</p>
+      $$E_{pa} = W_{a\infty} = \int_a^{\infty} q_0\,\vec{E}\cdot\mathrm{d}\vec{l}$$
+      <p>对点电荷 $q$ 产生的电场，$q_0$ 在距 $q$ 为 $r$ 处的电势能为</p>
+      $$E_p = \frac{qq_0}{4\pi\varepsilon_0 r}$$
+      <ul class="prop-list" style="margin-top:16px;">
+        <li class="prop-item">
+          <div class="prop-num">正</div>
+          <div class="prop-body">
+            $q$ 与 $q_0$ 同号（相互排斥）：$E_p > 0$。将 $q_0$ 从 $r$ 移至无穷远，电场力做正功，电势能减小。
+          </div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">负</div>
+          <div class="prop-body">
+            $q$ 与 $q_0$ 异号（相互吸引）：$E_p < 0$。将 $q_0$ 从 $r$ 移至无穷远，需外力做正功以克服吸引力，电势能增大（趋向零）。
+          </div>
+        </li>
+      </ul>
+    </div>
+
+  </div><!-- /panel-1 -->
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- Tab 2: 1-4-3 电势与电势差                   -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="panel-2">
+
+    <!-- 定义与公式 -->
+    <div class="card">
+      <div class="card-title">电势的定义</div>
+      <p>静电场中某点 $a$ 的<span class="hl">电势</span>定义为单位正电荷在该点处的电势能：</p>
+      $$V_a = \frac{E_{pa}}{q_0} = \int_a^{\infty}\vec{E}\cdot\mathrm{d}\vec{l}$$
+      <p>单位为 <span class="hl-green">伏特（V = J/C）</span>。参考点（零势点）通常取无穷远处。电势是标量，可正可负，描述电场本身的性质（与试探电荷无关）。</p>
+      <p>对<span class="hl-blue">点电荷</span> $q$，距其 $r$ 处的电势为</p>
+      $$V = \frac{q}{4\pi\varepsilon_0 r}$$
+      <p><span class="hl">叠加原理</span>：多个点电荷产生的电场中，某点电势等于各点电荷单独产生电势的<span class="hl">代数和</span>（前提：各分量使用相同零势点）：</p>
+      $$V = \sum_i \frac{q_i}{4\pi\varepsilon_0 r_i}$$
+    </div>
+
+    <div class="card">
+      <div class="card-title">电势差与功</div>
+      <p>$a$、$b$ 两点间的<span class="hl">电势差</span>（电压）为</p>
+      $$V_{ab} = V_a - V_b = \int_b^a \vec{E}\cdot\mathrm{d}\vec{l}$$
+      <p>电荷 $q$ 从 $a$ 移到 $b$，静电场力做的功为</p>
+      $$W_{ab} = q\,V_{ab} = q(V_a - V_b)$$
+    </div>
+
+    <!-- 例1：均匀带电球体 -->
+    <div class="card">
+      <div class="card-title">例1 &nbsp;均匀带电实心球体（半径 $R$，总电荷 $+q$，体密度 $\rho=\frac{3q}{4\pi R^3}$）</div>
+      <p>由高斯定理已知（见1-3-3例1）：</p>
+      $$E(r)=\begin{cases}\dfrac{q}{4\pi\varepsilon_0 r^2},&r\geq R\\[6pt]\dfrac{qr}{4\pi\varepsilon_0 R^3},&r\leq R\end{cases}$$
+      <p>利用 $V(r)=\int_r^{\infty}\vec{E}\cdot\mathrm{d}\vec{l}$ 分段积分（零势点取无穷远）：</p>
+      <p><span class="hl-green">$r \geq R$（球外）：</span></p>
+      $$V(r)=\int_r^{\infty}\frac{q}{4\pi\varepsilon_0 r'^2}\mathrm{d}r' = \frac{q}{4\pi\varepsilon_0}\left[-\frac{1}{r'}\right]_r^{\infty} = \frac{q}{4\pi\varepsilon_0 r}$$
+      <p><span class="hl-blue">$r \leq R$（球内）：</span>拆分积分为球内段加球外段，</p>
+      $$V(r)=\int_r^{R}\frac{qr'}{4\pi\varepsilon_0 R^3}\mathrm{d}r' + \int_R^{\infty}\frac{q}{4\pi\varepsilon_0 r'^2}\mathrm{d}r'$$
+      $$=\frac{q}{4\pi\varepsilon_0 R^3}\cdot\frac{R^2-r^2}{2}+\frac{q}{4\pi\varepsilon_0 R} = \frac{q}{4\pi\varepsilon_0}\cdot\frac{3R^2-r^2}{2R^3}$$
+      <p>验证：$r=R$ 时两式均给出 $V(R)=\frac{q}{4\pi\varepsilon_0 R}$，<span class="hl">电势在球面处连续</span>（但 $E$ 有跳变）。球心处 $V(0)=\frac{3}{2}V(R)$。</p>
+      <div class="demo-box" style="margin-top:18px;margin-bottom:0;">
+        <div class="demo-title">▶ $V$-$r$ 图（均匀带电球体）</div>
+        <canvas id="vrSphere" width="620" height="200"
+          style="border-radius:10px;max-width:100%;display:block;margin:0 auto;"></canvas>
+      </div>
+    </div>
+
+    <!-- 例2：电偶极子 -->
+    <div class="card">
+      <div class="card-title">例2 &nbsp;电偶极子的电势与等势面</div>
+      <p>设 $+q$ 在原点右方 $l/2$ 处，$-q$ 在左方 $l/2$ 处，偶极矩 $\vec{p}_e=q\vec{l}$（指向 $+q$）。场点 $P$ 极坐标 $(r,\theta)$，$\theta$ 为 $\vec{p}_e$ 与 $\overrightarrow{OP}$ 的夹角。</p>
+      <p>由叠加原理，$P$ 点电势：</p>
+      $$V=\frac{q}{4\pi\varepsilon_0}\!\left(\frac{1}{r_+}-\frac{1}{r_-}\right)$$
+      <p>当 $r\gg l$ 时，利用近似 $r_\pm\approx r\mp\frac{l}{2}\cos\theta$：</p>
+      $$\frac{1}{r_+}-\frac{1}{r_-}\approx\frac{l\cos\theta}{r^2}$$
+      <p>代入得远场近似：</p>
+      $$\boxed{V\approx\frac{p_e\cos\theta}{4\pi\varepsilon_0 r^2}}$$
+      <p>等势线方程 $r^2=C\cos\theta$（$C$ 为常数）。$\theta=90°$ 的赤道面上 $V=0$；沿 $\vec{p}_e$ 方向（$\theta=0$）电势最高，反方向（$\theta=180°$）最低。</p>
+      <div class="demo-box" style="margin-top:18px;margin-bottom:0;">
+        <div class="demo-title">▶ 电偶极子等势面（虚线）与电场线（实线）</div>
+        <canvas id="dipoleVCanvas" width="620" height="260"
+          style="border-radius:10px;max-width:100%;display:block;margin:0 auto;"></canvas>
+      </div>
+    </div>
+
+    <!-- 例3：有限长带电直线延长线 -->
+    <div class="card">
+      <div class="card-title">例3 &nbsp;有限长均匀带电直线（$+\lambda$，长 $L$）延长线上的电势</div>
+      <p>设直线沿 $x$ 轴放置，占据 $[0,L]$，场点 $P$ 在延长线上 $x=a+L$（即距近端 $a$，距远端 $a+L$）。取无穷远为零势点。</p>
+      <p>在直线上取微元 $\mathrm{d}x'$，带电量 $\mathrm{d}q=\lambda\,\mathrm{d}x'$，$P$ 距该微元距离为 $r'=a+L-x'$。积分：</p>
+      $$V=\int_0^{L}\frac{\lambda\,\mathrm{d}x'}{4\pi\varepsilon_0(a+L-x')}$$
+      <p>令 $u=a+L-x'$，$\mathrm{d}u=-\mathrm{d}x'$，积分范围从 $u=a+L$ 到 $u=a$：</p>
+      $$V=\frac{\lambda}{4\pi\varepsilon_0}\int_{a}^{a+L}\frac{\mathrm{d}u}{u}=\frac{\lambda}{4\pi\varepsilon_0}\ln\frac{a+L}{a}$$
+      <p>当 $a\to\infty$，$\ln\frac{a+L}{a}\approx\frac{L}{a}\to0$，退化为远处的"点电荷"行为。有限长时以无穷远为零势点合法（结果有限）；无限长时 $\int\frac{\mathrm{d}r'}{r'}$ 发散，必须另选参考点。</p>
+    </div>
+
+    <!-- 例4：均匀带电圆环轴线 -->
+    <div class="card">
+      <div class="card-title">例4 &nbsp;均匀带电圆环（半径 $R$，总电荷 $q$）轴线上的电势</div>
+      <p>在圆环上取微元 $\mathrm{d}q$，轴线上距圆心 $x$ 处场点 $P$ 到该微元的距离均为</p>
+      $$r=\sqrt{x^2+R^2}$$
+      <p>与微元位置无关，故可直接对全环积分：</p>
+      $$V(x)=\oint\frac{\mathrm{d}q}{4\pi\varepsilon_0 r}=\frac{1}{4\pi\varepsilon_0\sqrt{x^2+R^2}}\oint\mathrm{d}q=\frac{q}{4\pi\varepsilon_0\sqrt{x^2+R^2}}$$
+      <p>极值与极限：</p>
+      <ul class="prop-list" style="margin-top:10px;">
+        <li class="prop-item">
+          <div class="prop-num">圆心</div>
+          <div class="prop-body">$x=0$：$V_{\max}=\dfrac{q}{4\pi\varepsilon_0 R}$，为轴线上最大值。</div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">远场</div>
+          <div class="prop-body">$x\gg R$：$V\approx\dfrac{q}{4\pi\varepsilon_0 x}$，退化为点电荷电势。</div>
+        </li>
+      </ul>
+      <p style="margin-top:12px;">注：由 $E_x=-\dfrac{\partial V}{\partial x}$ 可验证 $E_x=\dfrac{qx}{4\pi\varepsilon_0(x^2+R^2)^{3/2}}$，与直接用叠加原理计算结果一致。</p>
+    </div>
+
+    <!-- 例5：无限长带电直线 -->
+    <div class="card">
+      <div class="card-title">例5 &nbsp;无限长均匀带电直线（$+\lambda$）外任一点的电势</div>
+      <p>已知 $E=\dfrac{\lambda}{2\pi\varepsilon_0 r}$（高斯定理结果）。若以 $r\to\infty$ 为零势点，则</p>
+      $$V(r)=\int_r^{\infty}\frac{\lambda}{2\pi\varepsilon_0 r'}\mathrm{d}r'=\frac{\lambda}{2\pi\varepsilon_0}\ln r\Big|_r^{\infty}\to\infty$$
+      <p>积分发散，<span class="hl-red">无穷远不能作为零势点</span>。改选距直线 $r_0$ 处为参考点（$V(r_0)=0$）：</p>
+      $$V(r)=\int_r^{r_0}\frac{\lambda}{2\pi\varepsilon_0 r'}\mathrm{d}r'=\frac{\lambda}{2\pi\varepsilon_0}\ln\frac{r_0}{r}$$
+      <p>当 $r&lt;r_0$（更近处）时 $V&gt;0$；当 $r&gt;r_0$（更远处）时 $V&lt;0$。等势面为与直线同轴的圆柱面（$r=\mathrm{const}$）。</p>
+    </div>
+
+    <!-- 例6：无限大带电平面 -->
+    <div class="card">
+      <div class="card-title">例6 &nbsp;无限大均匀带电平面（$+\sigma$）两侧的电势</div>
+      <p>已知 $E=\dfrac{\sigma}{2\varepsilon_0}$，方向垂直平面向外（$z>0$ 侧指向 $+z$，$z<0$ 侧指向 $-z$）。若以 $z\to\infty$ 为零势点同样发散，<span class="hl-red">必须另选参考点</span>，取带电平面所在处（$z=0$）为零势点。</p>
+      <p>$z>0$ 侧：电场方向与 $+z$ 相同，沿 $+z$ 方向走，电势降低，</p>
+      $$V(z)=-\int_0^z\frac{\sigma}{2\varepsilon_0}\mathrm{d}z'=-\frac{\sigma}{2\varepsilon_0}z\quad(z>0)$$
+      <p>由对称性，$z<0$ 侧电场指向 $-z$，类比得</p>
+      $$V(z)=\frac{\sigma}{2\varepsilon_0}|z|\quad(z<0)$$
+      <p>统一写为 $V(z)=-\dfrac{\sigma}{2\varepsilon_0}|z|$（以平面为零势点，两侧均为负值或零）。</p>
+      <p>等势面为平行于带电平面的平面族；$|E|=\left|-\dfrac{\partial V}{\partial z}\right|=\dfrac{\sigma}{2\varepsilon_0}$，与高斯定理结果自洽。</p>
+    </div>
+
+  </div><!-- /panel-2 -->
+
+</div><!-- /page -->
+
+<script>
+// ── Tab 切换 ──
+function switchTab(idx){
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===idx));
+  document.querySelectorAll('.tab-panel').forEach((p,i)=>p.classList.toggle('active',i===idx));
+}
+
+// ── 粒子背景 ──
+(function(){
+  const canvas=document.getElementById('particles');
+  const ctx=canvas.getContext('2d');
+  let W,H,pts=[];
+  function resize(){ W=canvas.width=innerWidth; H=canvas.height=innerHeight; }
+  window.addEventListener('resize',resize); resize();
+  const COLORS=['#818cf8','#38bdf8','#c084fc','#34d399'];
+  function spawn(){ return {x:Math.random()*W,y:H+10,r:Math.random()*2.5+0.5,speed:Math.random()*0.5+0.15,color:COLORS[Math.random()*COLORS.length|0],op:Math.random()*0.15+0.04}; }
+  for(let i=0;i<50;i++){const p=spawn();p.y=Math.random()*H;pts.push(p);}
+  function draw(){ctx.clearRect(0,0,W,H);pts.forEach((p,i)=>{p.y-=p.speed;if(p.y<-10)pts[i]=spawn();ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.color;ctx.globalAlpha=p.op;ctx.fill();});ctx.globalAlpha=1;requestAnimationFrame(draw);}
+  draw();
+})();
+
+// ── 通用箭头 ──
+function drawArrow(ctx,x1,y1,x2,y2,col,lw){
+  const dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy);
+  if(len<3) return;
+  const ux=dx/len,uy=dy/len,h=10;
+  ctx.save();
+  ctx.strokeStyle=col; ctx.fillStyle=col; ctx.lineWidth=lw; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2-ux*h*0.6,y2-uy*h*0.6); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x2,y2);
+  ctx.lineTo(x2-h*ux+h*0.42*uy, y2-h*uy-h*0.42*ux);
+  ctx.lineTo(x2-h*ux-h*0.42*uy, y2-h*uy+h*0.42*ux);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+// ── 路径无关演示 ──
+(function(){
+  const canvas=document.getElementById('pathCanvas');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+
+  // charge at left, points a and b
+  const qx=W*0.18, qy=H/2;
+  const ax=W*0.38, ay=H*0.5;
+  const bx=W*0.82, by=H*0.5;
+  const ra=Math.sqrt((ax-qx)**2+(ay-qy)**2);
+  const rb=Math.sqrt((bx-qx)**2+(by-qy)**2);
+
+  ctx.clearRect(0,0,W,H);
+  ctx.save(); ctx.fillStyle='rgba(255,255,255,0.012)'; ctx.fillRect(0,0,W,H); ctx.restore();
+
+  // faint field lines
+  for(let k=0;k<12;k++){
+    const angle=(2*Math.PI/12)*k;
+    let x=qx+20*Math.cos(angle), y=qy+20*Math.sin(angle);
+    ctx.save(); ctx.strokeStyle='rgba(248,113,113,0.12)'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(x,y);
+    for(let s=0;s<400;s++){
+      const dx=x-qx,dy=y-qy,r=Math.sqrt(dx*dx+dy*dy);
+      if(r<1||x<0||x>W||y<0||y>H) break;
+      x+=2*dx/r; y+=2*dy/r; ctx.lineTo(x,y);
+    }
+    ctx.stroke(); ctx.restore();
+  }
+
+  // Path L1: straight radial-ish (direct)
+  ctx.save(); ctx.strokeStyle='rgba(99,200,130,0.75)'; ctx.lineWidth=2; ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke(); ctx.restore();
+  // arrowhead at midpoint
+  drawArrow(ctx,(ax+bx)/2-1,(ay+by)/2,(ax+bx)/2+1,(ay+by)/2,'rgba(99,200,130,0.75)',1.8);
+
+  // Path L2: arc above
+  ctx.save(); ctx.strokeStyle='rgba(251,191,36,0.75)'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(ax,ay);
+  ctx.bezierCurveTo(ax+60,ay-90, bx-60,ay-90, bx,by);
+  ctx.stroke(); ctx.restore();
+  drawArrow(ctx,(ax+bx)/2-1,ay-72,(ax+bx)/2+1,ay-72,'rgba(251,191,36,0.75)',1.8);
+
+  // Path L3: arc below with detour
+  ctx.save(); ctx.strokeStyle='rgba(192,132,252,0.75)'; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(ax,ay);
+  ctx.bezierCurveTo(ax+40,ay+80, bx-80,ay+100, bx,by);
+  ctx.stroke(); ctx.restore();
+  drawArrow(ctx,(ax+bx)/2-20,ay+90,(ax+bx)/2-18,ay+91,'rgba(192,132,252,0.75)',1.8);
+
+  // path labels
+  ctx.save(); ctx.font='italic bold 13px Times New Roman'; ctx.textBaseline='middle';
+  ctx.fillStyle='rgba(99,200,130,0.9)'; ctx.textAlign='center';
+  ctx.fillText('L\u2081',(ax+bx)/2,ay-12);
+  ctx.fillStyle='rgba(251,191,36,0.9)';
+  ctx.fillText('L\u2082',(ax+bx)/2,ay-100);
+  ctx.fillStyle='rgba(192,132,252,0.9)';
+  ctx.fillText('L\u2083',(ax+bx)/2+10,ay+104);
+  ctx.restore();
+
+  // source charge
+  ctx.save();
+  const g=ctx.createRadialGradient(qx-5,qy-5,2,qx,qy,20);
+  g.addColorStop(0,'rgba(255,255,255,0.35)'); g.addColorStop(1,'#f87171');
+  ctx.beginPath(); ctx.arc(qx,qy,20,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=1.5; ctx.stroke();
+  ctx.fillStyle='#fff'; ctx.font='bold 14px Times New Roman'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('+q',qx,qy); ctx.restore();
+
+  // points a and b
+  [[ax,ay,'a','rgba(99,200,130,0.9)'],[bx,by,'b','rgba(251,191,36,0.9)']].forEach(([px,py,lbl,col])=>{
+    ctx.save();
+    ctx.beginPath(); ctx.arc(px,py,7,0,Math.PI*2); ctx.fillStyle=col; ctx.fill();
+    ctx.fillStyle='#fff'; ctx.font='bold 13px Times New Roman'; ctx.textAlign='center'; ctx.textBaseline='bottom';
+    ctx.fillText(lbl,px,py-10); ctx.restore();
+  });
+
+  // r_a, r_b labels
+  ctx.save(); ctx.setLineDash([4,4]); ctx.strokeStyle='rgba(255,255,255,0.12)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(qx,qy); ctx.lineTo(ax,ay); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(qx,qy); ctx.lineTo(bx,by); ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,0.35)'; ctx.font='italic 12px Times New Roman'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('r\u2090',(qx+ax)/2,(qy+ay)/2-12);
+  ctx.fillText('r\u1D47',(qx+bx)/2,(qy+by)/2+14);
+  ctx.restore();
+})();
+
+// ── 通用 V-r 折线图 ──
+function drawVrPlot(canvasId, segs, xMax, yMax, vlines, xLbl, yLbl){
+  const canvas=document.getElementById(canvasId);
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  const PAD={l:52,r:20,t:18,b:40};
+  const pw=W-PAD.l-PAD.r, ph=H-PAD.t-PAD.b;
+  const xsc=x=>PAD.l+x/xMax*pw;
+  const ysc=y=>PAD.t+ph-y/yMax*ph;
+
+  ctx.clearRect(0,0,W,H);
+  ctx.save(); ctx.fillStyle='rgba(255,255,255,0.012)'; ctx.fillRect(0,0,W,H); ctx.restore();
+
+  // grid
+  ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+  for(let i=1;i<=4;i++){ const gy=PAD.t+ph*i/4; ctx.beginPath(); ctx.moveTo(PAD.l,gy); ctx.lineTo(PAD.l+pw,gy); ctx.stroke(); }
+  for(let i=1;i<=5;i++){ const gx=PAD.l+pw*i/5; ctx.beginPath(); ctx.moveTo(gx,PAD.t); ctx.lineTo(gx,PAD.t+ph); ctx.stroke(); }
+  ctx.restore();
+
+  // vlines
+  (vlines||[]).forEach(vl=>{
+    ctx.save(); ctx.setLineDash([5,4]); ctx.strokeStyle='rgba(255,255,255,0.22)'; ctx.lineWidth=1.2;
+    const vx=xsc(vl.x); ctx.beginPath(); ctx.moveTo(vx,PAD.t); ctx.lineTo(vx,PAD.t+ph); ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,0.38)'; ctx.font='12px Times New Roman'; ctx.textAlign='center'; ctx.textBaseline='top';
+    ctx.fillText(vl.label,vx,PAD.t+ph+4); ctx.restore();
+  });
+
+  // axes
+  ctx.save(); ctx.strokeStyle='rgba(255,255,255,0.35)'; ctx.lineWidth=1.5; ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(PAD.l,PAD.t); ctx.lineTo(PAD.l,PAD.t+ph+6); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(PAD.l-4,PAD.t+ph); ctx.lineTo(PAD.l+pw+8,PAD.t+ph); ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.font='italic 13px Times New Roman';
+  ctx.textAlign='center'; ctx.textBaseline='bottom'; ctx.fillText(xLbl||'r',PAD.l+pw/2,H-2);
+  ctx.save(); ctx.translate(13,PAD.t+ph/2); ctx.rotate(-Math.PI/2); ctx.textBaseline='middle'; ctx.fillText(yLbl||'V',0,0); ctx.restore();
+  ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.font='12px Times New Roman'; ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillText('O',PAD.l,PAD.t+ph+4);
+  ctx.restore();
+
+  // segments
+  segs.forEach(seg=>{
+    ctx.save(); ctx.strokeStyle=seg.color||'#fbbf24'; ctx.lineWidth=2.2; ctx.lineCap='round'; ctx.setLineDash([]);
+    ctx.beginPath();
+    const N=300; let started=false;
+    for(let i=0;i<=N;i++){
+      const x=seg.x0+(seg.x1-seg.x0)*i/N;
+      const y=Math.max(0,Math.min(seg.fn(x),yMax*1.05));
+      const px=xsc(x), py=ysc(y);
+      if(!started){ ctx.moveTo(px,py); started=true; } else ctx.lineTo(px,py);
+    }
+    ctx.stroke(); ctx.restore();
+  });
+}
+
+// ── V-r 图：均匀带电球体 ──
+(function(){
+  const R=1, xMax=3.5, yMax=1.35;
+  // normalized: V(R)=1
+  drawVrPlot('vrSphere',[
+    { x0:0.001, x1:R, color:'#60a5fa', fn: r=> (3-r*r)/(2) },  // V=(3R²-r²)/2R³ * q/4πε₀, norm to V(R)=1
+    { x0:R, x1:xMax, color:'#fbbf24', fn: r=> 1/r }            // V=q/4πε₀r, norm
+  ], xMax, yMax, [{x:R,label:'R'}]);
+
+  // mark V(0)=3/2 and V(R)=1
+  const canvas=document.getElementById('vrSphere'); if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width,H=canvas.height,PAD={l:52,r:20,t:18,b:40};
+  const pw=W-PAD.l-PAD.r,ph=H-PAD.t-PAD.b;
+  const xsc=x=>PAD.l+x/3.5*pw, ysc=y=>PAD.t+ph-y/1.35*ph;
+  ctx.save(); ctx.setLineDash([3,3]); ctx.strokeStyle='rgba(255,255,255,0.18)'; ctx.lineWidth=1;
+  // V(0)=1.5 horizontal guide
+  ctx.beginPath(); ctx.moveTo(PAD.l,ysc(1.5)); ctx.lineTo(xsc(R),ysc(1.5)); ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,0.35)'; ctx.font='11px Times New Roman'; ctx.textAlign='right'; ctx.textBaseline='middle';
+  ctx.fillText('3V(R)/2',PAD.l-2,ysc(1.5));
+  ctx.fillText('V(R)',PAD.l-2,ysc(1.0));
+  ctx.restore();
+})();
+
+// ── 电偶极子等势面与电场线 ──
+(function(){
+  const canvas=document.getElementById('dipoleVCanvas');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  const cx=W/2, cy=H/2, d=55; // half-separation
+  const qpos={x:cx+d,y:cy}, qneg={x:cx-d,y:cy};
+
+  ctx.clearRect(0,0,W,H);
+  ctx.save(); ctx.fillStyle='rgba(255,255,255,0.012)'; ctx.fillRect(0,0,W,H); ctx.restore();
+
+  // helpers
+  function V(x,y){
+    const rp=Math.sqrt((x-qpos.x)**2+(y-qpos.y)**2)||0.01;
+    const rn=Math.sqrt((x-qneg.x)**2+(y-qneg.y)**2)||0.01;
+    return 1/rp - 1/rn;
+  }
+  function Ex(x,y){
+    let e=0;
+    [[qpos.x,qpos.y,1],[qneg.x,qneg.y,-1]].forEach(([qx,qy,s])=>{
+      const dx=x-qx,dy=y-qy,r3=Math.pow(dx*dx+dy*dy,1.5)||1e-9;
+      e+=s*dx/r3;
+    });
+    return e;
+  }
+  function Ey(x,y){
+    let e=0;
+    [[qpos.x,qpos.y,1],[qneg.x,qneg.y,-1]].forEach(([qx,qy,s])=>{
+      const dx=x-qx,dy=y-qy,r3=Math.pow(dx*dx+dy*dy,1.5)||1e-9;
+      e+=s*dy/r3;
+    });
+    return e;
+  }
+
+  // draw equipotential lines by marching squares on a grid
+  const GW=120, GH=100;
+  const vgrid=[];
+  for(let j=0;j<GH;j++){
+    vgrid.push([]);
+    for(let i=0;i<GW;i++){
+      const x=i/GW*W, y=j/GH*H;
+      vgrid[j].push(V(x,y));
+    }
+  }
+
+  // contour levels
+  const levels=[-0.06,-0.03,-0.015,0.015,0.03,0.06];
+  levels.forEach(lv=>{
+    const col=lv>0?'rgba(248,113,113,0.55)':'rgba(96,165,250,0.55)';
+    ctx.save(); ctx.strokeStyle=col; ctx.lineWidth=1.2; ctx.setLineDash([5,3]);
+    // simple linear interpolation along cell edges
+    for(let j=0;j<GH-1;j++){
+      for(let i=0;i<GW-1;i++){
+        const v00=vgrid[j][i], v10=vgrid[j][i+1], v01=vgrid[j+1][i], v11=vgrid[j+1][i+1];
+        const x0=i/GW*W, x1=(i+1)/GW*W, y0=j/GH*H, y1=(j+1)/GH*H;
+        const pts=[];
+        // bottom edge
+        if((v00-lv)*(v10-lv)<0){ const t=(lv-v00)/(v10-v00); pts.push([x0+t*(x1-x0),y0]); }
+        // top edge
+        if((v01-lv)*(v11-lv)<0){ const t=(lv-v01)/(v11-v01); pts.push([x0+t*(x1-x0),y1]); }
+        // left edge
+        if((v00-lv)*(v01-lv)<0){ const t=(lv-v00)/(v01-v00); pts.push([x0,y0+t*(y1-y0)]); }
+        // right edge
+        if((v10-lv)*(v11-lv)<0){ const t=(lv-v10)/(v11-v10); pts.push([x1,y0+t*(y1-y0)]); }
+        if(pts.length>=2){ ctx.beginPath(); ctx.moveTo(pts[0][0],pts[0][1]); ctx.lineTo(pts[1][0],pts[1][1]); ctx.stroke(); }
+      }
+    }
+    ctx.restore();
+  });
+
+  // field lines from +q
+  const nFL=12;
+  for(let k=0;k<nFL;k++){
+    const angle=(2*Math.PI/nFL)*k;
+    let x=qpos.x+18*Math.cos(angle), y=qpos.y+18*Math.sin(angle);
+    ctx.save(); ctx.strokeStyle='rgba(251,191,36,0.5)'; ctx.lineWidth=1.1; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(x,y);
+    for(let s=0;s<600;s++){
+      const ex=Ex(x,y),ey=Ey(x,y),en=Math.sqrt(ex*ex+ey*ey)||1;
+      x+=2*ex/en; y+=2*ey/en;
+      if(x<0||x>W||y<0||y>H) break;
+      const dneg=Math.sqrt((x-qneg.x)**2+(y-qneg.y)**2);
+      if(dneg<16) break;
+      ctx.lineTo(x,y);
+    }
+    ctx.stroke(); ctx.restore();
+  }
+
+  // charges
+  [[qpos,'#f87171','+'],[qneg,'#60a5fa','\u2212']].forEach(([q,col,lbl])=>{
+    ctx.save();
+    const g=ctx.createRadialGradient(q.x-4,q.y-4,2,q.x,q.y,16);
+    g.addColorStop(0,'rgba(255,255,255,0.35)'); g.addColorStop(1,col);
+    ctx.beginPath(); ctx.arc(q.x,q.y,16,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.fillStyle='#fff'; ctx.font='bold 14px Times New Roman'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(lbl,q.x,q.y); ctx.restore();
+  });
+
+  // legend
+  ctx.save();
+  ctx.font='11px "Microsoft YaHei",sans-serif'; ctx.textBaseline='middle';
+  ctx.setLineDash([5,3]);
+  ctx.strokeStyle='rgba(248,113,113,0.7)'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(14,H-22); ctx.lineTo(34,H-22); ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,0.5)'; ctx.textAlign='left'; ctx.fillText('等势线（正）',38,H-22);
+  ctx.strokeStyle='rgba(96,165,250,0.7)';
+  ctx.beginPath(); ctx.moveTo(14,H-8); ctx.lineTo(34,H-8); ctx.stroke();
+  ctx.fillText('等势线（负）',38,H-8);
+  ctx.setLineDash([]);
+  ctx.strokeStyle='rgba(251,191,36,0.6)';
+  ctx.beginPath(); ctx.moveTo(130,H-22); ctx.lineTo(150,H-22); ctx.stroke();
+  ctx.fillText('电场线',154,H-22);
+  ctx.restore();
+})();
+</script>
+
+<!-- ── 笔记工具栏 ── -->
+<style>
+.note-fab {
+  position: fixed; bottom: 28px; right: 28px; z-index: 1000;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+}
+.fab-main {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 22px; box-shadow: 0 4px 20px rgba(99,102,241,0.5);
+  transition: transform 0.2s, box-shadow 0.2s;
+  color: #fff;
+}
+.fab-main:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(99,102,241,0.65); }
+.fab-main.active { background: linear-gradient(135deg, #7c3aed, #a78bfa); transform: rotate(45deg); }
+.fab-menu {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+  opacity: 0; pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.fab-menu.open { opacity: 1; pointer-events: all; transform: translateY(0); }
+.fab-item {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(15,12,41,0.92); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px; padding: 9px 16px 9px 12px;
+  cursor: pointer; white-space: nowrap;
+  backdrop-filter: blur(12px);
+  transition: border-color 0.2s, background 0.2s;
+  font-family: "Microsoft YaHei", sans-serif;
+}
+.fab-item:hover { border-color: rgba(129,140,248,0.4); background: rgba(99,102,241,0.15); }
+.fab-item .fi-icon { font-size: 17px; }
+.fab-item .fi-label { font-size: 13px; color: rgba(255,255,255,0.8); }
+.fab-item.starred .fi-label { color: #fbbf24; }
+.fab-item.starred { border-color: rgba(251,191,36,0.35); }
+.fab-item.read-done .fi-label { color: #34d399; }
+.fab-item.read-done { border-color: rgba(52,211,153,0.35); }
+.note-drawer {
+  position: fixed; bottom: 0; right: 0; left: 0; z-index: 999;
+  background: rgba(10,8,30,0.96);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(20px);
+  padding: 20px 28px 28px;
+  transform: translateY(100%);
+  transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
+}
+.note-drawer.open { transform: translateY(0); }
+.drawer-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.drawer-title { font-size: 14px; font-weight: 700; color: #a5b4fc; font-family: "Microsoft YaHei",sans-serif; letter-spacing: 1px; }
+.drawer-close { font-size: 20px; color: rgba(255,255,255,0.4); cursor: pointer; transition: color 0.2s; line-height: 1; }
+.drawer-close:hover { color: #fff; }
+.drawer-textarea {
+  width: 100%; height: 120px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; padding: 12px 16px;
+  color: #fff; font-size: 14px; font-family: "Microsoft YaHei",sans-serif;
+  resize: vertical; outline: none; line-height: 1.8;
+  transition: border-color 0.2s;
+}
+.drawer-textarea:focus { border-color: rgba(129,140,248,0.5); }
+.drawer-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+.drawer-hint { font-size: 11px; color: rgba(255,255,255,0.25); font-family: "Microsoft YaHei",sans-serif; }
+.drawer-save {
+  background: linear-gradient(135deg, #6366f1, #818cf8); border: none;
+  color: #fff; font-size: 13px; font-weight: 600; padding: 8px 22px; border-radius: 10px;
+  cursor: pointer; font-family: "Microsoft YaHei",sans-serif; transition: opacity 0.2s;
+}
+.drawer-save:hover { opacity: 0.85; }
+.phy-toast {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: rgba(15,12,41,0.95); border: 1px solid rgba(129,140,248,0.3);
+  border-radius: 24px; padding: 10px 22px;
+  font-size: 13px; color: rgba(255,255,255,0.85); font-family: "Microsoft YaHei",sans-serif;
+  z-index: 1100; opacity: 0;
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none; white-space: nowrap;
+}
+.phy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+
+<div class="note-fab">
+  <div class="fab-menu" id="fabMenu">
+    <div class="fab-item" id="fabStar" onclick="toggleStar()">
+      <span class="fi-icon">☆</span>
+      <span class="fi-label">收藏此节</span>
+    </div>
+    <div class="fab-item" id="fabRead" onclick="toggleRead()">
+      <span class="fi-icon">○</span>
+      <span class="fi-label">标记已读</span>
+    </div>
+    <div class="fab-item" onclick="openDrawer()">
+      <span class="fi-icon">📝</span>
+      <span class="fi-label">我的笔记</span>
+    </div>
+  </div>
+  <button class="fab-main" id="fabBtn" onclick="toggleFab()" title="工具">✦</button>
+</div>
+
+<div class="note-drawer" id="noteDrawer">
+  <div class="drawer-header">
+    <div class="drawer-title">📝 我的笔记 · §1-4</div>
+    <div class="drawer-close" onclick="closeDrawer()">×</div>
+  </div>
+  <textarea class="drawer-textarea" id="drawerTA" placeholder="在此记录你的理解、疑问或总结……"></textarea>
+  <div class="drawer-footer">
+    <span class="drawer-hint">自动保存到本地，刷新不丢失</span>
+    <button class="drawer-save" onclick="saveNote()">保存</button>
+  </div>
+</div>
+
+<div class="phy-toast" id="phyToast"></div>
+
+<script>
+(function(){
+  const PID = '1-4';
+  const SK  = 'phy26_note_' + PID;
+  const STK = 'phy26_star_' + PID;
+  const RDK = 'phy26_read_' + PID;
+  let fabOpen = false;
+
+  function showToast(msg) {
+    const t = document.getElementById('phyToast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  window.toggleFab = function() {
+    fabOpen = !fabOpen;
+    document.getElementById('fabMenu').classList.toggle('open', fabOpen);
+    document.getElementById('fabBtn').classList.toggle('active', fabOpen);
+  };
+
+  window.toggleStar = function() {
+    const starred = localStorage.getItem(STK) === '1';
+    if (starred) { localStorage.removeItem(STK); showToast('已取消收藏'); }
+    else { localStorage.setItem(STK, '1'); showToast('⭐ 已收藏此节'); }
+    refreshStarUI();
+  };
+
+  window.toggleRead = function() {
+    const read = localStorage.getItem(RDK) === '1';
+    if (read) { localStorage.removeItem(RDK); showToast('已取消已读标记'); }
+    else { localStorage.setItem(RDK, '1'); showToast('✓ 已标记为已读'); }
+    refreshReadUI();
+  };
+
+  function refreshStarUI() {
+    const starred = localStorage.getItem(STK) === '1';
+    const el = document.getElementById('fabStar');
+    el.querySelector('.fi-icon').textContent = starred ? '★' : '☆';
+    el.querySelector('.fi-label').textContent = starred ? '已收藏' : '收藏此节';
+    el.classList.toggle('starred', starred);
+  }
+
+  function refreshReadUI() {
+    const read = localStorage.getItem(RDK) === '1';
+    const el = document.getElementById('fabRead');
+    el.querySelector('.fi-icon').textContent = read ? '✓' : '○';
+    el.querySelector('.fi-label').textContent = read ? '已读' : '标记已读';
+    el.classList.toggle('read-done', read);
+  }
+
+  window.openDrawer = function() {
+    document.getElementById('drawerTA').value = localStorage.getItem(SK) || '';
+    document.getElementById('noteDrawer').classList.add('open');
+    document.getElementById('fabMenu').classList.remove('open');
+    document.getElementById('fabBtn').classList.remove('active');
+    fabOpen = false;
+    setTimeout(() => document.getElementById('drawerTA').focus(), 350);
+  };
+
+  window.closeDrawer = function() {
+    document.getElementById('noteDrawer').classList.remove('open');
+  };
+
+  window.saveNote = function() {
+    const val = document.getElementById('drawerTA').value.trim();
+    if (val) { localStorage.setItem(SK, val); showToast('✓ 笔记已保存'); }
+    else { localStorage.removeItem(SK); showToast('笔记已清空'); }
+    closeDrawer();
+  };
+
+  let saveTimer;
+  document.getElementById('drawerTA').addEventListener('input', function() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      const val = this.value.trim();
+      if (val) localStorage.setItem(SK, val);
+    }, 1500);
+  });
+
+  refreshStarUI(); refreshReadUI();
+
+  if (localStorage.getItem(SK)) {
+    const noteItem = document.querySelector('.fab-item:last-of-type .fi-icon');
+    if (noteItem) noteItem.textContent = '📋';
+  }
+})();
+</script>
+</body>
+</html>

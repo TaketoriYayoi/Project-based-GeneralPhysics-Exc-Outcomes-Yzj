@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>§3-2 磁场与磁感应强度 — 实验仿真</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    min-height: 100vh;
+    color: #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* ── Topbar ── */
+  #topbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 20px;
+    background: rgba(255,255,255,0.05);
+    border-bottom: 1px solid rgba(16,185,129,0.3);
+    backdrop-filter: blur(8px);
+    flex-shrink: 0;
+  }
+  #topbar a.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: rgba(16,185,129,0.15);
+    border: 1px solid rgba(16,185,129,0.4);
+    border-radius: 8px;
+    color: #34d399;
+    text-decoration: none;
+    font-size: 13px;
+    transition: background 0.2s;
+  }
+  #topbar a.back-btn:hover { background: rgba(16,185,129,0.28); }
+  .topbar-title-wrap { display: flex; flex-direction: column; gap: 2px; }
+  .topbar-title { font-size: 16px; font-weight: 700; color: #fff; }
+  .topbar-course { font-size: 11px; color: rgba(255,255,255,0.38); letter-spacing: 1px; }
+  .topbar-sub { margin-left: auto; font-size: 12px; color: rgba(255,255,255,0.3); }
+  .topbar-badge {
+    margin-left: auto;
+    padding: 4px 10px;
+    background: rgba(16,185,129,0.18);
+    border: 1px solid rgba(52,211,153,0.35);
+    border-radius: 20px;
+    font-size: 11px;
+    color: #6ee7b7;
+  }
+
+  /* ── Layout ── */
+  #main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── Sidebar ── */
+  #sidebar {
+    width: 250px;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.04);
+    border-right: 1px solid rgba(16,185,129,0.2);
+    padding: 14px 12px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  #sidebar::-webkit-scrollbar { width: 4px; }
+  #sidebar::-webkit-scrollbar-thumb { background: rgba(52,211,153,0.3); border-radius: 2px; }
+
+  .ctrl-section {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(16,185,129,0.18);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+  .ctrl-section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #34d399;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  /* Mode buttons */
+  .mode-btns { display: flex; gap: 6px; }
+  .mode-btn {
+    flex: 1;
+    padding: 7px 4px;
+    border: 1px solid rgba(52,211,153,0.3);
+    border-radius: 8px;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .mode-btn:hover { border-color: #34d399; color: #34d399; }
+  .mode-btn.active {
+    background: rgba(16,185,129,0.25);
+    border-color: #10b981;
+    color: #6ee7b7;
+    font-weight: 600;
+  }
+
+  /* Sliders */
+  .slider-row { display: flex; flex-direction: column; gap: 5px; margin-bottom: 8px; }
+  .slider-label { display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; }
+  .slider-label span:last-child { color: #34d399; font-weight: 600; }
+  input[type=range] {
+    width: 100%;
+    height: 4px;
+    -webkit-appearance: none;
+    background: rgba(52,211,153,0.2);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    background: #10b981;
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(16,185,129,0.6);
+  }
+
+  /* Toggles */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 7px;
+  }
+  .toggle-label { font-size: 12px; color: #cbd5e1; }
+  .toggle-switch {
+    position: relative;
+    width: 36px; height: 20px;
+    cursor: pointer;
+  }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-track {
+    position: absolute; inset: 0;
+    background: rgba(255,255,255,0.12);
+    border-radius: 10px;
+    transition: background 0.2s;
+  }
+  .toggle-thumb {
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 14px; height: 14px;
+    background: #64748b;
+    border-radius: 50%;
+    transition: transform 0.2s, background 0.2s;
+  }
+  .toggle-switch input:checked ~ .toggle-track { background: rgba(16,185,129,0.4); }
+  .toggle-switch input:checked ~ .toggle-thumb { transform: translateX(16px); background: #10b981; }
+
+  /* Clear button */
+  .clear-btn {
+    width: 100%;
+    padding: 8px;
+    background: rgba(239,68,68,0.12);
+    border: 1px solid rgba(239,68,68,0.35);
+    border-radius: 8px;
+    color: #fca5a5;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .clear-btn:hover { background: rgba(239,68,68,0.25); border-color: #ef4444; }
+
+  /* Result panel */
+  #result-panel {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(52,211,153,0.2);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 11.5px;
+    line-height: 1.8;
+  }
+  .result-row { display: flex; justify-content: space-between; }
+  .result-key { color: #64748b; }
+  .result-val { color: #34d399; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  /* Compass count */
+  #compass-count {
+    font-size: 11px;
+    color: #475569;
+    text-align: right;
+    margin-top: 4px;
+  }
+
+  /* ── Canvas area ── */
+  #canvas-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+  #sim-canvas {
+    display: block;
+    cursor: crosshair;
+  }
+
+  /* Tooltip */
+  #tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: rgba(15,12,41,0.92);
+    border: 1px solid rgba(52,211,153,0.4);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 11.5px;
+    line-height: 1.7;
+    display: none;
+    backdrop-filter: blur(6px);
+    z-index: 10;
+    min-width: 150px;
+  }
+  #tooltip .tt-key { color: #64748b; }
+  #tooltip .tt-val { color: #34d399; font-weight: 600; }
+
+  /* Formula bar */
+  #formula-bar {
+    flex-shrink: 0;
+    padding: 7px 20px;
+    background: rgba(0,0,0,0.35);
+    border-top: 1px solid rgba(16,185,129,0.2);
+    font-size: 12px;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  #formula-bar span.formula {
+    color: #6ee7b7;
+    font-style: italic;
+    letter-spacing: 0.3px;
+  }
+  #formula-bar .formula-label { color: #334155; font-size: 11px; }
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div id="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">⚡ 实验：磁场与磁感应强度</div>
+    <span class="topbar-course">普通物理（卓越班）下册 · 电磁学</span>
+  </div>
+  <div class="topbar-sub">§3-2 磁场 · 磁感应强度</div>
+</div>
+
+<!-- Main -->
+<div id="main">
+
+  <!-- Sidebar -->
+  <div id="sidebar">
+
+    <div class="ctrl-section">
+      <div class="ctrl-section-title">操作模式</div>
+      <div class="mode-btns">
+        <button class="mode-btn active" id="btn-place" onclick="setMode('place')">🧭 放置磁针</button>
+        <button class="mode-btn" id="btn-erase" onclick="setMode('erase')">✕ 擦除磁针</button>
+      </div>
+      <div id="compass-count" style="margin-top:6px;">磁针数: 0 / 20</div>
+    </div>
+
+    <div class="ctrl-section">
+      <div class="ctrl-section-title">磁铁参数</div>
+      <div class="slider-row">
+        <div class="slider-label"><span>磁场强度 q<sub>m</sub></span><span id="lbl-q">2</span></div>
+        <input type="range" id="sl-q" min="1" max="5" step="0.1" value="2" oninput="onSliderQ(this)">
+      </div>
+      <div class="slider-row">
+        <div class="slider-label"><span>磁铁长度 L</span><span id="lbl-l">100 px</span></div>
+        <input type="range" id="sl-l" min="50" max="200" step="5" value="100" oninput="onSliderL(this)">
+      </div>
+    </div>
+
+    <div class="ctrl-section">
+      <div class="ctrl-section-title">显示选项</div>
+      <div class="toggle-row">
+        <span class="toggle-label">显示磁场线</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="tog-lines" checked onchange="redraw()">
+          <span class="toggle-track"></span>
+          <span class="toggle-thumb"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-label">场强色图</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="tog-heatmap" checked onchange="redraw()">
+          <span class="toggle-track"></span>
+          <span class="toggle-thumb"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-label">显示磁针</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="tog-compass" checked onchange="redraw()">
+          <span class="toggle-track"></span>
+          <span class="toggle-thumb"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="ctrl-section">
+      <div class="ctrl-section-title">操作</div>
+      <button class="clear-btn" onclick="clearCompasses()">🗑 清除所有磁针</button>
+    </div>
+
+    <div class="ctrl-section">
+      <div class="ctrl-section-title">当前测量</div>
+      <div id="result-panel">
+        <div class="result-row"><span class="result-key">B<sub>x</sub></span><span class="result-val" id="rv-bx">—</span></div>
+        <div class="result-row"><span class="result-key">B<sub>y</sub></span><span class="result-val" id="rv-by">—</span></div>
+        <div class="result-row"><span class="result-key">|B|</span><span class="result-val" id="rv-bm">—</span></div>
+        <div class="result-row"><span class="result-key">方向角</span><span class="result-val" id="rv-ang">—</span></div>
+      </div>
+    </div>
+
+    <div class="ctrl-section" style="font-size:11px; color:#475569; line-height:1.6;">
+      <div class="ctrl-section-title">说明</div>
+      <p>拖动磁铁移动位置。</p>
+      <p style="margin-top:4px;">在"放置磁针"模式下，点击画布放置罗盘。</p>
+      <p style="margin-top:4px;">红色端 = N 极方向（B 场方向）。</p>
+    </div>
+
+    <div class="report-fab" style="margin-top:auto;padding-top:12px"><button class="report-fab-btn" onclick="openReport()"><span class="rfb-icon">📄</span> 生成实验报告</button></div>
+  </div><!-- /sidebar -->
+
+  <!-- Canvas wrap -->
+  <div id="canvas-wrap">
+    <canvas id="sim-canvas"></canvas>
+    <div id="tooltip"></div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- Formula bar -->
+<div id="formula-bar">
+  <span class="formula-label">偶极子公式：</span>
+  <span class="formula">B = (μ₀/4π)(m/r³)(2cosθ r̂ + sinθ θ̂)</span>
+  <span class="formula-label" style="margin-left:20px;">点电荷模型：</span>
+  <span class="formula">B = (μ₀/4π) · q<sub>m</sub> · r̂ / r²</span>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  State
+// ─────────────────────────────────────────────
+const canvas = document.getElementById('sim-canvas');
+const ctx    = canvas.getContext('2d');
+const wrap   = document.getElementById('canvas-wrap');
+const tooltip = document.getElementById('tooltip');
+
+let W = 0, H = 0;
+
+// Magnet state
+let magnet = { x: 0, y: 0, angle: 0 }; // center, angle in radians
+let qm = 2;       // pole strength (arbitrary units)
+let L  = 100;     // total length px
+
+// Compass needles
+let compasses = []; // [{x,y,angle,targetAngle}]
+const MAX_COMP = 20;
+
+// Interaction
+let mode = 'place'; // 'place' | 'erase'
+let dragging = false;
+let dragOffX = 0, dragOffY = 0;
+
+// Heatmap offscreen
+let heatCanvas = null, heatCtx = null;
+let heatDirty = true;
+
+// Animation
+let animFrameId = null;
+let cursorPos = null;
+
+// ─────────────────────────────────────────────
+//  Init / Resize
+// ─────────────────────────────────────────────
+function resize() {
+  W = wrap.clientWidth;
+  H = wrap.clientHeight;
+  canvas.width  = W;
+  canvas.height = H;
+  // Default magnet center
+  if (magnet.x === 0 && magnet.y === 0) {
+    magnet.x = W / 2;
+    magnet.y = H / 2;
+  }
+  heatDirty = true;
+  heatCanvas = null;
+}
+
+window.addEventListener('resize', () => { resize(); redraw(); });
+
+// ─────────────────────────────────────────────
+//  Physics
+// ─────────────────────────────────────────────
+// Returns {bx, by} at point (px, py)
+// Magnet: N pole at (nx,ny), S pole at (sx,sy)
+// B = sum over poles: sign * (mu0/4pi) * qm * r_hat / r^2
+// We use normalized units: mu0/4pi = 1
+function getPolePositions() {
+  const half = L / 2;
+  const nx = magnet.x + half * Math.cos(magnet.angle);
+  const ny = magnet.y + half * Math.sin(magnet.angle);
+  const sx = magnet.x - half * Math.cos(magnet.angle);
+  const sy = magnet.y - half * Math.sin(magnet.angle);
+  return { nx, ny, sx, sy };
+}
+
+function getB(px, py) {
+  const { nx, ny, sx, sy } = getPolePositions();
+  const scale = qm * 15000; // scale factor for visual
+
+  let bx = 0, by = 0;
+
+  // N pole: +qm
+  let dx = px - nx, dy = py - ny;
+  let r2 = dx*dx + dy*dy;
+  if (r2 > 1) {
+    let r  = Math.sqrt(r2);
+    bx += scale * dx / (r2 * r);
+    by += scale * dy / (r2 * r);
+  }
+  // S pole: -qm
+  dx = px - sx; dy = py - sy;
+  r2 = dx*dx + dy*dy;
+  if (r2 > 1) {
+    let r = Math.sqrt(r2);
+    bx -= scale * dx / (r2 * r);
+    by -= scale * dy / (r2 * r);
+  }
+  return { bx, by };
+}
+
+function getBMag(px, py) {
+  const { bx, by } = getB(px, py);
+  return Math.sqrt(bx*bx + by*by);
+}
+
+// ─────────────────────────────────────────────
+//  Heatmap
+// ─────────────────────────────────────────────
+const HEAT_STEP = 8; // px per sample
+
+function buildHeatmap() {
+  heatCanvas = document.createElement('canvas');
+  heatCanvas.width  = W;
+  heatCanvas.height = H;
+  heatCtx = heatCanvas.getContext('2d');
+
+  const cols = Math.ceil(W / HEAT_STEP) + 1;
+  const rows = Math.ceil(H / HEAT_STEP) + 1;
+
+  // Sample B magnitudes
+  const mags = new Float32Array(cols * rows);
+  let maxMag = 0;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const m = getBMag(c * HEAT_STEP, r * HEAT_STEP);
+      mags[r * cols + c] = m;
+      if (m > maxMag) maxMag = m;
+    }
+  }
+
+  // Draw colored squares
+  const imgData = heatCtx.createImageData(W, H);
+  const d = imgData.data;
+
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const c = Math.floor(x / HEAT_STEP);
+      const r = Math.floor(y / HEAT_STEP);
+      const m = mags[r * cols + c];
+      const t = Math.min(1, Math.pow(m / (maxMag * 0.3 + 0.001), 0.35));
+
+      // Color: deep blue → purple → green → yellow
+      let rr, gg, bb;
+      if (t < 0.33) {
+        const s = t / 0.33;
+        rr = Math.round(20  + s * 40);
+        gg = Math.round(10  + s * 30);
+        bb = Math.round(60  + s * 80);
+      } else if (t < 0.66) {
+        const s = (t - 0.33) / 0.33;
+        rr = Math.round(60  + s * 60);
+        gg = Math.round(40  + s * 100);
+        bb = Math.round(140 - s * 80);
+      } else {
+        const s = (t - 0.66) / 0.34;
+        rr = Math.round(120 + s * 100);
+        gg = Math.round(140 + s * 60);
+        bb = Math.round(60  - s * 40);
+      }
+      const idx = (y * W + x) * 4;
+      d[idx]   = rr;
+      d[idx+1] = gg;
+      d[idx+2] = bb;
+      d[idx+3] = Math.round(180 * t + 10);
+    }
+  }
+  heatCtx.putImageData(imgData, 0, 0);
+  heatDirty = false;
+}
+
+// ─────────────────────────────────────────────
+//  Field lines
+// ─────────────────────────────────────────────
+const NUM_LINES  = 16;
+const STEP_SIZE  = 5;
+const MAX_STEPS  = 800;
+
+function traceFieldLine(startX, startY, forward) {
+  const points = [[startX, startY]];
+  let x = startX, y = startY;
+  const { sx, sy } = getPolePositions();
+
+  for (let i = 0; i < MAX_STEPS; i++) {
+    const { bx, by } = getB(x, y);
+    const bm = Math.sqrt(bx*bx + by*by);
+    if (bm < 0.01) break;
+    const dir = forward ? 1 : -1;
+    const nx2 = x + dir * STEP_SIZE * bx / bm;
+    const ny2 = y + dir * STEP_SIZE * by / bm;
+
+    // Stop if outside canvas
+    if (nx2 < -20 || nx2 > W + 20 || ny2 < -20 || ny2 > H + 20) break;
+
+    // Stop near S pole
+    const dsx = nx2 - sx, dsy = ny2 - sy;
+    if (dsx*dsx + dsy*dsy < (L * 0.18) * (L * 0.18)) break;
+
+    x = nx2; y = ny2;
+    points.push([x, y]);
+    if (points.length > MAX_STEPS) break;
+  }
+  return points;
+}
+
+function drawFieldLines() {
+  const { nx, ny } = getPolePositions();
+  const startR = L * 0.22;
+
+  for (let i = 0; i < NUM_LINES; i++) {
+    const angle = (2 * Math.PI * i) / NUM_LINES;
+    const sx0 = nx + startR * Math.cos(angle);
+    const sy0 = ny + startR * Math.sin(angle);
+    const pts = traceFieldLine(sx0, sy0, true);
+
+    if (pts.length < 2) continue;
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let k = 1; k < pts.length; k++) {
+      ctx.lineTo(pts[k][0], pts[k][1]);
+    }
+    ctx.strokeStyle = 'rgba(52,211,153,0.55)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // Arrow at ~60% along
+    const mid = Math.floor(pts.length * 0.55);
+    if (mid + 1 < pts.length) {
+      drawArrow(pts[mid][0], pts[mid][1], pts[mid+1][0], pts[mid+1][1]);
+    }
+  }
+}
+
+function drawArrow(x1, y1, x2, y2) {
+  const ang = Math.atan2(y2 - y1, x2 - x1);
+  const al = 8, aw = 3;
+  ctx.save();
+  ctx.translate(x2, y2);
+  ctx.rotate(ang);
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(-al, -aw);
+  ctx.lineTo(-al,  aw);
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(52,211,153,0.8)';
+  ctx.fill();
+  ctx.restore();
+}
+
+// ─────────────────────────────────────────────
+//  Magnet drawing
+// ─────────────────────────────────────────────
+function drawMagnet() {
+  const { nx, ny, sx, sy } = getPolePositions();
+  const half = L / 2;
+  const barW = 18;
+
+  ctx.save();
+  ctx.translate(magnet.x, magnet.y);
+  ctx.rotate(magnet.angle);
+
+  // Glow
+  ctx.shadowColor = 'rgba(52,211,153,0.4)';
+  ctx.shadowBlur  = 18;
+
+  // N half (red)
+  const gradN = ctx.createLinearGradient(0, -barW/2, half, barW/2);
+  gradN.addColorStop(0, '#f87171');
+  gradN.addColorStop(1, '#ef4444');
+  ctx.fillStyle = gradN;
+  ctx.beginPath();
+  ctx.roundRect(0, -barW/2, half, barW, [0, 6, 6, 0]);
+  ctx.fill();
+
+  // S half (blue)
+  const gradS = ctx.createLinearGradient(-half, -barW/2, 0, barW/2);
+  gradS.addColorStop(0, '#3b82f6');
+  gradS.addColorStop(1, '#2563eb');
+  ctx.fillStyle = gradS;
+  ctx.beginPath();
+  ctx.roundRect(-half, -barW/2, half, barW, [6, 0, 0, 6]);
+  ctx.fill();
+
+  // Border
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.roundRect(-half, -barW/2, L, barW, 6);
+  ctx.stroke();
+
+  // Labels
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.font = 'bold 11px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('N', half * 0.65, 0);
+  ctx.fillText('S', -half * 0.65, 0);
+
+  ctx.restore();
+
+  // Pole dots
+  ctx.beginPath();
+  ctx.arc(nx, ny, 4, 0, Math.PI*2);
+  ctx.fillStyle = '#fca5a5';
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(sx, sy, 4, 0, Math.PI*2);
+  ctx.fillStyle = '#93c5fd';
+  ctx.fill();
+}
+
+// ─────────────────────────────────────────────
+//  Compass needles
+// ─────────────────────────────────────────────
+function targetAngle(cx, cy) {
+  const { bx, by } = getB(cx, cy);
+  return Math.atan2(by, bx);
+}
+
+function updateCompasses(dt) {
+  compasses.forEach(c => {
+    c.targetAngle = targetAngle(c.x, c.y);
+    // Smooth rotation
+    let diff = c.targetAngle - c.angle;
+    // Normalize
+    while (diff >  Math.PI) diff -= 2 * Math.PI;
+    while (diff < -Math.PI) diff += 2 * Math.PI;
+    c.angle += diff * Math.min(1, dt * 6);
+  });
+}
+
+function drawCompass(c) {
+  const EW = 12, EH = 5;
+  ctx.save();
+  ctx.translate(c.x, c.y);
+  ctx.rotate(c.angle);
+
+  // Shadow
+  ctx.shadowColor = 'rgba(0,0,0,0.5)';
+  ctx.shadowBlur = 4;
+
+  // Red half (N direction = +x)
+  ctx.beginPath();
+  ctx.ellipse(EW/4, 0, EW/2, EH/2, 0, -Math.PI/2, Math.PI/2);
+  ctx.fillStyle = '#ef4444';
+  ctx.fill();
+
+  // White half (S direction = -x)
+  ctx.beginPath();
+  ctx.ellipse(-EW/4, 0, EW/2, EH/2, 0, Math.PI/2, Math.PI*1.5);
+  ctx.fillStyle = '#f1f5f9';
+  ctx.fill();
+
+  // Border
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, EW/2, EH/2, 0, 0, Math.PI*2);
+  ctx.stroke();
+
+  // Center dot
+  ctx.beginPath();
+  ctx.arc(0, 0, 1.5, 0, Math.PI*2);
+  ctx.fillStyle = '#fff';
+  ctx.shadowColor = 'transparent';
+  ctx.fill();
+
+  ctx.restore();
+}
+
+// ─────────────────────────────────────────────
+//  Erase near click
+// ─────────────────────────────────────────────
+function eraseNear(x, y) {
+  const R2 = 20 * 20;
+  compasses = compasses.filter(c => {
+    const dx = c.x - x, dy = c.y - y;
+    return dx*dx + dy*dy > R2;
+  });
+  updateCountLabel();
+}
+
+function clearCompasses() {
+  compasses = [];
+  updateCountLabel();
+  redraw();
+}
+
+function updateCountLabel() {
+  document.getElementById('compass-count').textContent =
+    `磁针数: ${compasses.length} / ${MAX_COMP}`;
+}
+
+// ─────────────────────────────────────────────
+//  Main draw
+// ─────────────────────────────────────────────
+let lastTime = 0;
+
+function redraw(ts) {
+  if (ts === undefined) ts = lastTime;
+  const dt = Math.min(0.1, (ts - lastTime) / 1000);
+  lastTime = ts;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Heatmap
+  if (document.getElementById('tog-heatmap').checked) {
+    if (heatDirty || !heatCanvas) buildHeatmap();
+    ctx.drawImage(heatCanvas, 0, 0);
+  }
+
+  // Field lines
+  if (document.getElementById('tog-lines').checked) drawFieldLines();
+
+  // Compasses
+  updateCompasses(dt);
+  if (document.getElementById('tog-compass').checked) {
+    compasses.forEach(drawCompass);
+  }
+
+  // Magnet
+  drawMagnet();
+
+  // Cursor hint
+  if (cursorPos && mode === 'erase') {
+    ctx.beginPath();
+    ctx.arc(cursorPos.x, cursorPos.y, 20, 0, Math.PI*2);
+    ctx.strokeStyle = 'rgba(239,68,68,0.5)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4,4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  animFrameId = requestAnimationFrame(redraw);
+}
+
+// ─────────────────────────────────────────────
+//  UI helpers
+// ─────────────────────────────────────────────
+function setMode(m) {
+  mode = m;
+  document.getElementById('btn-place').classList.toggle('active', m === 'place');
+  document.getElementById('btn-erase').classList.toggle('active', m === 'erase');
+  canvas.style.cursor = m === 'erase' ? 'cell' : 'crosshair';
+}
+
+function onSliderQ(el) {
+  qm = parseFloat(el.value);
+  document.getElementById('lbl-q').textContent = qm.toFixed(1);
+  heatDirty = true;
+  updateCompassTargets();
+}
+
+function onSliderL(el) {
+  L = parseInt(el.value);
+  document.getElementById('lbl-l').textContent = L + ' px';
+  heatDirty = true;
+  updateCompassTargets();
+}
+
+function updateCompassTargets() {
+  compasses.forEach(c => { c.targetAngle = targetAngle(c.x, c.y); });
+}
+
+function formatB(v) {
+  if (!isFinite(v)) return '∞';
+  const abs = Math.abs(v);
+  if (abs > 999) return v.toExponential(2);
+  if (abs > 10)  return v.toFixed(1);
+  return v.toFixed(3);
+}
+
+function updateMeasurement(x, y) {
+  const { bx, by } = getB(x, y);
+  const bm  = Math.sqrt(bx*bx + by*by);
+  const ang = (Math.atan2(by, bx) * 180 / Math.PI).toFixed(1);
+  document.getElementById('rv-bx').textContent  = formatB(bx);
+  document.getElementById('rv-by').textContent  = formatB(by);
+  document.getElementById('rv-bm').textContent  = formatB(bm);
+  document.getElementById('rv-ang').textContent = ang + '°';
+
+  // Tooltip
+  tooltip.innerHTML =
+    `<span class="tt-key">B<sub>x</sub></span> <span class="tt-val">${formatB(bx)}</span><br>` +
+    `<span class="tt-key">B<sub>y</sub></span> <span class="tt-val">${formatB(by)}</span><br>` +
+    `<span class="tt-key">|B|</span> <span class="tt-val">${formatB(bm)}</span><br>` +
+    `<span class="tt-key">方向角</span> <span class="tt-val">${ang}°</span>`;
+}
+
+// ─────────────────────────────────────────────
+//  Drag magnet
+// ─────────────────────────────────────────────
+function hitMagnet(x, y) {
+  const { nx, ny, sx, sy } = getPolePositions();
+  // Check if point is near the magnet bar
+  // Project onto magnet axis
+  const ax = Math.cos(magnet.angle), ay = Math.sin(magnet.angle);
+  const dx = x - magnet.x, dy = y - magnet.y;
+  const along = dx*ax + dy*ay;
+  const perp  = Math.abs(-dx*ay + dy*ax);
+  return Math.abs(along) <= L/2 + 8 && perp <= 16;
+}
+
+canvas.addEventListener('mousedown', e => {
+  const r = canvas.getBoundingClientRect();
+  const x = e.clientX - r.left, y = e.clientY - r.top;
+  if (hitMagnet(x, y)) {
+    dragging = true;
+    dragOffX = x - magnet.x;
+    dragOffY = y - magnet.y;
+    canvas.style.cursor = 'grabbing';
+  }
+});
+
+canvas.addEventListener('mousemove', e => {
+  const r = canvas.getBoundingClientRect();
+  const x = e.clientX - r.left, y = e.clientY - r.top;
+  cursorPos = { x, y };
+
+  if (dragging) {
+    magnet.x = x - dragOffX;
+    magnet.y = y - dragOffY;
+    heatDirty = true;
+    updateCompassTargets();
+  }
+
+  updateMeasurement(x, y);
+
+  // Position tooltip
+  let tx = e.clientX - r.left + 14;
+  let ty = e.clientY - r.top - 10;
+  if (tx + 170 > W) tx -= 185;
+  if (ty + 100 > H) ty -= 100;
+  tooltip.style.left = tx + 'px';
+  tooltip.style.top  = ty + 'px';
+  tooltip.style.display = 'block';
+});
+
+canvas.addEventListener('mouseup', e => {
+  const r = canvas.getBoundingClientRect();
+  const x = e.clientX - r.left, y = e.clientY - r.top;
+
+  if (dragging) {
+    dragging = false;
+    canvas.style.cursor = mode === 'erase' ? 'cell' : 'crosshair';
+    return;
+  }
+
+  if (mode === 'place') {
+    if (compasses.length < MAX_COMP) {
+      // Don't place on top of magnet
+      if (!hitMagnet(x, y)) {
+        const ang = targetAngle(x, y);
+        compasses.push({ x, y, angle: ang, targetAngle: ang });
+        updateCountLabel();
+      }
+    }
+  } else if (mode === 'erase') {
+    eraseNear(x, y);
+  }
+});
+
+canvas.addEventListener('mouseleave', () => {
+  cursorPos = null;
+  tooltip.style.display = 'none';
+  if (dragging) { dragging = false; canvas.style.cursor = 'crosshair'; }
+});
+
+// Touch support
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const r = canvas.getBoundingClientRect();
+  const t = e.touches[0];
+  const x = t.clientX - r.left, y = t.clientY - r.top;
+  if (hitMagnet(x, y)) {
+    dragging = true;
+    dragOffX = x - magnet.x;
+    dragOffY = y - magnet.y;
+  }
+}, { passive: false });
+
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (!dragging) return;
+  const r = canvas.getBoundingClientRect();
+  const t = e.touches[0];
+  magnet.x = t.clientX - r.left - dragOffX;
+  magnet.y = t.clientY - r.top - dragOffY;
+  heatDirty = true;
+  updateCompassTargets();
+}, { passive: false });
+
+canvas.addEventListener('touchend', e => {
+  e.preventDefault();
+  if (dragging) { dragging = false; return; }
+  const r = canvas.getBoundingClientRect();
+  const t = e.changedTouches[0];
+  const x = t.clientX - r.left, y = t.clientY - r.top;
+  if (mode === 'place' && compasses.length < MAX_COMP && !hitMagnet(x, y)) {
+    const ang = targetAngle(x, y);
+    compasses.push({ x, y, angle: ang, targetAngle: ang });
+    updateCountLabel();
+  } else if (mode === 'erase') {
+    eraseNear(x, y);
+  }
+}, { passive: false });
+
+// Right-click to rotate magnet
+canvas.addEventListener('contextmenu', e => {
+  e.preventDefault();
+  const r = canvas.getBoundingClientRect();
+  const x = e.clientX - r.left, y = e.clientY - r.top;
+  if (hitMagnet(x, y)) {
+    magnet.angle += Math.PI / 8;
+    heatDirty = true;
+    updateCompassTargets();
+  }
+});
+
+// ─────────────────────────────────────────────
+//  Start
+// ─────────────────────────────────────────────
+resize();
+requestAnimationFrame(redraw);
+</script>
+<!-- ── 实验报告生成器 ── -->
+<style>
+.report-fab {
+  position: fixed; bottom: 28px; right: 28px; z-index: 1000;
+}
+.report-fab-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  border: none; border-radius: 28px; padding: 12px 20px;
+  color: #fff; font-size: 13px; font-weight: 700;
+  font-family: "Microsoft YaHei", sans-serif;
+  cursor: pointer; letter-spacing: 0.5px;
+  box-shadow: 0 4px 20px rgba(52,211,153,0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.report-fab-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(52,211,153,0.55); }
+.report-fab-btn .rfb-icon { font-size: 17px; }
+
+.report-overlay {
+  position: fixed; inset: 0; z-index: 1200;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.report-overlay.open { display: flex; }
+.report-modal {
+  background: #0e0c24;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  width: min(760px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+  animation: slideUp 0.3s cubic-bezier(0.4,0,0.2,1) both;
+}
+@keyframes slideUp {
+  from { opacity:0; transform: translateY(30px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.rm-header {
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.rm-title { font-size: 17px; font-weight: 700; color: #fff; font-family: "Microsoft YaHei",sans-serif; }
+.rm-title span { color: #34d399; }
+.rm-close { font-size: 22px; color: rgba(255,255,255,0.4); cursor: pointer; line-height:1; transition: color 0.2s; }
+.rm-close:hover { color: #fff; }
+.rm-body { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; }
+.rm-field { display: flex; flex-direction: column; gap: 6px; }
+.rm-label { font-size: 12px; color: rgba(255,255,255,0.45); font-family: "Microsoft YaHei",sans-serif; letter-spacing: 0.5px; }
+.rm-label span { color: #f87171; }
+.rm-input, .rm-textarea {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 10px 14px;
+  color: #fff; font-size: 14px; font-family: "Microsoft YaHei",sans-serif;
+  outline: none; transition: border-color 0.2s; width: 100%;
+}
+.rm-input:focus, .rm-textarea:focus { border-color: rgba(52,211,153,0.5); }
+.rm-textarea { resize: vertical; min-height: 80px; line-height: 1.8; }
+.rm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.rm-section-title {
+  font-size: 12px; font-weight: 700; color: rgba(52,211,153,0.8);
+  letter-spacing: 1px; text-transform: uppercase;
+  border-bottom: 1px solid rgba(52,211,153,0.15);
+  padding-bottom: 8px; margin-top: 4px;
+  font-family: "Microsoft YaHei",sans-serif;
+}
+.rm-footer { padding: 16px 28px 24px; display: flex; gap: 12px; justify-content: flex-end; }
+.rm-btn {
+  padding: 10px 28px; border-radius: 12px; border: none; cursor: pointer;
+  font-size: 14px; font-weight: 700; font-family: "Microsoft YaHei",sans-serif;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.rm-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.rm-btn-cancel { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6); }
+.rm-btn-gen { background: linear-gradient(135deg,#10b981,#34d399); color: #fff; }
+.rm-btn-copy { background: linear-gradient(135deg,#6366f1,#818cf8); color: #fff; display:none; }
+
+.report-output {
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px; padding: 20px 24px; margin: 0 28px 24px;
+  font-family: "Microsoft YaHei", "Times New Roman", serif;
+  font-size: 13.5px; color: rgba(255,255,255,0.85);
+  line-height: 2; white-space: pre-wrap; display: none;
+  max-height: 340px; overflow-y: auto;
+}
+.report-output.show { display: block; }
+</style>
+
+
+<div class="report-overlay" id="reportOverlay" onclick="overlayClick(event)">
+  <div class="report-modal">
+    <div class="rm-header">
+      <div class="rm-title">实验报告 · <span>磁感应强度</span></div>
+      <div class="rm-close" onclick="closeReport()">×</div>
+    </div>
+    <div class="rm-body">
+      <div class="rm-section-title">基本信息</div>
+      <div class="rm-row">
+        <div class="rm-field">
+          <div class="rm-label">姓名 <span>*</span></div>
+          <input class="rm-input" id="rName" placeholder="请输入姓名">
+        </div>
+        <div class="rm-field">
+          <div class="rm-label">学号 <span>*</span></div>
+          <input class="rm-input" id="rStuId" placeholder="请输入学号">
+        </div>
+      </div>
+      <div class="rm-row">
+        <div class="rm-field">
+          <div class="rm-label">实验日期</div>
+          <input class="rm-input" id="rDate" type="date">
+        </div>
+        <div class="rm-field">
+          <div class="rm-label">实验伙伴</div>
+          <input class="rm-input" id="rPartner" placeholder="可选">
+        </div>
+      </div>
+      <div class="rm-section-title">实验内容</div>
+      <div class="rm-field">
+        <div class="rm-label">实验目的</div>
+        <textarea class="rm-textarea" id="rPurpose" placeholder="描述本次实验的目的和预期目标……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验步骤与观察</div>
+        <textarea class="rm-textarea" id="rProcess" placeholder="描述你进行的操作步骤和实验过程中的观察……" style="min-height:100px"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验数据记录</div>
+        <textarea class="rm-textarea" id="rData" placeholder="记录关键数据、参数和仿真结果……"></textarea>
+      </div>
+      <div class="rm-section-title">分析与总结</div>
+      <div class="rm-field">
+        <div class="rm-label">结果分析</div>
+        <textarea class="rm-textarea" id="rAnalysis" placeholder="对实验现象和数据进行分析……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">误差分析与思考</div>
+        <textarea class="rm-textarea" id="rError" placeholder="分析可能的误差来源，以及对物理规律的思考……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验结论</div>
+        <textarea class="rm-textarea" id="rConclusion" placeholder="总结本次实验的结论……"></textarea>
+      </div>
+    </div>
+    <div class="report-output" id="reportOutput"></div>
+    <div class="rm-footer">
+      <button class="rm-btn rm-btn-cancel" onclick="closeReport()">取消</button>
+      <button class="rm-btn rm-btn-copy" id="rmCopyBtn" onclick="copyReport()">复制报告</button>
+      <button class="rm-btn rm-btn-gen" onclick="generateReport()">生成报告</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const EXP_NAME = '磁感应强度';
+  const EXP_SEC  = '§3-2';
+  const STORE_KEY = 'phy26_report_' + EXP_SEC.replace(/[§\/]/g,'');
+
+  function loadSaved() {
+    const d = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+    if (d.name)       document.getElementById('rName').value      = d.name;
+    if (d.stuId)      document.getElementById('rStuId').value     = d.stuId;
+    if (d.date)       document.getElementById('rDate').value      = d.date;
+    if (d.partner)    document.getElementById('rPartner').value   = d.partner;
+    if (d.purpose)    document.getElementById('rPurpose').value   = d.purpose;
+    if (d.process)    document.getElementById('rProcess').value   = d.process;
+    if (d.data)       document.getElementById('rData').value      = d.data;
+    if (d.analysis)   document.getElementById('rAnalysis').value  = d.analysis;
+    if (d.error)      document.getElementById('rError').value     = d.error;
+    if (d.conclusion) document.getElementById('rConclusion').value= d.conclusion;
+  }
+
+  function saveDraft() {
+    const d = {
+      name:       document.getElementById('rName').value,
+      stuId:      document.getElementById('rStuId').value,
+      date:       document.getElementById('rDate').value,
+      partner:    document.getElementById('rPartner').value,
+      purpose:    document.getElementById('rPurpose').value,
+      process:    document.getElementById('rProcess').value,
+      data:       document.getElementById('rData').value,
+      analysis:   document.getElementById('rAnalysis').value,
+      error:      document.getElementById('rError').value,
+      conclusion: document.getElementById('rConclusion').value,
+    };
+    localStorage.setItem(STORE_KEY, JSON.stringify(d));
+  }
+
+  window.openReport = function() {
+    document.getElementById('reportOverlay').classList.add('open');
+    document.getElementById('reportOutput').classList.remove('show');
+    document.getElementById('rmCopyBtn').style.display = 'none';
+    const dateEl = document.getElementById('rDate');
+    if (!dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
+    loadSaved();
+    const _d = {
+      rPurpose:    '研究电流产生的磁场分布，理解磁感应强度B的概念，观察直导线、圆形线圈和螺线管的磁场特征，验证磁场的叠加原理。',
+      rProcess:    '设置载流直导线，观察磁场线（同心圆）的分布，测量不同距离处的B值；设置圆形电流线圈，观察轴线上B的分布；构建螺线管，观察内部均匀磁场；改变电流方向，观察磁场方向的变化；叠加两个平行导线的磁场，验证叠加原理。',
+      rData:       '直导线（I=1A）：r=1cm处B=μ₀I/(2πr)=20μT，r=2cm处B=10μT（B∝1/r）；圆形线圈（R=5cm，I=1A）：圆心处B=μ₀I/(2R)=12.6μT；螺线管（n=1000匝/m，I=1A）：内部B=μ₀nI=1.26mT，均匀分布；两平行同向电流：中间区域磁场叠加增强。',
+      rAnalysis:   '电流产生磁场，磁场线是闭合曲线（无源场）。直导线磁场B=μ₀I/(2πr)，方向由右手定则确定。螺线管内部磁场近似均匀，B=μ₀nI，外部磁场很弱。磁场满足叠加原理，合磁场等于各电流产生磁场的矢量和。',
+      rError:      '仿真中导线为无限长理想导线，实际导线有限长会产生端部效应；螺线管的均匀场假设在端部不成立；磁场测量中探针的磁导率会干扰被测磁场。',
+      rConclusion: '电流产生磁场，磁场线为闭合曲线；直导线磁场B∝I/r，圆形线圈轴线磁场在圆心处最强，螺线管内部磁场均匀；磁场满足叠加原理；磁场方向由右手定则确定。',
+    };
+    Object.entries(_d).forEach(([id, val]) => { const el = document.getElementById(id); if (el && !el.value) el.value = val; });
+  };
+
+  window.closeReport = function() {
+    saveDraft();
+    document.getElementById('reportOverlay').classList.remove('open');
+  };
+
+  window.overlayClick = function(e) {
+    if (e.target === document.getElementById('reportOverlay')) closeReport();
+  };
+
+  window.generateReport = function() {
+    const name       = document.getElementById('rName').value.trim();
+    const stuId      = document.getElementById('rStuId').value.trim();
+    const date       = document.getElementById('rDate').value || '—';
+    const partner    = document.getElementById('rPartner').value.trim() || '—';
+    const purpose    = document.getElementById('rPurpose').value.trim() || '（未填写）';
+    const process    = document.getElementById('rProcess').value.trim() || '（未填写）';
+    const data       = document.getElementById('rData').value.trim() || '（未填写）';
+    const analysis   = document.getElementById('rAnalysis').value.trim() || '（未填写）';
+    const error      = document.getElementById('rError').value.trim() || '（未填写）';
+    const conclusion = document.getElementById('rConclusion').value.trim() || '（未填写）';
+
+    if (!name || !stuId) { alert('请填写姓名和学号'); return; }
+    saveDraft();
+
+    const divider = '─'.repeat(40);
+    const report = [
+      '普通物理（卓越班）下册 · 电磁学',
+      `实验报告：${EXP_NAME}（${EXP_SEC}）`,
+      divider,
+      `姓　　名：${name}　　　学　　号：${stuId}`,
+      `实验日期：${date}　　　实验伙伴：${partner}`,
+      divider,
+      '',
+      '一、实验目的',
+      purpose,
+      '',
+      '二、实验步骤与观察',
+      process,
+      '',
+      '三、实验数据记录',
+      data,
+      '',
+      '四、结果分析',
+      analysis,
+      '',
+      '五、误差分析与思考',
+      error,
+      '',
+      '六、实验结论',
+      conclusion,
+      '',
+      divider,
+      `生成时间：${new Date().toLocaleString('zh-CN')}`,
+      '本报告由 NUSEP26 普通物理（卓越班）实验仿真平台生成',
+    ].join('\n');
+
+    const out = document.getElementById('reportOutput');
+    out.textContent = report;
+    out.classList.add('show');
+    document.getElementById('rmCopyBtn').style.display = 'inline-flex';
+    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+
+  window.copyReport = function() {
+    const text = document.getElementById('reportOutput').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('rmCopyBtn');
+      const orig = btn.textContent;
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => btn.textContent = orig, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      const btn = document.getElementById('rmCopyBtn');
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => btn.textContent = '复制报告', 2000);
+    });
+  };
+
+  ['rName','rStuId','rDate','rPartner','rPurpose','rProcess','rData','rAnalysis','rError','rConclusion']
+    .forEach(id => document.getElementById(id).addEventListener('input', saveDraft));
+})();
+</script>
+
+</body>
+</html>

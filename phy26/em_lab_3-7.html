@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>实验：安培力 §3-7</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    min-height: 100vh;
+    color: #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+  /* Topbar */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 28px;
+    background: rgba(16,185,129,0.08);
+    border-bottom: 1px solid rgba(16,185,129,0.25);
+    backdrop-filter: blur(10px);
+    flex-shrink: 0;
+  }
+  .back-btn {
+    text-decoration: none;
+    color: #34d399;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border: 1px solid rgba(52,211,153,0.4);
+    border-radius: 6px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .back-btn:hover { background: rgba(52,211,153,0.15); border-color: #34d399; }
+  .topbar-title-wrap { display: flex; flex-direction: column; gap: 2px; }
+  .topbar-title { font-size: 16px; font-weight: 700; color: #fff; }
+  .topbar-course { font-size: 11px; color: rgba(255,255,255,0.38); letter-spacing: 1px; }
+  .topbar-sub { margin-left: auto; font-size: 12px; color: rgba(255,255,255,0.3); }
+  /* Main layout */
+  .main {
+    display: flex;
+    flex: 1;
+    gap: 0;
+    overflow: hidden;
+  }
+  /* Sidebar */
+  .sidebar {
+    width: 250px;
+    min-width: 250px;
+    background: rgba(255,255,255,0.04);
+    border-right: 1px solid rgba(16,185,129,0.15);
+    padding: 18px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow-y: auto;
+  }
+  .sidebar-section { display: flex; flex-direction: column; gap: 8px; }
+  .sidebar-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #64748b;
+  }
+  /* Mode selector */
+  .mode-btns { display: flex; flex-direction: column; gap: 6px; }
+  .mode-btn {
+    padding: 8px 12px;
+    border: 1px solid rgba(52,211,153,0.25);
+    border-radius: 8px;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+  }
+  .mode-btn:hover { border-color: rgba(52,211,153,0.5); color: #34d399; }
+  .mode-btn.active {
+    background: rgba(16,185,129,0.18);
+    border-color: #10b981;
+    color: #34d399;
+  }
+  /* Sliders */
+  .slider-row { display: flex; flex-direction: column; gap: 4px; }
+  .slider-row-header { display: flex; justify-content: space-between; align-items: center; }
+  .slider-name { font-size: 12px; color: #cbd5e1; }
+  .slider-val {
+    font-size: 12px;
+    font-weight: 700;
+    color: #34d399;
+    min-width: 45px;
+    text-align: right;
+  }
+  input[type=range] {
+    width: 100%;
+    height: 4px;
+    -webkit-appearance: none;
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 6px rgba(16,185,129,0.6);
+    cursor: pointer;
+  }
+  /* Toggles */
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; }
+  .toggle-label { font-size: 12px; color: #cbd5e1; }
+  .toggle {
+    position: relative;
+    width: 34px;
+    height: 18px;
+    cursor: pointer;
+  }
+  .toggle input { display: none; }
+  .toggle-track {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.12);
+    border-radius: 9px;
+    transition: background 0.2s;
+  }
+  .toggle input:checked + .toggle-track { background: #10b981; }
+  .toggle-thumb {
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: white;
+    transition: left 0.2s;
+  }
+  .toggle input:checked ~ .toggle-thumb { left: 18px; }
+  /* Results panel */
+  .results-panel {
+    background: rgba(16,185,129,0.07);
+    border: 1px solid rgba(16,185,129,0.2);
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .result-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .result-key { font-size: 11px; color: #64748b; }
+  .result-val { font-size: 13px; font-weight: 700; color: #34d399; text-align: right; }
+  .result-val.red { color: #f87171; }
+  .result-val.blue { color: #60a5fa; }
+  /* Canvas area */
+  .canvas-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    gap: 8px;
+    overflow: hidden;
+  }
+  canvas {
+    border: 1px solid rgba(16,185,129,0.2);
+    background: #0d0d1a;
+    box-shadow: 0 0 40px rgba(16,185,129,0.08);
+    display: block; flex: 1; width: 100%;
+  }
+  /* Formula bar */
+  .formula-bar {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(16,185,129,0.18);
+    border-radius: 8px;
+    padding: 10px 18px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    max-width: 620px;
+  }
+  .formula-item {
+    font-size: 13px;
+    color: #94a3b8;
+    font-family: 'Courier New', monospace;
+  }
+  .formula-item span { color: #34d399; font-weight: 700; }
+  /* Mode-specific controls */
+  .mode-ctrl { display: none; }
+  .mode-ctrl.visible { display: flex; flex-direction: column; gap: 8px; }
+  /* Divider */
+  .divider { height: 1px; background: rgba(255,255,255,0.06); margin: 2px 0; }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(52,211,153,0.3); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div class="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">⚡ 实验：安培力</div>
+    <span class="topbar-course">普通物理（卓越班）下册 · 电磁学</span>
+  </div>
+  <div class="topbar-sub">§3-7 磁场对载流导线的作用</div>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <!-- Mode selector -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">模式选择</div>
+      <div class="mode-btns">
+        <button class="mode-btn active" onclick="setMode(1)">① 直导线 · 匀强磁场</button>
+        <button class="mode-btn" onclick="setMode(2)">② 双平行导线</button>
+        <button class="mode-btn" onclick="setMode(3)">③ 矩形线圈（电动机）</button>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Common controls -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">公共参数</div>
+      <div class="slider-row">
+        <div class="slider-row-header">
+          <span class="slider-name">电流 I₁ (A)</span>
+          <span class="slider-val" id="val-I1">5.0</span>
+        </div>
+        <input type="range" id="sl-I1" min="1" max="10" step="0.5" value="5" oninput="updateSlider('I1',this.value)">
+      </div>
+      <div class="slider-row">
+        <div class="slider-row-header">
+          <span class="slider-name">磁场强度 B (T)</span>
+          <span class="slider-val" id="val-B">1.0</span>
+        </div>
+        <input type="range" id="sl-B" min="0.1" max="3" step="0.1" value="1" oninput="updateSlider('B',this.value)">
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Mode 1 controls -->
+    <div class="mode-ctrl visible" id="ctrl-m1">
+      <div class="sidebar-label">模式①参数</div>
+      <div class="slider-row">
+        <div class="slider-row-header">
+          <span class="slider-name">导线长度 L (m)</span>
+          <span class="slider-val" id="val-L">1.0</span>
+        </div>
+        <input type="range" id="sl-L" min="0.2" max="2" step="0.1" value="1" oninput="updateSlider('L',this.value)">
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-label">B 场向里 (⊗)</span>
+        <label class="toggle">
+          <input type="checkbox" id="tog-Bdir" onchange="draw()">
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Mode 2 controls -->
+    <div class="mode-ctrl" id="ctrl-m2">
+      <div class="sidebar-label">模式②参数</div>
+      <div class="slider-row">
+        <div class="slider-row-header">
+          <span class="slider-name">电流 I₂ (A) <span style="font-size:10px;color:#64748b">(负=反向)</span></span>
+          <span class="slider-val" id="val-I2">5.0</span>
+        </div>
+        <input type="range" id="sl-I2" min="-10" max="10" step="0.5" value="5" oninput="updateSlider('I2',this.value)">
+      </div>
+      <div class="slider-row">
+        <div class="slider-row-header">
+          <span class="slider-name">导线间距 d (cm)</span>
+          <span class="slider-val" id="val-d">10</span>
+        </div>
+        <input type="range" id="sl-d" min="3" max="25" step="1" value="10" oninput="updateSlider('d',this.value)">
+      </div>
+    </div>
+
+    <!-- Mode 3 controls -->
+    <div class="mode-ctrl" id="ctrl-m3">
+      <div class="sidebar-label">模式③参数</div>
+      <div class="slider-row">
+        <div class="slider-row-header">
+          <span class="slider-name">线圈匝数 N</span>
+          <span class="slider-val" id="val-N">100</span>
+        </div>
+        <input type="range" id="sl-N" min="1" max="200" step="1" value="100" oninput="updateSlider('N',this.value)">
+      </div>
+      <div class="slider-row">
+        <div class="slider-row-header">
+          <span class="slider-name">线圈角度 θ (°)</span>
+          <span class="slider-val" id="val-theta">30</span>
+        </div>
+        <input type="range" id="sl-theta" min="0" max="180" step="1" value="30" oninput="updateSlider('theta',this.value)">
+      </div>
+      <div class="slider-row">
+        <div class="slider-row-header">
+          <span class="slider-name">线圈面积 A (cm²)</span>
+          <span class="slider-val" id="val-A">50</span>
+        </div>
+        <input type="range" id="sl-A" min="10" max="200" step="5" value="50" oninput="updateSlider('A',this.value)">
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-label">自动旋转</span>
+        <label class="toggle">
+          <input type="checkbox" id="tog-autorot" onchange="toggleAutoRot()">
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Display toggles -->
+    <div class="sidebar-section">
+      <div class="sidebar-label">显示选项</div>
+      <div class="toggle-row">
+        <span class="toggle-label">显示力向量</span>
+        <label class="toggle">
+          <input type="checkbox" id="tog-force" checked onchange="draw()">
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-label">显示磁场</span>
+        <label class="toggle">
+          <input type="checkbox" id="tog-Bfield" checked onchange="draw()">
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Results panel -->
+    <div class="results-panel" id="results-panel">
+      <div class="sidebar-label" style="margin-bottom:2px">计算结果</div>
+      <div class="result-row">
+        <span class="result-key" id="res-label1">安培力 F</span>
+        <span class="result-val" id="res-val1">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-key" id="res-label2">方向</span>
+        <span class="result-val" id="res-val2">—</span>
+      </div>
+      <div class="result-row">
+        <span class="result-key" id="res-label3">—</span>
+        <span class="result-val" id="res-val3">—</span>
+      </div>
+    </div>
+  <div class="report-fab" style="margin-top:auto;padding-top:12px"><button class="report-fab-btn" onclick="openReport()"><span class="rfb-icon">📄</span> 生成实验报告</button></div>
+  </div>
+
+  <!-- Canvas area -->
+  <div class="canvas-area">
+    <canvas id="sim"></canvas>
+    <!-- Formula bar -->
+    <div class="formula-bar">
+      <div class="formula-item"><span>F</span> = IL × B</div>
+      <div class="formula-item"><span>f/L</span> = μ₀I₁I₂ / (2πd)</div>
+      <div class="formula-item"><span>τ</span> = m×B = NIAB sinθ</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── State ─────────────────────────────────────────────────────────────────
+const S = {
+  mode: 1,
+  I1: 5, B: 1, L: 1,
+  I2: 5, d: 10,
+  N: 100, theta: 30, A: 50,
+  BdirIn: false,
+  showForce: true,
+  showB: true,
+  autoRot: false,
+};
+let animId = null;
+let wire1Y = 0, wire2Y = 0; // offsets for mode2 animation
+let coilAngle = 30;         // live angle for mode3
+
+// ─── Slider updates ─────────────────────────────────────────────────────────
+function updateSlider(key, val) {
+  const v = parseFloat(val);
+  S[key] = v;
+  const label = document.getElementById('val-' + key);
+  if (label) {
+    if (key === 'theta') label.textContent = v.toFixed(0);
+    else if (key === 'd' || key === 'N' || key === 'A') label.textContent = v.toFixed(0);
+    else label.textContent = v.toFixed(1);
+  }
+  if (key === 'theta') coilAngle = v;
+  draw();
+}
+
+function toggleAutoRot() {
+  S.autoRot = document.getElementById('tog-autorot').checked;
+  if (S.autoRot) { startAutoRot(); }
+  else { stopAutoRot(); draw(); }
+}
+
+// ─── Mode switching ──────────────────────────────────────────────────────────
+function setMode(m) {
+  S.mode = m;
+  document.querySelectorAll('.mode-btn').forEach((b,i) => b.classList.toggle('active', i===m-1));
+  document.querySelectorAll('.mode-ctrl').forEach((c,i) => c.classList.toggle('visible', i===m-1));
+  stopAutoRot();
+  wire1Y = 0; wire2Y = 0;
+  coilAngle = S.theta;
+  draw();
+}
+
+// ─── Canvas helpers ──────────────────────────────────────────────────────────
+const cv = document.getElementById('sim');
+const ctx = cv.getContext('2d');
+let W = cv.width||600, H = cv.height||420;
+let cx = W/2, cy = H/2;
+
+function clr(c, a=1) {
+  if (a < 1) {
+    // parse hex
+    const r=parseInt(c.slice(1,3),16), g=parseInt(c.slice(3,5),16), b=parseInt(c.slice(5,7),16);
+    return `rgba(${r},${g},${b},${a})`;
+  }
+  return c;
+}
+
+function arrow(x1,y1, x2,y2, color, lw=2, headLen=12) {
+  const dx=x2-x1, dy=y2-y1, angle=Math.atan2(dy,dx);
+  ctx.save();
+  ctx.strokeStyle=color; ctx.fillStyle=color; ctx.lineWidth=lw;
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x2,y2);
+  ctx.lineTo(x2-headLen*Math.cos(angle-0.35), y2-headLen*Math.sin(angle-0.35));
+  ctx.lineTo(x2-headLen*Math.cos(angle+0.35), y2-headLen*Math.sin(angle+0.35));
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+function drawBdots(inward) {
+  const sym = inward ? '⊗' : '⊙';
+  const cols = 7, rows = 5;
+  const gx = W/cols, gy = H/rows;
+  ctx.save();
+  ctx.font = '16px serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = inward ? 'rgba(100,149,237,0.35)' : 'rgba(100,149,237,0.35)';
+  for (let r=0; r<rows; r++) for (let c=0; c<cols; c++) {
+    ctx.fillText(sym, gx*(c+0.5), gy*(r+0.5));
+  }
+  ctx.restore();
+}
+
+function label(text, x, y, color='#94a3b8', size=12, align='center') {
+  ctx.save();
+  ctx.font = `${size}px 'Microsoft YaHei', sans-serif`;
+  ctx.fillStyle = color;
+  ctx.textAlign = align;
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, x, y);
+  ctx.restore();
+}
+
+// ─── Mode 1: Straight wire ───────────────────────────────────────────────────
+function drawMode1() {
+  S.BdirIn = document.getElementById('tog-Bdir').checked;
+  S.showForce = document.getElementById('tog-force').checked;
+  S.showB = document.getElementById('tog-Bfield').checked;
+
+  // B field dots
+  if (S.showB) drawBdots(S.BdirIn);
+
+  // Wire half-length in px (L from 0.2..2 → 40..200 px)
+  const halfPx = S.L * 100;
+  const wy = cy; // wire center y — no animation for mode1 (force shown as arrow)
+  const I = S.I1;
+
+  // Draw wire
+  ctx.save();
+  ctx.strokeStyle = '#f97316'; ctx.lineWidth = 6;
+  ctx.lineCap = 'round';
+  ctx.shadowColor = '#f97316'; ctx.shadowBlur = 10;
+  ctx.beginPath(); ctx.moveTo(cx-halfPx, wy); ctx.lineTo(cx+halfPx, wy); ctx.stroke();
+  ctx.restore();
+
+  // Current direction arrow
+  const iarrow = I >= 0 ? 1 : -1; // positive = rightward
+  arrow(cx - iarrow*30, wy, cx + iarrow*40, wy, '#fbbf24', 3, 14);
+  label('I = ' + Math.abs(I).toFixed(1)+'A  '+(I>=0?'→':'←'), cx, wy-20, '#fbbf24', 13);
+
+  // Force: F = BIL
+  // Current direction: rightward (+x) if I>0
+  // B direction: +z (out of page) if !BdirIn, -z if BdirIn
+  // F = I L × B
+  // If I>0 (+x), B out (+z): F = IL(x̂ × ẑ) = IL(-ŷ) → downward
+  // If I>0 (+x), B in (-z):  F = IL(x̂ × -ẑ) = IL(+ŷ) → upward
+  const F = Math.abs(S.B * I * S.L);
+  let Fdir; // +1 = up (canvas -y), -1 = down
+  if (I >= 0) Fdir = S.BdirIn ? -1 : 1;
+  else        Fdir = S.BdirIn ? 1 : -1;
+  // Fdir +1 means upward on screen (canvas y decreases upward)
+  const Fpx = Math.min(F * 35, 140);
+
+  if (S.showForce) {
+    const fColor = '#10b981';
+    const fSy = wy;
+    const fEy = wy - Fdir * Fpx;
+    arrow(cx, fSy, cx, fEy, fColor, 3, 16);
+    label('F = '+F.toFixed(2)+' N', cx+14, fEy + (Fdir<0?12:-12), fColor, 13);
+    label(Fdir>0 ? '↑ 向上' : '↓ 向下', cx+14, fEy + (Fdir<0?28:-28), fColor, 12);
+  }
+
+  // Labels
+  label('L = '+S.L.toFixed(1)+' m', cx-halfPx-5, wy, '#fb923c', 11, 'right');
+  label('B = '+S.B.toFixed(1)+' T  '+(S.BdirIn?'向里⊗':'向外⊙'), cx, H-20, '#93c5fd', 12);
+
+  // Update results
+  document.getElementById('res-label1').textContent = '安培力 F';
+  document.getElementById('res-val1').textContent = F.toFixed(3) + ' N';
+  document.getElementById('res-label2').textContent = '方向';
+  document.getElementById('res-val2').textContent = Fdir>0 ? '↑ 向上' : '↓ 向下';
+  document.getElementById('res-label3').textContent = '公式';
+  document.getElementById('res-val3').textContent = 'F = BIL';
+}
+
+// ─── Mode 2: Two parallel wires ──────────────────────────────────────────────
+function drawMode2() {
+  S.showForce = document.getElementById('tog-force').checked;
+  S.showB = document.getElementById('tog-Bfield').checked;
+
+  const I1 = S.I1, I2 = S.I2;
+  const d = S.d; // cm
+  const dPx = d * 5; // 1 cm = 5 px (max 25cm → 125px each side)
+  const x1 = cx - dPx/2;
+  const x2 = cx + dPx/2;
+  const wireTop = 60, wireBot = H - 60;
+  const wireLen = wireBot - wireTop;
+
+  // Force per unit length
+  const mu0 = 4*Math.PI*1e-7;
+  const fPerL = mu0 * Math.abs(I1) * Math.abs(I2) / (2*Math.PI*(d/100));
+  const attract = (I1 * I2) > 0;
+
+  // Animation offset
+  const maxOff = Math.min(fPerL * 2e5, 30);
+  if (attract) {
+    wire1Y = Math.min(wire1Y + (maxOff - wire1Y)*0.05, maxOff);
+  } else {
+    wire1Y = Math.max(wire1Y + (-maxOff - wire1Y)*0.05, -maxOff);
+  }
+  wire2Y = -wire1Y;
+  const x1a = x1 + wire1Y, x2a = x2 + wire2Y;
+
+  // Draw B field circles for each wire
+  if (S.showB) {
+    const drawCircles = (xw, current) => {
+      for (let r = 25; r <= 90; r += 25) {
+        const alpha = 0.12 + (1/r)*3;
+        ctx.save();
+        ctx.strokeStyle = `rgba(96,165,250,${Math.min(alpha,0.35)})`;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3,4]);
+        ctx.beginPath();
+        ctx.arc(xw, cy, r, 0, 2*Math.PI);
+        ctx.stroke();
+        ctx.restore();
+        // direction arrows on circles
+        const ang = current >= 0 ? -Math.PI/2 : Math.PI/2;
+        const rx = xw + r*Math.cos(ang);
+        const ry = cy + r*Math.sin(ang);
+        const dang = current >= 0 ? 0.4 : -0.4;
+        ctx.save();
+        ctx.strokeStyle = `rgba(96,165,250,0.5)`;
+        ctx.lineWidth=1;
+        ctx.beginPath();
+        ctx.moveTo(rx,ry);
+        ctx.lineTo(rx+8*Math.cos(ang+Math.PI+dang), ry+8*Math.sin(ang+Math.PI+dang));
+        ctx.stroke();
+        ctx.restore();
+      }
+    };
+    drawCircles(x1a, I1);
+    drawCircles(x2a, I2);
+  }
+
+  // Draw wires
+  const drawWire = (xw, I, lbl) => {
+    ctx.save();
+    ctx.strokeStyle = I>=0 ? '#f97316' : '#a78bfa';
+    ctx.lineWidth = 5;
+    ctx.lineCap = 'round';
+    ctx.shadowColor = ctx.strokeStyle; ctx.shadowBlur = 10;
+    ctx.beginPath(); ctx.moveTo(xw, wireTop); ctx.lineTo(xw, wireBot); ctx.stroke();
+    ctx.restore();
+    // Current arrows along wire
+    const dir = I>=0?1:-1;
+    for (let y=wireTop+25; y<wireBot-20; y+=40) {
+      arrow(xw, y, xw, y+dir*22, I>=0?'#fbbf24':'#c4b5fd', 2, 8);
+    }
+    label(lbl, xw, wireTop-14, '#e2e8f0', 11);
+    label((I>=0?'↑':'↓')+'  '+(Math.abs(I)).toFixed(1)+' A', xw, wireBot+16, I>=0?'#fb923c':'#a78bfa', 11);
+  };
+  drawWire(x1a, I1, 'Wire 1');
+  drawWire(x2a, I2, 'Wire 2');
+
+  // Force arrows
+  if (S.showForce) {
+    const fScale = Math.min(fPerL * 3e6, 60);
+    const fc = attract ? '#10b981' : '#f87171';
+    const dir1 = attract ? 1 : -1; // +1 = toward wire2
+    const dir2 = attract ? -1 : 1;
+    arrow(x1a, cy, x1a + dir1*fScale, cy, fc, 3, 14);
+    arrow(x2a, cy, x2a + dir2*fScale, cy, fc, 3, 14);
+    const fLabel = attract ? '相互吸引' : '相互排斥';
+    label(fLabel, cx, cy + 40, fc, 13);
+  }
+
+  // separation label
+  ctx.save();
+  ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=1; ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.moveTo(x1a, wireTop+5); ctx.lineTo(x2a, wireTop+5); ctx.stroke();
+  ctx.restore();
+  label('d = '+d+' cm', cx, wireTop-2, '#94a3b8', 11);
+
+  // Results
+  document.getElementById('res-label1').textContent = 'f/L (N/m)';
+  document.getElementById('res-val1').textContent = fPerL.toExponential(3);
+  document.getElementById('res-label2').textContent = '相互作用';
+  const r2 = document.getElementById('res-val2');
+  r2.textContent = attract ? '吸引力 ←→' : '排斥力 →←';
+  r2.className = 'result-val ' + (attract ? '' : 'red');
+  document.getElementById('res-label3').textContent = 'μ₀ (H/m)';
+  document.getElementById('res-val3').textContent = '4π×10⁻⁷';
+}
+
+// ─── Mode 3: Rectangular coil ────────────────────────────────────────────────
+function drawMode3() {
+  S.showForce = document.getElementById('tog-force').checked;
+  S.showB = document.getElementById('tog-Bfield').checked;
+
+  const I = S.I1, B = S.B, N = S.N;
+  const A = S.A * 1e-4; // cm² → m²
+  const thRad = coilAngle * Math.PI / 180;
+  const tau = N * I * A * B * Math.sin(thRad);
+
+  // Background B field (horizontal, left to right)
+  if (S.showB) {
+    for (let y = 50; y < H; y += 50) {
+      arrow(20, y, W-20, y, 'rgba(96,165,250,0.18)', 1.5, 8);
+    }
+    label('B →', W-30, 30, 'rgba(96,165,250,0.6)', 12);
+  }
+
+  // Draw coil as a 3D-projected rectangle
+  // Coil dimensions in px
+  const cw = 110, ch = 140; // half-width and half-height
+
+  // The coil rotates around vertical axis (z-axis in 3D → horizontal axis on screen)
+  // theta = angle between coil plane and B field
+  // projected width = cw * cos(theta) (foreshortening)
+  const projW = cw * Math.cos(thRad);
+
+  const tlx = cx - Math.abs(projW), tly = cy - ch;
+  const trx = cx + Math.abs(projW), try_ = cy - ch;
+  const blx = cx - Math.abs(projW), bly = cy + ch;
+  const brx = cx + Math.abs(projW), bry = cy + ch;
+
+  const sideCol = '#f97316';
+  const tbCol = '#34d399';
+
+  // Fill interior
+  ctx.save();
+  ctx.fillStyle = 'rgba(16,185,129,0.08)';
+  ctx.beginPath();
+  ctx.moveTo(tlx, tly); ctx.lineTo(trx, try_);
+  ctx.lineTo(brx, bry); ctx.lineTo(blx, bly);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+
+  // Top and bottom sides (parallel to B) — no Ampere force component along B
+  const drawSide = (x1,y1,x2,y2,col,lw=4) => {
+    ctx.save(); ctx.strokeStyle=col; ctx.lineWidth=lw;
+    ctx.shadowColor=col; ctx.shadowBlur=8;
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    ctx.restore();
+  };
+  drawSide(tlx, tly, trx, try_, tbCol, 3);
+  drawSide(blx, bly, brx, bry, tbCol, 3);
+  drawSide(tlx, tly, blx, bly, sideCol, 5);
+  drawSide(trx, try_, brx, bry, sideCol, 5);
+
+  // Current direction on sides
+  const cdir = I >= 0 ? 1 : -1;
+  // Left side: upward if I>0, downward if I<0
+  arrow(tlx+(blx-tlx)*0.3, tly+(bly-tly)*0.3, tlx+(blx-tlx)*0.5+cdir*0, tly+(bly-tly)*0.5, '#fbbf24', 2, 10);
+  // Right side: opposite
+  arrow(trx+(brx-trx)*0.5, try_+(bry-try_)*0.5, trx+(brx-trx)*0.3-cdir*0, try_+(bry-try_)*0.3, '#fbbf24', 2, 10);
+
+  // Ampere forces on left and right sides
+  if (S.showForce) {
+    const Fside = I * (ch*2/100) * B; // IL × B on each side
+    const FpxMax = Math.min(Math.abs(Fside)*40, 70);
+    // Force on left side: F = I L × B
+    // If I upward (+y), B rightward (+x): F = I L(ŷ × x̂) = I L(-ẑ) → into screen, shown as outward/inward symbol
+    // In 2D projection: left side force is in -z (into screen) or +z
+    // For visualization: show vertical forces (simplified for side view)
+    // Actually for a horizontal B field and vertical current:
+    // Left side current direction (assuming I>0) is upward: F_left = IL(ŷ × x̂) = IL(-ẑ) (into page)
+    // Right side current downward: F_right = IL(-ŷ × x̂) = IL(+ẑ) (out of page)
+    // This creates torque. Show it as horizontal arrows perpendicular to B × coil normal
+    // For display, show the net force arrows as in/out indicators
+    const lx = (tlx+blx)/2, ly = cy;
+    const rx = (trx+brx)/2, ry = cy;
+
+    // torque direction indicator
+    const tauDir = tau > 0 ? '逆时针 ↺' : tau < 0 ? '顺时针 ↻' : '平衡';
+    label(tauDir, cx, cy+ch+30, '#10b981', 13);
+
+    // Draw force arrows on left/right sides
+    const fCol = '#10b981';
+    // Left side force direction based on theta
+    const outDir = Math.cos(thRad) >= 0 ? -1 : 1; // left side pushes left if theta<90
+    arrow(lx, ly, lx + outDir*FpxMax, ly, fCol, 3, 12);
+    arrow(rx, ry, rx - outDir*FpxMax, ry, fCol, 3, 12);
+    label('F', lx + outDir*(FpxMax+12), ly, fCol, 12);
+    label('F', rx - outDir*(FpxMax+12), ry, fCol, 12);
+  }
+
+  // Angle indicator
+  ctx.save();
+  ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+90,cy); ctx.stroke();
+  ctx.restore();
+  // arc for angle
+  ctx.save();
+  ctx.strokeStyle='rgba(255,200,0,0.5)'; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.arc(cx, cy, 50, -thRad/2, thRad/2); ctx.stroke();
+  ctx.restore();
+  label('θ='+coilAngle.toFixed(0)+'°', cx+60, cy-10, '#fcd34d', 11);
+
+  // Labels
+  label('矩形线圈', cx, tly-18, '#34d399', 12);
+  label('B 场', 40, 20, '#93c5fd', 12);
+  label('N='+N+'匝  I='+I.toFixed(1)+'A  B='+B.toFixed(1)+'T  A='+S.A+'cm²', cx, H-18, '#94a3b8', 11);
+
+  // Results
+  document.getElementById('res-label1').textContent = '力矩 τ (N·m)';
+  document.getElementById('res-val1').textContent = tau.toFixed(4);
+  document.getElementById('res-label2').textContent = '最大力矩';
+  document.getElementById('res-val2').textContent = (N*I*A*B).toFixed(4)+' N·m';
+  document.getElementById('res-label3').textContent = '转向';
+  document.getElementById('res-val3').textContent = tau>0.001 ? '逆时针 ↺' : tau<-0.001 ? '顺时针 ↻' : '平衡';
+}
+
+// ─── Draw dispatcher ─────────────────────────────────────────────────────────
+function draw() {
+  ctx.clearRect(0,0,W,H);
+  // Grid overlay
+  ctx.save();
+  ctx.strokeStyle='rgba(255,255,255,0.03)'; ctx.lineWidth=1;
+  for (let x=0;x<W;x+=40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for (let y=0;y<H;y+=40) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+  ctx.restore();
+
+  if (S.mode===1) drawMode1();
+  else if (S.mode===2) drawMode2();
+  else drawMode3();
+}
+
+// ─── Mode 2 animation ─────────────────────────────────────────────────────────
+let m2animId = null;
+function startM2Anim() {
+  if (m2animId) return;
+  const step = () => { draw(); m2animId = requestAnimationFrame(step); };
+  m2animId = requestAnimationFrame(step);
+}
+function stopM2Anim() {
+  if (m2animId) { cancelAnimationFrame(m2animId); m2animId = null; }
+}
+
+// ─── Mode 3 auto-rotate ───────────────────────────────────────────────────────
+let m3animId = null;
+function startAutoRot() {
+  if (m3animId) return;
+  const step = () => {
+    coilAngle = (coilAngle + 0.8) % 360;
+    // sync slider
+    const sl = document.getElementById('sl-theta');
+    sl.value = coilAngle % 180;
+    document.getElementById('val-theta').textContent = (coilAngle % 180).toFixed(0);
+    draw();
+    m3animId = requestAnimationFrame(step);
+  };
+  m3animId = requestAnimationFrame(step);
+}
+function stopAutoRot() {
+  if (m3animId) { cancelAnimationFrame(m3animId); m3animId = null; }
+  S.autoRot = false;
+  const tog = document.getElementById('tog-autorot');
+  if (tog) tog.checked = false;
+}
+
+// Watch mode changes for animation
+const _origSetMode = setMode;
+// Augment setMode to manage animations
+window.setMode = function(m) {
+  stopM2Anim();
+  stopAutoRot();
+  S.mode = m;
+  document.querySelectorAll('.mode-btn').forEach((b,i) => b.classList.toggle('active', i===m-1));
+  document.querySelectorAll('.mode-ctrl').forEach((c,i) => c.classList.toggle('visible', i===m-1));
+  wire1Y = 0; wire2Y = 0;
+  coilAngle = S.theta;
+  if (m===2) startM2Anim();
+  else draw();
+};
+
+// Also toggle-based sync
+document.getElementById('tog-force').addEventListener('change', () => { S.showForce = document.getElementById('tog-force').checked; draw(); });
+document.getElementById('tog-Bfield').addEventListener('change', () => { S.showB = document.getElementById('tog-Bfield').checked; draw(); });
+
+// ─── Init ────────────────────────────────────────────────────────────────────
+function resizeCanvas(){cv.width=cv.offsetWidth;cv.height=cv.offsetHeight;W=cv.width||600;H=cv.height||420;cx=W/2;cy=H/2;draw();}
+window.addEventListener('resize',resizeCanvas);
+setTimeout(resizeCanvas,80);
+</script>
+<!-- ── 实验报告生成器 ── -->
+<style>
+.report-fab {
+  position: fixed; bottom: 28px; right: 28px; z-index: 1000;
+}
+.report-fab-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  border: none; border-radius: 28px; padding: 12px 20px;
+  color: #fff; font-size: 13px; font-weight: 700;
+  font-family: "Microsoft YaHei", sans-serif;
+  cursor: pointer; letter-spacing: 0.5px;
+  box-shadow: 0 4px 20px rgba(52,211,153,0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.report-fab-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(52,211,153,0.55); }
+.report-fab-btn .rfb-icon { font-size: 17px; }
+
+.report-overlay {
+  position: fixed; inset: 0; z-index: 1200;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.report-overlay.open { display: flex; }
+.report-modal {
+  background: #0e0c24;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  width: min(760px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+  animation: slideUp 0.3s cubic-bezier(0.4,0,0.2,1) both;
+}
+@keyframes slideUp {
+  from { opacity:0; transform: translateY(30px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.rm-header {
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.rm-title { font-size: 17px; font-weight: 700; color: #fff; font-family: "Microsoft YaHei",sans-serif; }
+.rm-title span { color: #34d399; }
+.rm-close { font-size: 22px; color: rgba(255,255,255,0.4); cursor: pointer; line-height:1; transition: color 0.2s; }
+.rm-close:hover { color: #fff; }
+.rm-body { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; }
+.rm-field { display: flex; flex-direction: column; gap: 6px; }
+.rm-label { font-size: 12px; color: rgba(255,255,255,0.45); font-family: "Microsoft YaHei",sans-serif; letter-spacing: 0.5px; }
+.rm-label span { color: #f87171; }
+.rm-input, .rm-textarea {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 10px 14px;
+  color: #fff; font-size: 14px; font-family: "Microsoft YaHei",sans-serif;
+  outline: none; transition: border-color 0.2s; width: 100%;
+}
+.rm-input:focus, .rm-textarea:focus { border-color: rgba(52,211,153,0.5); }
+.rm-textarea { resize: vertical; min-height: 80px; line-height: 1.8; }
+.rm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.rm-section-title {
+  font-size: 12px; font-weight: 700; color: rgba(52,211,153,0.8);
+  letter-spacing: 1px; text-transform: uppercase;
+  border-bottom: 1px solid rgba(52,211,153,0.15);
+  padding-bottom: 8px; margin-top: 4px;
+  font-family: "Microsoft YaHei",sans-serif;
+}
+.rm-footer { padding: 16px 28px 24px; display: flex; gap: 12px; justify-content: flex-end; }
+.rm-btn {
+  padding: 10px 28px; border-radius: 12px; border: none; cursor: pointer;
+  font-size: 14px; font-weight: 700; font-family: "Microsoft YaHei",sans-serif;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.rm-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.rm-btn-cancel { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6); }
+.rm-btn-gen { background: linear-gradient(135deg,#10b981,#34d399); color: #fff; }
+.rm-btn-copy { background: linear-gradient(135deg,#6366f1,#818cf8); color: #fff; display:none; }
+
+.report-output {
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px; padding: 20px 24px; margin: 0 28px 24px;
+  font-family: "Microsoft YaHei", "Times New Roman", serif;
+  font-size: 13.5px; color: rgba(255,255,255,0.85);
+  line-height: 2; white-space: pre-wrap; display: none;
+  max-height: 340px; overflow-y: auto;
+}
+.report-output.show { display: block; }
+</style>
+
+
+<div class="report-overlay" id="reportOverlay" onclick="overlayClick(event)">
+  <div class="report-modal">
+    <div class="rm-header">
+      <div class="rm-title">实验报告 · <span>磁场对载流导线</span></div>
+      <div class="rm-close" onclick="closeReport()">×</div>
+    </div>
+    <div class="rm-body">
+      <div class="rm-section-title">基本信息</div>
+      <div class="rm-row">
+        <div class="rm-field">
+          <div class="rm-label">姓名 <span>*</span></div>
+          <input class="rm-input" id="rName" placeholder="请输入姓名">
+        </div>
+        <div class="rm-field">
+          <div class="rm-label">学号 <span>*</span></div>
+          <input class="rm-input" id="rStuId" placeholder="请输入学号">
+        </div>
+      </div>
+      <div class="rm-row">
+        <div class="rm-field">
+          <div class="rm-label">实验日期</div>
+          <input class="rm-input" id="rDate" type="date">
+        </div>
+        <div class="rm-field">
+          <div class="rm-label">实验伙伴</div>
+          <input class="rm-input" id="rPartner" placeholder="可选">
+        </div>
+      </div>
+      <div class="rm-section-title">实验内容</div>
+      <div class="rm-field">
+        <div class="rm-label">实验目的</div>
+        <textarea class="rm-textarea" id="rPurpose" placeholder="描述本次实验的目的和预期目标……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验步骤与观察</div>
+        <textarea class="rm-textarea" id="rProcess" placeholder="描述你进行的操作步骤和实验过程中的观察……" style="min-height:100px"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验数据记录</div>
+        <textarea class="rm-textarea" id="rData" placeholder="记录关键数据、参数和仿真结果……"></textarea>
+      </div>
+      <div class="rm-section-title">分析与总结</div>
+      <div class="rm-field">
+        <div class="rm-label">结果分析</div>
+        <textarea class="rm-textarea" id="rAnalysis" placeholder="对实验现象和数据进行分析……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">误差分析与思考</div>
+        <textarea class="rm-textarea" id="rError" placeholder="分析可能的误差来源，以及对物理规律的思考……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验结论</div>
+        <textarea class="rm-textarea" id="rConclusion" placeholder="总结本次实验的结论……"></textarea>
+      </div>
+    </div>
+    <div class="report-output" id="reportOutput"></div>
+    <div class="rm-footer">
+      <button class="rm-btn rm-btn-cancel" onclick="closeReport()">取消</button>
+      <button class="rm-btn rm-btn-copy" id="rmCopyBtn" onclick="copyReport()">复制报告</button>
+      <button class="rm-btn rm-btn-gen" onclick="generateReport()">生成报告</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const EXP_NAME = '磁场对载流导线';
+  const EXP_SEC  = '§3-7';
+  const STORE_KEY = 'phy26_report_' + EXP_SEC.replace(/[§\/]/g,'');
+
+  function loadSaved() {
+    const d = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+    if (d.name)       document.getElementById('rName').value      = d.name;
+    if (d.stuId)      document.getElementById('rStuId').value     = d.stuId;
+    if (d.date)       document.getElementById('rDate').value      = d.date;
+    if (d.partner)    document.getElementById('rPartner').value   = d.partner;
+    if (d.purpose)    document.getElementById('rPurpose').value   = d.purpose;
+    if (d.process)    document.getElementById('rProcess').value   = d.process;
+    if (d.data)       document.getElementById('rData').value      = d.data;
+    if (d.analysis)   document.getElementById('rAnalysis').value  = d.analysis;
+    if (d.error)      document.getElementById('rError').value     = d.error;
+    if (d.conclusion) document.getElementById('rConclusion').value= d.conclusion;
+  }
+
+  function saveDraft() {
+    const d = {
+      name:       document.getElementById('rName').value,
+      stuId:      document.getElementById('rStuId').value,
+      date:       document.getElementById('rDate').value,
+      partner:    document.getElementById('rPartner').value,
+      purpose:    document.getElementById('rPurpose').value,
+      process:    document.getElementById('rProcess').value,
+      data:       document.getElementById('rData').value,
+      analysis:   document.getElementById('rAnalysis').value,
+      error:      document.getElementById('rError').value,
+      conclusion: document.getElementById('rConclusion').value,
+    };
+    localStorage.setItem(STORE_KEY, JSON.stringify(d));
+  }
+
+  window.openReport = function() {
+    document.getElementById('reportOverlay').classList.add('open');
+    document.getElementById('reportOutput').classList.remove('show');
+    document.getElementById('rmCopyBtn').style.display = 'none';
+    const dateEl = document.getElementById('rDate');
+    if (!dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
+    loadSaved();
+    const _d = {
+      rPurpose:    '研究载流导线在磁场中受到的安培力，验证安培力公式F=IL×B，理解安培力的方向（左手定则），分析安培力在电动机等装置中的应用。',
+      rProcess:    '设置匀强磁场B，将载流导线（电流I，长度L）置于磁场中，测量安培力F；改变I、L、B和导线与磁场的夹角θ，验证F=BILsinθ；观察安培力的方向随电流方向和磁场方向的变化；分析矩形线圈在匀强磁场中受到的力矩。',
+      rData:       '导线（L=0.1m，I=1A），B=0.1T，θ=90°：F=BIL=0.01N；θ=30°：F=BILsin30°=0.005N；I增大2倍：F=0.02N（F∝I）；B增大2倍：F=0.02N（F∝B）；矩形线圈（面积A=0.01m²，N=100匝，I=0.1A，B=0.1T）：最大力矩M=NIAB=0.01N·m。',
+      rAnalysis:   '安培力F=IL×B，大小F=BILsinθ，方向由左手定则（或F=IL×B的叉积方向）确定。安培力是洛伦兹力对导线中所有运动电荷的宏观合力。矩形线圈在匀强磁场中受到力矩M=NIAB·sinα（α为线圈平面法线与B的夹角），这是电动机工作的基本原理。',
+      rError:      '仿真中使用无限长均匀磁场，实际磁场有边界效应；导线的质量和刚度会影响实际偏转量；电流的测量误差和磁场的不均匀性是主要误差来源。',
+      rConclusion: '验证了安培力公式F=BILsinθ；安培力与电流、磁场强度和导线长度成正比，与导线和磁场夹角的正弦成正比；方向由左手定则确定；矩形线圈在匀强磁场中受到力矩，是电动机工作的物理基础。',
+    };
+    Object.entries(_d).forEach(([id, val]) => { const el = document.getElementById(id); if (el && !el.value) el.value = val; });
+  };
+
+  window.closeReport = function() {
+    saveDraft();
+    document.getElementById('reportOverlay').classList.remove('open');
+  };
+
+  window.overlayClick = function(e) {
+    if (e.target === document.getElementById('reportOverlay')) closeReport();
+  };
+
+  window.generateReport = function() {
+    const name       = document.getElementById('rName').value.trim();
+    const stuId      = document.getElementById('rStuId').value.trim();
+    const date       = document.getElementById('rDate').value || '—';
+    const partner    = document.getElementById('rPartner').value.trim() || '—';
+    const purpose    = document.getElementById('rPurpose').value.trim() || '（未填写）';
+    const process    = document.getElementById('rProcess').value.trim() || '（未填写）';
+    const data       = document.getElementById('rData').value.trim() || '（未填写）';
+    const analysis   = document.getElementById('rAnalysis').value.trim() || '（未填写）';
+    const error      = document.getElementById('rError').value.trim() || '（未填写）';
+    const conclusion = document.getElementById('rConclusion').value.trim() || '（未填写）';
+
+    if (!name || !stuId) { alert('请填写姓名和学号'); return; }
+    saveDraft();
+
+    const divider = '─'.repeat(40);
+    const report = [
+      '普通物理（卓越班）下册 · 电磁学',
+      `实验报告：${EXP_NAME}（${EXP_SEC}）`,
+      divider,
+      `姓　　名：${name}　　　学　　号：${stuId}`,
+      `实验日期：${date}　　　实验伙伴：${partner}`,
+      divider,
+      '',
+      '一、实验目的',
+      purpose,
+      '',
+      '二、实验步骤与观察',
+      process,
+      '',
+      '三、实验数据记录',
+      data,
+      '',
+      '四、结果分析',
+      analysis,
+      '',
+      '五、误差分析与思考',
+      error,
+      '',
+      '六、实验结论',
+      conclusion,
+      '',
+      divider,
+      `生成时间：${new Date().toLocaleString('zh-CN')}`,
+      '本报告由 NUSEP26 普通物理（卓越班）实验仿真平台生成',
+    ].join('\n');
+
+    const out = document.getElementById('reportOutput');
+    out.textContent = report;
+    out.classList.add('show');
+    document.getElementById('rmCopyBtn').style.display = 'inline-flex';
+    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+
+  window.copyReport = function() {
+    const text = document.getElementById('reportOutput').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('rmCopyBtn');
+      const orig = btn.textContent;
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => btn.textContent = orig, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      const btn = document.getElementById('rmCopyBtn');
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => btn.textContent = '复制报告', 2000);
+    });
+  };
+
+  ['rName','rStuId','rDate','rPartner','rPurpose','rProcess','rData','rAnalysis','rError','rConclusion']
+    .forEach(id => document.getElementById(id).addEventListener('input', saveDraft));
+})();
+</script>
+
+</body>
+</html>

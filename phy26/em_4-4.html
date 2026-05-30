@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>4-4 磁场的能量 — 电磁学</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Times New Roman","Microsoft YaHei","PingFang SC",serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;color:#fff}
+    canvas#particles{position:fixed;inset:0;pointer-events:none;z-index:0}
+    .topbar{position:relative;z-index:10;display:flex;align-items:center;gap:14px;padding:18px 36px;border-bottom:1px solid rgba(255,255,255,0.07);background:rgba(15,12,41,0.7);backdrop-filter:blur(12px);font-family:"Microsoft YaHei",sans-serif}
+    .back-btn{color:rgba(255,255,255,0.5);font-size:14px;cursor:pointer;text-decoration:none;transition:color .2s}.back-btn:hover{color:#fbbf24}
+    .topbar-title{font-size:16px;font-weight:700;letter-spacing:1px}
+    .topbar-sub{margin-left:auto;font-size:12px;color:rgba(255,255,255,0.3)}
+    .tabs{display:flex;gap:10px;margin-bottom:32px;font-family:"Microsoft YaHei",sans-serif;flex-wrap:wrap}
+    .tab{padding:9px 22px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.5);transition:all .2s}
+    .tab.active{background:linear-gradient(135deg,#f59e0b,#fbbf24);border-color:transparent;color:#1a1200;box-shadow:0 4px 16px rgba(251,191,36,0.4)}
+    .tab-panel{display:none}.tab-panel.active{display:block}
+    .page{position:relative;z-index:10;max-width:860px;margin:0 auto;padding:36px 24px 80px}
+    .card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:16px;padding:28px 32px;margin-bottom:20px}
+    .card-title{font-size:16px;font-weight:700;color:#fbbf24;margin-bottom:14px;display:flex;align-items:center;gap:8px;font-family:"Microsoft YaHei",sans-serif}
+    .card-title::before{content:"";display:inline-block;width:4px;height:18px;border-radius:2px;background:linear-gradient(#f59e0b,#fbbf24);flex-shrink:0}
+    .card p{font-size:15px;color:rgba(255,255,255,0.8);line-height:2}.card p+p{margin-top:10px}
+    .hl{color:#fbbf24;font-weight:600}.hl-blue{color:#38bdf8;font-weight:600}.hl-green{color:#34d399;font-weight:600}.hl-red{color:#f87171;font-weight:600}.hl-purple{color:#c084fc;font-weight:600}
+    .katex{color:#e2e8f0;font-size:1.05em}.katex-display{margin:14px 0}.katex-display>.katex{color:#fde68a}
+    .prop-list{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:12px}
+    .prop-item{display:flex;gap:14px;align-items:flex-start;background:rgba(255,255,255,0.03);border-radius:10px;padding:14px 18px;border-left:3px solid #f59e0b}
+    .prop-item:nth-child(2){border-left-color:#38bdf8}.prop-item:nth-child(3){border-left-color:#34d399}.prop-item:nth-child(4){border-left-color:#f87171}
+    .prop-num{min-width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:linear-gradient(135deg,#f59e0b,#fbbf24);color:#1a1200;font-family:"Microsoft YaHei",sans-serif}
+    .prop-item:nth-child(2) .prop-num{background:linear-gradient(135deg,#0ea5e9,#38bdf8);color:#fff}.prop-item:nth-child(3) .prop-num{background:linear-gradient(135deg,#10b981,#34d399);color:#fff}.prop-item:nth-child(4) .prop-num{background:linear-gradient(135deg,#ef4444,#f87171);color:#fff}
+    .prop-body{font-size:14.5px;color:rgba(255,255,255,0.78);line-height:1.9}.prop-body strong{color:#fff;font-family:"Microsoft YaHei",sans-serif}
+    .note-box{background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);border-radius:12px;padding:16px 20px;margin-top:14px;font-size:14px;color:rgba(255,255,255,0.7);line-height:1.9;font-family:"Microsoft YaHei",sans-serif}
+    .note-box .note-label{font-weight:700;color:#fbbf24;margin-bottom:4px;display:block}
+    .green-box{background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.2);border-radius:12px;padding:16px 20px;margin-top:14px;font-size:14px;color:rgba(255,255,255,0.75);line-height:1.9;font-family:"Microsoft YaHei",sans-serif}
+    .green-box .note-label{font-weight:700;color:#34d399;margin-bottom:4px;display:block}
+    .blue-box{background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.2);border-radius:12px;padding:16px 20px;margin-top:14px;font-size:14px;color:rgba(255,255,255,0.75);line-height:1.9;font-family:"Microsoft YaHei",sans-serif}
+    .blue-box .note-label{font-weight:700;color:#38bdf8;margin-bottom:4px;display:block}
+    .eg-block{background:rgba(251,191,36,0.04);border:1px solid rgba(251,191,36,0.15);border-radius:14px;padding:24px 28px;margin-bottom:20px}
+    .eg-title{font-size:15px;font-weight:700;color:#fbbf24;margin-bottom:14px;font-family:"Microsoft YaHei",sans-serif;display:flex;align-items:center;gap:8px}
+    .eg-title::before{content:"";display:inline-block;width:4px;height:16px;background:linear-gradient(#f59e0b,#fbbf24);border-radius:2px;flex-shrink:0}
+    .eg-block p{font-size:14.5px;color:rgba(255,255,255,0.8);line-height:2}.eg-block p+p{margin-top:8px}
+    .sol-steps{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+    .sol-step{background:rgba(255,255,255,0.025);border-left:3px solid #f59e0b;border-radius:0 8px 8px 0;padding:12px 16px;font-size:14.5px;color:rgba(255,255,255,0.78);line-height:2}
+    .sol-step:nth-child(2){border-left-color:#38bdf8}.sol-step:nth-child(3){border-left-color:#34d399}.sol-step:nth-child(4){border-left-color:#f87171}.sol-step:nth-child(5){border-left-color:#c084fc}
+    .sol-step strong{color:#fff;font-family:"Microsoft YaHei",sans-serif}
+    .ans-box{background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:10px;padding:12px 18px;margin-top:12px;font-size:14.5px;color:rgba(255,255,255,0.85);line-height:2}
+    .ans-box .ans-label{color:#fbbf24;font-weight:700;font-family:"Microsoft YaHei",sans-serif}
+    canvas.demo-canvas{display:block;margin:18px auto 0;background:rgba(0,0,0,0.25);border-radius:12px;border:1px solid rgba(255,255,255,0.07)}
+    .demo-label{text-align:center;font-size:12.5px;color:rgba(255,255,255,0.35);font-family:"Microsoft YaHei",sans-serif;margin-top:8px}
+    .sim-ctrl{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+    .sim-btn{padding:7px 20px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:13px;font-family:"Microsoft YaHei",sans-serif;cursor:pointer;transition:all .2s}
+    .sim-btn:hover{background:rgba(245,158,11,0.25);border-color:rgba(251,191,36,0.5);color:#fff}
+    .sim-btn.active{background:linear-gradient(135deg,#f59e0b,#fbbf24);border-color:transparent;color:#1a1200;box-shadow:0 2px 10px rgba(251,191,36,0.4)}
+    .slider-row{display:flex;align-items:center;gap:14px;margin-top:14px;font-family:"Microsoft YaHei",sans-serif;font-size:13px;color:rgba(255,255,255,0.65)}
+    .slider-row input[type=range]{flex:1;accent-color:#fbbf24}
+    .slider-val{min-width:60px;text-align:right;color:#fbbf24;font-weight:600}
+    .readout-row{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap}
+    .readout{flex:1;min-width:120px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px 16px;text-align:center}
+    .readout-val{font-size:22px;font-weight:800;color:#fbbf24;font-family:"Times New Roman",serif}
+    .readout-label{font-size:11px;color:rgba(255,255,255,0.35);font-family:"Microsoft YaHei",sans-serif;margin-top:4px;letter-spacing:1px}
+    .formula-highlight{background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:12px;padding:18px 24px;margin:14px 0;text-align:center}
+  </style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">§4-4 &nbsp;磁场的能量</div>
+    <span class="topbar-course">普通物理（卓越班）下册 · 电磁学</span>
+  </div>
+  <div class="topbar-sub">NUSEP26 · 普通物理（卓）下</div>
+</div>
+
+<div class="page">
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(0)">磁场能量</div>
+    <div class="tab" onclick="switchTab(1)">磁场能量密度</div>
+    <div class="tab" onclick="switchTab(2)">仿真：能量分布</div>
+    <div class="tab" onclick="switchTab(3)">例题</div>
+  </div>
+
+  <!-- ══ Tab 0：磁场能量 ══ -->
+  <div class="tab-panel active" id="panel-0">
+    <div class="card">
+      <div class="card-title">自感线圈储存的磁场能量</div>
+      <p>RL 串联电路接通电源后，电流从 0 增大到稳态值 $I_0$。在此过程中，电源做的功一部分消耗在电阻上，另一部分以<span class="hl">磁场能量</span>的形式储存在自感线圈中。</p>
+      <p>对自感线圈两端电压 $U_L = L\,dI/dt$ 积分，得到储存的磁场能量：</p>
+      $$W_m = \int_0^{I_0} U_L I\,dt = \int_0^{I_0} L I\,dI = \frac{1}{2}L I_0^2$$
+      <div class="note-box">
+        <span class="note-label">类比电场能量</span>
+        电容器储存电场能量 $W_e = \dfrac{1}{2}CV^2$，自感线圈储存磁场能量 $W_m = \dfrac{1}{2}LI^2$。两者形式完全对称：$C \leftrightarrow L$，$V \leftrightarrow I$。
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">磁场能量的本质</div>
+      <p>磁场能量储存在<span class="hl">磁场本身</span>中，而不是在导线中。以长直螺线管为例：</p>
+      <p>螺线管自感 $L = \mu_0 n^2 V$，通电流 $I$ 时，内部磁场 $B = \mu_0 n I$，磁场能量：</p>
+      $$W_m = \frac{1}{2}LI^2 = \frac{1}{2}\mu_0 n^2 V \cdot I^2 = \frac{1}{2}\mu_0 n^2 I^2 \cdot V = \frac{B^2}{2\mu_0}\cdot V$$
+      <p>这说明磁场能量均匀分布在螺线管内部体积 $V$ 中，<span class="hl-blue">单位体积的磁场能量</span>（磁场能量密度）为：</p>
+      $$\omega_m = \frac{W_m}{V} = \frac{B^2}{2\mu_0} = \frac{1}{2}\mu_0 H^2 = \frac{1}{2}BH$$
+    </div>
+
+    <div class="card">
+      <div class="card-title">RL 电路的能量转化过程</div>
+      <ul class="prop-list">
+        <li class="prop-item"><span class="prop-num">①</span><div class="prop-body"><strong>充电阶段</strong>（接通电源）：电源做功 $W_{电源}$，一部分 $W_R = \int I^2 R\,dt$ 耗散在电阻，另一部分 $W_m = \frac{1}{2}LI_0^2$ 储存在磁场中</div></li>
+        <li class="prop-item"><span class="prop-num">②</span><div class="prop-body"><strong>放电阶段</strong>（断开电源）：磁场能量 $W_m$ 全部转化为电阻热，$W_m = \int_0^\infty I^2 R\,dt$</div></li>
+        <li class="prop-item"><span class="prop-num">③</span><div class="prop-body"><strong>时间常数</strong>：$\tau = L/R$，$\tau$ 越大，充放电越慢，磁场能量的建立与释放越缓慢</div></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ══ Tab 1：磁场能量密度 ══ -->
+  <div class="tab-panel" id="panel-1">
+    <div class="card">
+      <div class="card-title">磁场能量密度公式</div>
+      <p>在磁导率为 $\mu$ 的介质中，磁场能量密度为：</p>
+      $$\omega_m = \frac{1}{2}\mu H^2 = \frac{B^2}{2\mu} = \frac{1}{2}\vec{B}\cdot\vec{H}$$
+      <p>对于非均匀磁场，总磁场能量为对全空间积分：</p>
+      $$W_m = \iiint_V \omega_m\,dV = \iiint_V \frac{B^2}{2\mu}\,dV$$
+      <div class="blue-box">
+        <span class="note-label">与电场能量密度对比</span>
+        电场能量密度：$\omega_e = \dfrac{1}{2}\varepsilon E^2 = \dfrac{D^2}{2\varepsilon} = \dfrac{1}{2}\vec{D}\cdot\vec{E}$<br>
+        磁场能量密度：$\omega_m = \dfrac{1}{2}\mu H^2 = \dfrac{B^2}{2\mu} = \dfrac{1}{2}\vec{B}\cdot\vec{H}$<br>
+        两者形式完全对称，体现了电磁场的对偶性。
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">磁场能量密度的分布特点</div>
+      <ul class="prop-list">
+        <li class="prop-item"><span class="prop-num">均</span><div class="prop-body"><strong>均匀磁场</strong>：$\omega_m$ 处处相同，$W_m = \omega_m \cdot V$。例如长直螺线管内部。</div></li>
+        <li class="prop-item"><span class="prop-num">非</span><div class="prop-body"><strong>非均匀磁场</strong>：$\omega_m \propto B^2$，磁场越强的区域能量密度越大。例如同轴电缆中 $B \propto 1/r$，内侧能量密度更高。</div></li>
+        <li class="prop-item"><span class="prop-num">外</span><div class="prop-body"><strong>外部磁场</strong>：即使在导体外部，只要有磁场存在，就有磁场能量。磁场能量弥散在整个空间。</div></li>
+      </ul>
+      <div class="green-box">
+        <span class="note-label">计算磁场能量的两种方法</span>
+        <strong>方法一</strong>：$W_m = \dfrac{1}{2}LI^2$（已知自感和电流时使用）<br>
+        <strong>方法二</strong>：$W_m = \displaystyle\iiint \dfrac{B^2}{2\mu}\,dV$（已知磁场分布时使用，适合非均匀场）
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ Tab 2：仿真：能量分布 ══ -->
+  <div class="tab-panel" id="panel-2">
+    <div class="card">
+      <div class="card-title">交互仿真：同轴电缆磁场能量密度分布</div>
+      <p>同轴电缆内外半径分别为 $R_1$、$R_2$，通电流 $I$。两柱面之间 $B = \dfrac{\mu I}{2\pi r}$，能量密度 $\omega_m = \dfrac{B^2}{2\mu} = \dfrac{\mu I^2}{8\pi^2 r^2}$，随 $r$ 增大而减小。</p>
+      <div class="slider-row">
+        <span>电流 $I$ =</span>
+        <input type="range" id="slI" min="1" max="20" step="1" value="10" oninput="updateCoax()">
+        <span class="slider-val" id="valI">10 A</span>
+      </div>
+      <div class="slider-row">
+        <span>$R_2/R_1$ =</span>
+        <input type="range" id="slRatio" min="1.5" max="8" step="0.5" value="3" oninput="updateCoax()">
+        <span class="slider-val" id="valRatio">3.0</span>
+      </div>
+      <div class="sim-ctrl">
+        <button class="sim-btn active" id="btnDensity" onclick="toggleDensity()">能量密度色图</button>
+        <button class="sim-btn active" id="btnBLines" onclick="toggleBLines()">B 场线</button>
+      </div>
+      <div class="readout-row">
+        <div class="readout"><div class="readout-val" id="roWm">—</div><div class="readout-label">总能量 W_m (μJ/m)</div></div>
+        <div class="readout"><div class="readout-val" id="roOmMax">—</div><div class="readout-label">最大能量密度 (μJ/m³)</div></div>
+      </div>
+      <canvas id="coaxCanvas" class="demo-canvas" width="620" height="300"></canvas>
+      <div class="demo-label">左：截面能量密度分布（越亮越高）；右：$\omega_m(r)$ 曲线</div>
+    </div>
+  </div>
+
+  <!-- ══ Tab 3：例题 ══ -->
+  <div class="tab-panel" id="panel-3">
+    <div class="eg-block">
+      <div class="eg-title">例题 1：RL 电路的磁场能量</div>
+      <p>电源 $\varepsilon$、电阻 $R$、电感 $L$ 串联，$t=0$ 时接通电源（初始电流为零）。求：(1) 电流随时间的变化；(2) 稳态时磁场储存的能量；(3) 整个充电过程中电源做的功和电阻消耗的热量。</p>
+      <div class="sol-steps">
+        <div class="sol-step"><strong>微分方程</strong>：由基尔霍夫电压定律，$\varepsilon = IR + L\dfrac{dI}{dt}$，初始条件 $I(0) = 0$。</div>
+        <div class="sol-step"><strong>求解电流</strong>：$$I(t) = \frac{\varepsilon}{R}\!\left(1 - e^{-t/\tau}\right), \quad \tau = \frac{L}{R}$$稳态电流 $I_0 = \varepsilon/R$。</div>
+        <div class="sol-step"><strong>磁场能量</strong>：稳态时 $W_m = \dfrac{1}{2}LI_0^2 = \dfrac{L\varepsilon^2}{2R^2}$</div>
+        <div class="sol-step"><strong>电源做功</strong>：$W_{电源} = \displaystyle\int_0^\infty \varepsilon I\,dt = \dfrac{L\varepsilon^2}{R^2}$（可验证：$W_{电源} = 2W_m$）</div>
+        <div class="sol-step"><strong>电阻热量</strong>：$Q = W_{电源} - W_m = \dfrac{L\varepsilon^2}{2R^2} = W_m$，即充电过程中电源做功的一半储存在磁场，一半耗散为热。</div>
+      </div>
+      <div class="ans-box"><span class="ans-label">结论：</span>充电过程中，电源做功 $W = \dfrac{L\varepsilon^2}{R^2}$，其中一半 $W_m = \dfrac{L\varepsilon^2}{2R^2}$ 储存在磁场，另一半转化为电阻热。</div>
+    </div>
+
+    <div class="eg-block">
+      <div class="eg-title">例题 2：螺线管的磁场能量密度</div>
+      <p>横截面积 $S$、半径 $R$ 的实心金属圆环，套着匝数 $N$、电流 $I$、磁导率 $\mu$ 的螺线管（螺线管半径远小于圆环半径 $R$）。求螺线管内的磁场能量密度 $\omega_m$ 和总磁场能量 $W_m$。</p>
+      <div class="sol-steps">
+        <div class="sol-step"><strong>磁场强度</strong>：由安培环路定理，$\oint \vec{H}\cdot d\vec{l} = NI$，对半径为 $R$ 的环路：$H \cdot 2\pi R = NI$，故 $H = \dfrac{NI}{2\pi R}$</div>
+        <div class="sol-step"><strong>磁感应强度</strong>：$B = \mu H = \dfrac{\mu NI}{2\pi R}$</div>
+        <div class="sol-step"><strong>能量密度</strong>：$$\omega_m = \frac{1}{2}\mu H^2 = \frac{\mu N^2 I^2}{8\pi^2 R^2}$$</div>
+        <div class="sol-step"><strong>总能量</strong>：螺线管体积 $V = S \cdot 2\pi R$（截面积乘周长），故：$$W_m = \omega_m \cdot V = \frac{\mu N^2 I^2}{8\pi^2 R^2}\cdot 2\pi RS = \frac{\mu N^2 I^2 S}{4\pi R}$$</div>
+      </div>
+      <div class="ans-box"><span class="ans-label">结果：</span>$\omega_m = \dfrac{\mu N^2 I^2}{8\pi^2 R^2}$，$W_m = \dfrac{\mu N^2 I^2 S}{4\pi R}$。可验证 $W_m = \dfrac{1}{2}LI^2$，其中 $L = \dfrac{\mu N^2 S}{2\pi R}$。</div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<!-- Particle BG -->
+<script>
+(function(){
+  const cv=document.getElementById('particles'),cx=cv.getContext('2d');
+  let W,H,pts=[];
+  function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  for(let i=0;i<90;i++)pts.push({x:Math.random()*2000,y:Math.random()*1200,vx:(Math.random()-.5)*0.3,vy:(Math.random()-.5)*0.3,r:Math.random()*1.6+0.4,a:Math.random()*0.5+0.1});
+  (function frame(){cx.clearRect(0,0,W,H);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle=`rgba(251,191,36,${p.a*0.5})`;cx.fill();});requestAnimationFrame(frame);})();
+})();
+</script>
+
+<script>
+function switchTab(i){
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',j===i));
+  document.querySelectorAll('.tab-panel').forEach((p,j)=>p.classList.toggle('active',j===i));
+  if(i===2){updateCoax();}
+}
+</script>
+
+<!-- Coaxial cable energy simulation -->
+<script>
+let coaxI=10, coaxRatio=3, showDensity=true, showBLines=true;
+const mu0=4*Math.PI*1e-7;
+
+function updateCoax(){
+  coaxI=parseFloat(document.getElementById('slI').value);
+  coaxRatio=parseFloat(document.getElementById('slRatio').value);
+  document.getElementById('valI').textContent=coaxI.toFixed(0)+' A';
+  document.getElementById('valRatio').textContent=coaxRatio.toFixed(1);
+  drawCoax();
+}
+function toggleDensity(){showDensity=!showDensity;document.getElementById('btnDensity').classList.toggle('active',showDensity);drawCoax();}
+function toggleBLines(){showBLines=!showBLines;document.getElementById('btnBLines').classList.toggle('active',showBLines);drawCoax();}
+
+function drawCoax(){
+  const cv=document.getElementById('coaxCanvas');if(!cv)return;
+  const ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+
+  const R1=30, R2=R1*coaxRatio;
+  const cx=W*0.3, cy=H/2;
+
+  // Energy density heatmap (cross-section)
+  if(showDensity){
+    const imgData=ctx.createImageData(Math.floor(W*0.55),H);
+    for(let py=0;py<H;py++){
+      for(let px=0;px<Math.floor(W*0.55);px++){
+        const dx=px-cx, dy=py-cy;
+        const r=Math.sqrt(dx*dx+dy*dy);
+        let om=0;
+        if(r>=R1&&r<=R2){
+          const B=mu0*coaxI/(2*Math.PI*r*0.01);
+          om=B*B/(2*mu0)*1e-6;
+        }
+        const maxOm=mu0*coaxI*coaxI/(8*Math.PI*Math.PI*R1*R1*0.0001)*1e-6;
+        const t=Math.min(om/maxOm,1);
+        const idx=(py*Math.floor(W*0.55)+px)*4;
+        imgData.data[idx]=Math.floor(t*245);
+        imgData.data[idx+1]=Math.floor(t*158);
+        imgData.data[idx+2]=Math.floor(11+t*20);
+        imgData.data[idx+3]=Math.floor(t*220+20);
+      }
+    }
+    ctx.putImageData(imgData,0,0);
+  }
+
+  // B field circles
+  if(showBLines){
+    const nRings=5;
+    for(let i=1;i<=nRings;i++){
+      const r=R1+(R2-R1)*i/(nRings+1);
+      ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(56,189,248,${0.6-i*0.08})`;ctx.lineWidth=1.2;ctx.stroke();
+      // Arrow
+      const ax=cx+r, ay=cy;
+      ctx.fillStyle='rgba(56,189,248,0.7)';
+      ctx.beginPath();ctx.moveTo(ax,ay-5);ctx.lineTo(ax+8,ay);ctx.lineTo(ax,ay+5);ctx.closePath();ctx.fill();
+    }
+  }
+
+  // Inner conductor
+  ctx.beginPath();ctx.arc(cx,cy,R1,0,Math.PI*2);
+  ctx.fillStyle='rgba(251,191,36,0.25)';ctx.fill();
+  ctx.strokeStyle='rgba(251,191,36,0.8)';ctx.lineWidth=2;ctx.stroke();
+
+  // Outer conductor
+  ctx.beginPath();ctx.arc(cx,cy,R2,0,Math.PI*2);
+  ctx.strokeStyle='rgba(251,191,36,0.5)';ctx.lineWidth=2.5;ctx.stroke();
+
+  // Labels
+  ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='11px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText('R₁',cx,cy-R1-6);
+  ctx.fillText('R₂',cx,cy-R2-6);
+  ctx.fillStyle='rgba(56,189,248,0.7)';ctx.fillText('B 场线',cx,cy+R2+18);
+
+  // Right: omega_m(r) curve
+  const gx=W*0.6, gy=H*0.1, gW=W*0.36, gH=H*0.8;
+  ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(gx,gy);ctx.lineTo(gx,gy+gH);ctx.lineTo(gx+gW,gy+gH);ctx.stroke();
+
+  const omMax=1/(R1*R1);
+  ctx.strokeStyle='rgba(251,191,36,0.9)';ctx.lineWidth=2.5;
+  ctx.beginPath();
+  let first=true;
+  for(let px=0;px<=gW;px++){
+    const r=R1*0.5+px/gW*(R2*1.3-R1*0.5);
+    let om=0;
+    if(r>=R1&&r<=R2) om=1/(r*r);
+    const y=gy+gH*(1-om/omMax*0.95);
+    if(first){ctx.moveTo(gx+px,y);first=false;}else ctx.lineTo(gx+px,y);
+  }
+  ctx.stroke();
+
+  // R1, R2 markers on curve
+  const xR1=gx+(R1-R1*0.5)/(R2*1.3-R1*0.5)*gW;
+  const xR2=gx+(R2-R1*0.5)/(R2*1.3-R1*0.5)*gW;
+  ctx.strokeStyle='rgba(255,255,255,0.2)';ctx.lineWidth=1;ctx.setLineDash([3,3]);
+  ctx.beginPath();ctx.moveTo(xR1,gy);ctx.lineTo(xR1,gy+gH);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(xR2,gy);ctx.lineTo(xR2,gy+gH);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='10px Times New Roman';ctx.textAlign='center';
+  ctx.fillText('R₁',xR1,gy+gH+12);ctx.fillText('R₂',xR2,gy+gH+12);
+  ctx.fillStyle='rgba(251,191,36,0.7)';ctx.font='11px "Microsoft YaHei"';
+  ctx.fillText('ωₘ(r)',gx+gW/2,gy-4);
+
+  // Compute total energy and max density
+  const Wm=mu0*coaxI*coaxI/(4*Math.PI)*Math.log(coaxRatio)*1e6;
+  const omMaxVal=mu0*coaxI*coaxI/(8*Math.PI*Math.PI*(R1*0.01)*(R1*0.01))*1e6;
+  document.getElementById('roWm').textContent=Wm.toFixed(2);
+  document.getElementById('roOmMax').textContent=omMaxVal.toFixed(2);
+}
+
+window.addEventListener('DOMContentLoaded',function(){updateCoax();});
+</script>
+
+<!-- ── 笔记工具栏 ── -->
+<style>
+.note-fab{position:fixed;bottom:28px;right:28px;z-index:1000;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.fab-main{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#fbbf24);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 20px rgba(251,191,36,0.5);transition:transform .2s,box-shadow .2s;color:#1a1200}
+.fab-main:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(251,191,36,0.65)}
+.fab-main.active{background:linear-gradient(135deg,#d97706,#f59e0b);transform:rotate(45deg)}
+.fab-menu{display:flex;flex-direction:column;align-items:flex-end;gap:8px;opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .2s,transform .2s}
+.fab-menu.open{opacity:1;pointer-events:all;transform:translateY(0)}
+.fab-item{display:flex;align-items:center;gap:10px;background:rgba(15,12,41,0.92);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:9px 16px 9px 12px;cursor:pointer;white-space:nowrap;backdrop-filter:blur(12px);transition:border-color .2s,background .2s;font-family:"Microsoft YaHei",sans-serif}
+.fab-item:hover{border-color:rgba(251,191,36,0.4);background:rgba(245,158,11,0.15)}
+.fab-item .fi-icon{font-size:17px}.fab-item .fi-label{font-size:13px;color:rgba(255,255,255,0.8)}
+.fab-item.starred .fi-label{color:#fbbf24}.fab-item.starred{border-color:rgba(251,191,36,0.35)}
+.fab-item.read-done .fi-label{color:#34d399}.fab-item.read-done{border-color:rgba(52,211,153,0.35)}
+.note-drawer{position:fixed;bottom:0;right:0;left:0;z-index:999;background:rgba(10,8,30,0.96);border-top:1px solid rgba(255,255,255,0.1);backdrop-filter:blur(20px);padding:20px 28px 28px;transform:translateY(100%);transition:transform .32s cubic-bezier(0.4,0,0.2,1)}
+.note-drawer.open{transform:translateY(0)}
+.drawer-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.drawer-title{font-size:14px;font-weight:700;color:#fbbf24;font-family:"Microsoft YaHei",sans-serif;letter-spacing:1px}
+.drawer-close{font-size:20px;color:rgba(255,255,255,0.4);cursor:pointer;transition:color .2s;line-height:1}
+.drawer-close:hover{color:#fff}
+.drawer-textarea{width:100%;height:120px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 16px;color:#fff;font-size:14px;font-family:"Microsoft YaHei",sans-serif;resize:vertical;outline:none;line-height:1.8;transition:border-color .2s}
+.drawer-textarea:focus{border-color:rgba(251,191,36,0.5)}
+.drawer-footer{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.drawer-hint{font-size:11px;color:rgba(255,255,255,0.25);font-family:"Microsoft YaHei",sans-serif}
+.drawer-save{background:linear-gradient(135deg,#f59e0b,#fbbf24);border:none;color:#1a1200;font-size:13px;font-weight:700;padding:8px 22px;border-radius:10px;cursor:pointer;font-family:"Microsoft YaHei",sans-serif;transition:opacity .2s}
+.drawer-save:hover{opacity:0.85}
+.phy-toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(15,12,41,0.95);border:1px solid rgba(251,191,36,0.3);border-radius:24px;padding:10px 22px;font-size:13px;color:rgba(255,255,255,0.85);font-family:"Microsoft YaHei",sans-serif;z-index:1100;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;white-space:nowrap}
+.phy-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+
+<div class="note-fab">
+  <div class="fab-menu" id="fabMenu">
+    <div class="fab-item" id="fabStar" onclick="toggleStar()"><span class="fi-icon">☆</span><span class="fi-label">收藏此节</span></div>
+    <div class="fab-item" id="fabRead" onclick="toggleRead()"><span class="fi-icon">○</span><span class="fi-label">标记已读</span></div>
+    <div class="fab-item" onclick="openDrawer()"><span class="fi-icon">📝</span><span class="fi-label">我的笔记</span></div>
+  </div>
+  <button class="fab-main" id="fabBtn" onclick="toggleFab()" title="工具">✦</button>
+</div>
+
+<div class="note-drawer" id="noteDrawer">
+  <div class="drawer-header">
+    <div class="drawer-title">📝 我的笔记 · §4-4</div>
+    <div class="drawer-close" onclick="closeDrawer()">×</div>
+  </div>
+  <textarea class="drawer-textarea" id="drawerTA" placeholder="在此记录你的理解、疑问或总结……"></textarea>
+  <div class="drawer-footer">
+    <span class="drawer-hint">自动保存到本地，刷新不丢失</span>
+    <button class="drawer-save" onclick="saveNote()">保存</button>
+  </div>
+</div>
+<div class="phy-toast" id="phyToast"></div>
+
+<script>
+(function(){
+  const PID='4-4',SK='phy26_note_'+PID,STK='phy26_star_'+PID,RDK='phy26_read_'+PID;
+  let fabOpen=false;
+  function showToast(msg){const t=document.getElementById('phyToast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
+  window.toggleFab=function(){fabOpen=!fabOpen;document.getElementById('fabMenu').classList.toggle('open',fabOpen);document.getElementById('fabBtn').classList.toggle('active',fabOpen);};
+  window.toggleStar=function(){const s=localStorage.getItem(STK)==='1';if(s){localStorage.removeItem(STK);showToast('已取消收藏');}else{localStorage.setItem(STK,'1');showToast('已收藏此节');}refreshStarUI();};
+  window.toggleRead=function(){const r=localStorage.getItem(RDK)==='1';if(r){localStorage.removeItem(RDK);showToast('已取消已读标记');}else{localStorage.setItem(RDK,'1');showToast('已标记为已读');}refreshReadUI();};
+  function refreshStarUI(){const s=localStorage.getItem(STK)==='1';const el=document.getElementById('fabStar');el.querySelector('.fi-icon').textContent=s?'★':'☆';el.querySelector('.fi-label').textContent=s?'已收藏':'收藏此节';el.classList.toggle('starred',s);}
+  function refreshReadUI(){const r=localStorage.getItem(RDK)==='1';const el=document.getElementById('fabRead');el.querySelector('.fi-icon').textContent=r?'✓':'○';el.querySelector('.fi-label').textContent=r?'已读':'标记已读';el.classList.toggle('read-done',r);}
+  window.openDrawer=function(){document.getElementById('drawerTA').value=localStorage.getItem(SK)||'';document.getElementById('noteDrawer').classList.add('open');document.getElementById('fabMenu').classList.remove('open');document.getElementById('fabBtn').classList.remove('active');fabOpen=false;setTimeout(()=>document.getElementById('drawerTA').focus(),350);};
+  window.closeDrawer=function(){document.getElementById('noteDrawer').classList.remove('open');};
+  window.saveNote=function(){const val=document.getElementById('drawerTA').value.trim();if(val){localStorage.setItem(SK,val);showToast('笔记已保存');}else{localStorage.removeItem(SK);showToast('笔记已清空');}closeDrawer();};
+  let saveTimer;document.getElementById('drawerTA').addEventListener('input',function(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{const val=this.value.trim();if(val)localStorage.setItem(SK,val);},1500);});
+  refreshStarUI();refreshReadUI();
+})();
+</script>
+</body>
+</html>

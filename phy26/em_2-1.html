@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>2-1 导体的静电平衡性质 — 电磁学</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Times New Roman", "Microsoft YaHei", "PingFang SC", serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh; color: #fff;
+    }
+    :lang(zh), .zh { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; }
+    canvas#particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+
+    .topbar {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; gap: 14px;
+      padding: 18px 36px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      background: rgba(15,12,41,0.7); backdrop-filter: blur(12px);
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .back-btn { color: rgba(255,255,255,0.5); font-size: 14px; cursor: pointer; text-decoration: none; transition: color .2s; }
+    .back-btn:hover { color: #818cf8; }
+    .topbar-title-wrap { display: flex; flex-direction: column; gap: 2px; }
+    .topbar-title { font-size: 16px; font-weight: 700; letter-spacing: 1px; }
+    .topbar-course { font-size: 11px; color: rgba(255,255,255,0.38); letter-spacing: 1px; }
+    .topbar-sub { margin-left: auto; font-size: 12px; color: rgba(255,255,255,0.3); }
+
+    .tabs { display: flex; gap: 10px; margin-bottom: 32px; font-family: "Microsoft YaHei", sans-serif; flex-wrap: wrap; }
+    .tab {
+      padding: 9px 22px; border-radius: 10px; font-size: 14px; font-weight: 600;
+      cursor: pointer; border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.5);
+      transition: all .2s;
+    }
+    .tab.active {
+      background: linear-gradient(135deg,#6366f1,#818cf8);
+      border-color: transparent; color: #fff;
+      box-shadow: 0 4px 16px rgba(99,102,241,0.4);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .page { position: relative; z-index: 10; max-width: 860px; margin: 0 auto; padding: 36px 24px 80px; }
+
+    .card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 16px; padding: 28px 32px; margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 16px; font-weight: 700; color: #818cf8;
+      margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .card-title::before {
+      content: ""; display: inline-block;
+      width: 4px; height: 18px; border-radius: 2px;
+      background: linear-gradient(#6366f1,#818cf8); flex-shrink: 0;
+    }
+    .card p { font-size: 15px; color: rgba(255,255,255,0.8); line-height: 2; }
+    .card p + p { margin-top: 10px; }
+    .hl       { color: #fbbf24; font-weight: 600; }
+    .hl-blue  { color: #38bdf8; font-weight: 600; }
+    .hl-green { color: #34d399; font-weight: 600; }
+    .hl-red   { color: #f87171; font-weight: 600; }
+    .hl-purple { color: #c084fc; font-weight: 600; }
+
+    .katex { color: #e2e8f0; font-size: 1.05em; }
+    .katex-display { margin: 14px 0; }
+    .katex-display > .katex { color: #93c5fd; }
+
+    .prop-list { list-style: none; margin-top: 10px; display: flex; flex-direction: column; gap: 12px; }
+    .prop-item {
+      display: flex; gap: 14px; align-items: flex-start;
+      background: rgba(255,255,255,0.03); border-radius: 10px; padding: 14px 18px;
+      border-left: 3px solid #6366f1;
+    }
+    .prop-item:nth-child(2) { border-left-color: #38bdf8; }
+    .prop-item:nth-child(3) { border-left-color: #34d399; }
+    .prop-item:nth-child(4) { border-left-color: #f59e0b; }
+    .prop-num {
+      min-width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700;
+      background: linear-gradient(135deg,#6366f1,#818cf8); color: #fff;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .prop-item:nth-child(2) .prop-num { background: linear-gradient(135deg,#0ea5e9,#38bdf8); }
+    .prop-item:nth-child(3) .prop-num { background: linear-gradient(135deg,#10b981,#34d399); }
+    .prop-item:nth-child(4) .prop-num { background: linear-gradient(135deg,#f59e0b,#fbbf24); }
+    .prop-body { font-size: 14.5px; color: rgba(255,255,255,0.78); line-height: 1.9; }
+    .prop-body strong { color: #fff; font-family: "Microsoft YaHei", sans-serif; }
+
+    .note-box {
+      background: rgba(251,191,36,0.06); border: 1px solid rgba(251,191,36,0.2);
+      border-radius: 12px; padding: 16px 20px; margin-top: 14px;
+      font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.9;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .note-box .note-label { font-weight: 700; color: #fbbf24; margin-bottom: 4px; display: block; font-family: "Microsoft YaHei", sans-serif; }
+
+    .green-box {
+      background: rgba(52,211,153,0.06); border: 1px solid rgba(52,211,153,0.2);
+      border-radius: 12px; padding: 16px 20px; margin-top: 14px;
+      font-size: 14px; color: rgba(255,255,255,0.75); line-height: 1.9;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .green-box .note-label { font-weight: 700; color: #34d399; margin-bottom: 4px; display: block; }
+
+    .blue-box {
+      background: rgba(56,189,248,0.06); border: 1px solid rgba(56,189,248,0.2);
+      border-radius: 12px; padding: 16px 20px; margin-top: 14px;
+      font-size: 14px; color: rgba(255,255,255,0.75); line-height: 1.9;
+      font-family: "Microsoft YaHei", sans-serif;
+    }
+    .blue-box .note-label { font-weight: 700; color: #38bdf8; margin-bottom: 4px; display: block; }
+
+    /* 例题块 */
+    .eg-block {
+      background: rgba(192,132,252,0.05); border: 1px solid rgba(192,132,252,0.18);
+      border-radius: 14px; padding: 24px 28px; margin-bottom: 20px;
+    }
+    .eg-title {
+      font-size: 15px; font-weight: 700; color: #c084fc; margin-bottom: 14px;
+      font-family: "Microsoft YaHei", sans-serif; display: flex; align-items: center; gap: 8px;
+    }
+    .eg-title::before {
+      content: ""; display: inline-block; width: 4px; height: 16px;
+      background: linear-gradient(#c084fc,#818cf8); border-radius: 2px; flex-shrink: 0;
+    }
+    .eg-block p { font-size: 14.5px; color: rgba(255,255,255,0.8); line-height: 2; }
+    .eg-block p + p { margin-top: 8px; }
+
+    .sol-steps { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .sol-step {
+      background: rgba(255,255,255,0.025); border-left: 3px solid #6366f1;
+      border-radius: 0 8px 8px 0; padding: 12px 16px;
+      font-size: 14.5px; color: rgba(255,255,255,0.78); line-height: 2;
+    }
+    .sol-step:nth-child(2) { border-left-color: #38bdf8; }
+    .sol-step:nth-child(3) { border-left-color: #34d399; }
+    .sol-step:nth-child(4) { border-left-color: #f59e0b; }
+    .sol-step:nth-child(5) { border-left-color: #f87171; }
+    .sol-step:nth-child(6) { border-left-color: #c084fc; }
+    .sol-step strong { color: #fff; font-family: "Microsoft YaHei", sans-serif; }
+
+    .ans-box {
+      background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.25);
+      border-radius: 10px; padding: 12px 18px; margin-top: 12px;
+      font-size: 14.5px; color: rgba(255,255,255,0.85); line-height: 2;
+    }
+    .ans-box .ans-label { color: #fbbf24; font-weight: 700; font-family: "Microsoft YaHei",sans-serif; }
+
+    canvas.demo-canvas {
+      display: block; margin: 18px auto 0;
+      background: rgba(0,0,0,0.25); border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+    .demo-label {
+      text-align: center; font-size: 12.5px; color: rgba(255,255,255,0.35);
+      font-family: "Microsoft YaHei",sans-serif; margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+
+<div class="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title">§2-1 &nbsp;导体的静电平衡性质</div>
+  <div class="topbar-sub">NUSEP26 · 电磁学</div>
+</div>
+
+<div class="page">
+
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(0)">2-1-1 &nbsp;静电平衡条件</div>
+    <div class="tab" onclick="switchTab(1)">2-1-2 &nbsp;导体上的电荷分布</div>
+  </div>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- Tab 0: 2-1-1 导体的静电平衡条件            -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="tab-panel active" id="panel-0">
+
+    <!-- 1. 金属导体的电结构 -->
+    <div class="card">
+      <div class="card-title">金属导体的电结构</div>
+      <p>金属导体由两部分组成：固定在晶格点阵位置的正离子，以及能在导体中自由运动的<span class="hl">自由电子</span>（价电子）。在无外电场时，自由电子做无规热运动，宏观上无定向流动，导体呈电中性。</p>
+      <p>当把导体置于外电场 $\vec{E}_0$ 中，自由电子在外场作用下发生<span class="hl">定向运动</span>（与场方向相反），导致导体两侧出现<span class="hl-blue">感应电荷</span>——一侧积累负电荷，另一侧积累正电荷。感应电荷在导体内部建立与外场方向相反的<span class="hl-green">内建电场</span> $\vec{E}'$。</p>
+      <p>随着感应电荷的积累，内建电场 $\vec{E}'$ 逐渐增强，直到 $\vec{E}' = -\vec{E}_0$，导体内部合场强为零，自由电子不再定向运动，系统达到<span class="hl">静电平衡</span>。</p>
+      <canvas id="inductionCanvas" class="demo-canvas" width="580" height="200"></canvas>
+      <div class="demo-label">静电感应示意：外场 $\vec{E}_0$ 向右，感应电荷积累，内建场 $\vec{E}'$ 向左，导体内部 $\vec{E}=0$</div>
+    </div>
+
+    <!-- 2. 静电感应与感应电荷 -->
+    <div class="card">
+      <div class="card-title">静电感应与感应电荷</div>
+      <p>在外电场作用下引起导体中电荷重新分布而呈现带电的现象，称为<span class="hl">静电感应</span>。因静电感应而在导体两侧表面上出现的电荷，称为<span class="hl-blue">感应电荷</span>（induced charge）。</p>
+      <ul class="prop-list" style="margin-top:16px;">
+        <li class="prop-item">
+          <div class="prop-num">注</div>
+          <div class="prop-body"><strong>感应电荷的特点</strong><br>感应电荷是导体原有的自由电子重新分布的结果，总量为零——一侧 $-q$，另一侧 $+q$，导体整体保持原来的电荷量。感应电荷的大小和分布取决于外场的强弱和导体的形状。</div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">注</div>
+          <div class="prop-body"><strong>建立平衡的速度极快</strong><br>实验和理论均表明，从外场施加到静电平衡建立所需的特征时间极短（金属约 $10^{-19}\ \mathrm{s}$，远小于任何可观测时间尺度），故工程上可认为平衡是瞬时建立的。</div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 3. 静电平衡条件 -->
+    <div class="card">
+      <div class="card-title">静电平衡的两个条件</div>
+      <ul class="prop-list">
+        <li class="prop-item">
+          <div class="prop-num">①</div>
+          <div class="prop-body">
+            <strong>导体内部场强处处为零</strong>：$\vec{E}_{\text{内}} = \vec{0}$<br>
+            若内部某点 $\vec{E}\neq\vec{0}$，该点自由电子受力 $\vec{F}=q_e\vec{E}$ 将产生定向运动，与平衡假设矛盾。故平衡时导体内部必须无净电场。<br>
+            推论：导体表面处（从外侧趋近）场强 $\vec{E}$ <span class="hl">垂直于导体表面</span>——若有切向分量，表面自由电子将沿表面运动，尚未达到平衡。
+          </div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">②</div>
+          <div class="prop-body">
+            <strong>导体上的电势处处相等，表面为等势面</strong><br>
+            由 $\vec{E}_{\text{内}}=\vec{0}$ 可知，导体内部任意两点之间的电势差
+            $V_a - V_b = \displaystyle\int_a^b\vec{E}\cdot\mathrm{d}\vec{l} = 0$，
+            故整个导体（内部和表面）构成一个<span class="hl">等势体</span>，表面为等势面。
+          </div>
+        </li>
+      </ul>
+      <div class="note-box">
+        <span class="note-label">表面场强大小</span>
+        在导体表面附近，由高斯定理对贴近表面的扁形小盒取面（内侧 $E=0$，外侧 $E_n$）可得：
+        $$E_n = \frac{\sigma}{\varepsilon_0}$$
+        其中 $\sigma$ 为导体表面该处的面电荷密度。$E_n$ 正比于局部电荷面密度，曲率大处（尖端）$\sigma$ 大，场强强，称为<span class="hl">尖端效应</span>。
+      </div>
+    </div>
+
+    <!-- 4. 静电平衡下的电荷分布 -->
+    <div class="card">
+      <div class="card-title">静电平衡下的电荷分布</div>
+      <p>导体内部场强为零，由高斯定理：在导体内部任取一闭合高斯面，其通量为零，故面内净电荷为零。这意味着：</p>
+      <ul class="prop-list" style="margin-top:14px;">
+        <li class="prop-item">
+          <div class="prop-num">①</div>
+          <div class="prop-body"><strong>实心导体：</strong>电荷只能分布在导体<span class="hl">表面</span>，内部无净电荷（体积电荷密度 $\rho=0$）。</div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">②</div>
+          <div class="prop-body"><strong>空腔导体（腔内无电荷）：</strong>内表面无感应电荷，全部电荷分布在外表面。</div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">③</div>
+          <div class="prop-body"><strong>空腔导体（腔内有电荷 $+q$）：</strong>内表面感应 $-q$，外表面相应多出 $+q$（总电荷量守恒）。</div>
+        </li>
+      </ul>
+      <canvas id="chargeDistCanvas" class="demo-canvas" width="580" height="200"></canvas>
+      <div class="demo-label">导体壳内部有 $+q$ 时：内壁感应 $-q$，外壁多出 $+q$，导体内部 $\vec{E}=0$</div>
+    </div>
+
+    <!-- Eg1 -->
+    <div class="eg-block">
+      <div class="eg-title">例 1 &nbsp;同心球（不接地）</div>
+      <p>外径 $R_3$、内径 $R_2$ 的金属球壳内，放一半径为 $R_1$ 的实心金属球（$R_1 &lt; R_2 &lt; R_3$）。两者均带电量 $+q$。求：</p>
+      <p>（1）电荷分布；&nbsp;（2）球心 $O$ 的电势 $U_O$；&nbsp;（3）球壳的电势 $U'$。</p>
+      <canvas id="eg1Canvas" class="demo-canvas" width="460" height="260"></canvas>
+      <div class="demo-label">同心球示意：内球 $+q$，球壳内壁 $-q$，球壳外壁 $+2q$</div>
+      <div class="sol-steps">
+        <div class="sol-step"><strong>（1）电荷分布：</strong>
+          内球带 $+q$，均匀分布在其表面（半径 $R_1$）。以球壳金属内部（$R_2$ 到 $R_3$ 之间）取高斯面，由于导体内 $\vec{E}=0$ 故面内净电荷为零，故球壳<span class="hl">内壁</span>（$r=R_2$）感应 $-q$；球壳共带 $+q$，内壁 $-q$，故<span class="hl">外壁</span>（$r=R_3$）带 $+q-(-q)=+2q$。
+        </div>
+        <div class="sol-step"><strong>（2）球心电势（叠加原理，零势点 $\infty$）：</strong>
+          球心处各带电面的贡献（球面在内部产生均匀分布的电势等于 $Q/4\pi\varepsilon_0 R$）：
+          $$U_O = \frac{q}{4\pi\varepsilon_0 R_1} + \frac{(-q)}{4\pi\varepsilon_0 R_2} + \frac{2q}{4\pi\varepsilon_0 R_3}$$
+          $$= \frac{q}{4\pi\varepsilon_0}\left(\frac{1}{R_1} - \frac{1}{R_2} + \frac{2}{R_3}\right)$$
+        </div>
+        <div class="sol-step"><strong>（3）球壳电势：</strong>
+          球壳为等势体，从外部观察：$r &gt; R_3$ 时，只有外壁 $+2q$ 贡献（内部两个球面对外的等效电场由高斯定理知，$r &gt; R_3$ 时等效总电荷 $q + 2q - q = 2q$）。球壳电势等于从 $\infty$ 向内积到球壳表面的积分，仅取决于 $r \geq R_3$ 的场：
+          $$U' = \frac{2q}{4\pi\varepsilon_0 R_3} = \frac{q}{2\pi\varepsilon_0 R_3}$$
+          也可用叠加原理：$U' = \dfrac{q}{4\pi\varepsilon_0 R_3} + \dfrac{-q}{4\pi\varepsilon_0 R_3} + \dfrac{2q}{4\pi\varepsilon_0 R_3} = \dfrac{2q}{4\pi\varepsilon_0 R_3}$。
+        </div>
+        <div class="ans-box">
+          <span class="ans-label">答：</span>内球面 $+q$；球壳内壁 $-q$，外壁 $+2q$。<br>
+          $U_O = \dfrac{q}{4\pi\varepsilon_0}\!\left(\dfrac{1}{R_1}-\dfrac{1}{R_2}+\dfrac{2}{R_3}\right)$；&nbsp;$U' = \dfrac{q}{2\pi\varepsilon_0 R_3}$。
+        </div>
+      </div>
+    </div>
+
+    <!-- Eg2 -->
+    <div class="eg-block">
+      <div class="eg-title">例 2 &nbsp;同心球（球壳接地）</div>
+      <p>在例 1 的基础上，将<span class="hl">外球壳接地</span>（电势为零）。求：（1）电荷分布；（2）球心电势；（3）球壳电势，并说明静电屏蔽。</p>
+      <div class="sol-steps">
+        <div class="sol-step"><strong>（1）电荷分布：</strong>
+          内球仍带 $+q$（接地不影响内球）。球壳内壁由高斯定理仍感应 $-q$。球壳接地，电势为零，意味着外壁上的自由电荷将沿导线流入大地（或从大地流来），直到外壁对外产生的电势为零。由于 $r \geq R_3$ 的外场电势为零，外壁电荷量为 $0$。
+          $$\text{内壁：}-q;\quad\text{外壁：}0$$
+        </div>
+        <div class="sol-step"><strong>（2）球心电势：</strong>
+          $$U_O = \frac{q}{4\pi\varepsilon_0 R_1} + \frac{-q}{4\pi\varepsilon_0 R_2} + \frac{0}{4\pi\varepsilon_0 R_3} = \frac{q}{4\pi\varepsilon_0}\left(\frac{1}{R_1} - \frac{1}{R_2}\right)$$
+        </div>
+        <div class="sol-step"><strong>（3）球壳电势 $= 0$（已接地）。</strong>
+          球壳接地后外壁无电荷，$r &gt; R_3$ 处 $\vec{E}=0$，腔内的电场被完全"屏蔽"在球壳之内，不影响外部空间。
+        </div>
+        <div class="ans-box">
+          <span class="ans-label">答：</span>内球 $+q$；球壳内壁 $-q$，外壁 $0$。<br>
+          $U_O = \dfrac{q}{4\pi\varepsilon_0}\!\left(\dfrac{1}{R_1}-\dfrac{1}{R_2}\right)$；$U'=0$。
+        </div>
+      </div>
+      <div class="green-box">
+        <span class="note-label">静电屏蔽</span>
+        接地的封闭导体壳可以屏蔽内部电场对外界的影响（外壁无感应电荷，$r &gt; R_3$ 的空间 $\vec{E}=0$）。反之，即便不接地，封闭导体壳也能屏蔽外部电场对腔内的影响（无论外场如何，腔内 $\vec{E}_\text{外}$ 被感应电荷完全抵消）。利用这一性质，精密仪器和电子设备常置于导体壳（法拉第笼）内以隔绝外部电磁干扰。
+      </div>
+    </div>
+
+    <!-- Eg3 -->
+    <div class="eg-block">
+      <div class="eg-title">例 3 &nbsp;同心球（内球接地）</div>
+      <p>在例 1 的基础上，改为将<span class="hl">内球接地</span>（内球电势为零）。设接地后内球、球壳内壁、球壳外壁的电荷量分别为 $q_1$、$q_2$、$q_3$。求：（1）$q_1$、$q_2$、$q_3$；（2）内球电势；（3）球壳电势。</p>
+      <div class="sol-steps">
+        <div class="sol-step"><strong>（1）列方程组：</strong>
+          内球接地后电荷 $q_1$ 可以变化（从大地流入/流出），球壳总电荷守恒（$q_2 + q_3 = q$），且内球电势为零。三个约束条件：
+          $$\text{（内壁感应）：}\quad q_1 + q_2 = 0 \implies q_2 = -q_1$$
+          $$\text{（球壳总量）：}\quad q_2 + q_3 = q \implies q_3 = q - q_2 = q + q_1$$
+          $$\text{（内球等势为零）：}\quad V_{\text{内球}}=\frac{q_1}{4\pi\varepsilon_0 R_1}+\frac{q_2}{4\pi\varepsilon_0 R_2}+\frac{q_3}{4\pi\varepsilon_0 R_3}=0$$
+        </div>
+        <div class="sol-step"><strong>代入求解：</strong>
+          将 $q_2=-q_1$，$q_3=q+q_1$ 代入电势条件：
+          $$\frac{q_1}{4\pi\varepsilon_0}\left(\frac{1}{R_1}-\frac{1}{R_2}+\frac{1}{R_3}\right)+\frac{q}{4\pi\varepsilon_0 R_3}=0$$
+          $$q_1\left(\frac{1}{R_1}-\frac{1}{R_2}+\frac{1}{R_3}\right) = -\frac{q}{R_3}$$
+          $$q_1 = \frac{-q/R_3}{\dfrac{1}{R_1}-\dfrac{1}{R_2}+\dfrac{1}{R_3}}$$
+          从而 $q_2 = -q_1$，$q_3 = q + q_1$。
+        </div>
+        <div class="sol-step"><strong>（2）内球电势 $= 0$（接地条件）。</strong>
+        注意：内球电势为零，但其电荷量 $q_1 \neq 0$（内球从大地获得了电荷以使自身电势为零），这说明<span class="hl">电势为零不等于电荷为零</span>。</div>
+        <div class="sol-step"><strong>（3）球壳电势（用叠加原理）：</strong>
+          $$U' = \frac{q_1}{4\pi\varepsilon_0 R_3}+\frac{q_2}{4\pi\varepsilon_0 R_3}+\frac{q_3}{4\pi\varepsilon_0 R_3} = \frac{q_1+q_2+q_3}{4\pi\varepsilon_0 R_3} = \frac{q+q_1}{4\pi\varepsilon_0 R_3}\cdot\frac{4\pi\varepsilon_0 R_3}{4\pi\varepsilon_0 R_3}$$
+          整理：$q_1+q_2+q_3 = q_1 + (-q_1) + (q+q_1) = q + q_1$，故
+          $$U' = \frac{q+q_1}{4\pi\varepsilon_0 R_3} = \frac{q_3}{4\pi\varepsilon_0 R_3}$$
+        </div>
+        <div class="ans-box">
+          <span class="ans-label">答：</span>
+          $q_1 = \dfrac{-q/R_3}{\frac{1}{R_1}-\frac{1}{R_2}+\frac{1}{R_3}}$；&nbsp;$q_2 = -q_1$；&nbsp;$q_3 = q+q_1$。<br>
+          内球电势 $= 0$（接地），但 $q_1 \neq 0$；球壳电势 $U' = \dfrac{q_3}{4\pi\varepsilon_0 R_3}$。
+        </div>
+      </div>
+      <div class="note-box">
+        <span class="note-label">深层含义</span>
+        例 3 揭示了一个重要事实：<span class="hl">电势为零 $\neq$ 电荷为零</span>。内球虽然接地（$V=0$），但它通过与球壳的静电感应，从大地获取了电荷 $q_1$ 以平衡来自球壳和外壁电荷的电势贡献。这在高压技术（如范德格拉夫发电机、平行板电容器等）中有重要应用。
+      </div>
+    </div>
+
+    <!-- 镜像法简介 -->
+    <div class="card">
+      <div class="card-title">补充：电像法（镜像法）</div>
+      <p>对于<span class="hl">导体附近点电荷</span>的问题，直接求感应电荷分布再积分非常繁琐。电像法提供了一种等效替换思路：</p>
+      <p>将导体移去，在导体的另一侧放一个<span class="hl-blue">像电荷</span> $q'$，使得原导体所在区域的边界条件（等势面条件）得到满足，则导体外侧的电场与原问题完全相同。</p>
+      <ul class="prop-list" style="margin-top:14px;">
+        <li class="prop-item">
+          <div class="prop-num">典型</div>
+          <div class="prop-body">
+            <strong>点电荷 $+q$ 与无限大接地导体平面</strong>（距平面 $d$）<br>
+            像电荷：$q' = -q$，位置在导体平面另一侧距平面 $d$ 处（与 $+q$ 关于平面对称）。<br>
+            导体外侧等效场 = $+q$ 与 $-q$ 的偶极场（仅取平面外侧半区域）。<br>
+            感应电荷面密度：$\sigma = -\dfrac{qd}{2\pi(r^2+d^2)^{3/2}}$，其中 $r$ 为平面上的点距像电荷投影点的距离。<br>
+            $+q$ 受导体平面的吸引力：$F = \dfrac{q^2}{4\pi\varepsilon_0(2d)^2} = \dfrac{q^2}{16\pi\varepsilon_0 d^2}$（两像电荷之间的库仑力）。
+          </div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">注</div>
+          <div class="prop-body">
+            <strong>适用条件与局限</strong><br>
+            电像法只能用于求导体外侧（原问题区域）的场，不能直接给出导体内侧的场（内部 $\vec{E}=0$）。像电荷的选取要使边界条件（等势面或给定电势）得到满足，这是一个<span class="hl">唯一性定理</span>（若边界条件相同，则场唯一）的应用。
+          </div>
+        </li>
+      </ul>
+      <canvas id="imageCanvas" class="demo-canvas" width="540" height="220"></canvas>
+      <div class="demo-label">电像法示意：$+q$ 在导体平面上方，像电荷 $-q$ 在平面下方，合场线垂直于导体平面</div>
+    </div>
+
+  </div><!-- /panel-0 -->
+
+  <!-- ══════════════════════════════════════════ -->
+  <!-- Tab 1: 2-1-2 导体上的电荷分布              -->
+  <!-- ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="panel-1">
+
+    <!-- 性质1 -->
+    <div class="card">
+      <div class="card-title">性质 1 &nbsp;电荷分布在导体表面</div>
+      <ul class="prop-list">
+        <li class="prop-item">
+          <div class="prop-num">①</div>
+          <div class="prop-body">
+            <strong>结论：</strong>导体达到静电平衡时，<span class="hl">电荷全部分布在导体表面</span>，导体内部各处净电荷为零（体积电荷密度 $\rho = 0$）。
+          </div>
+        </li>
+        <li class="prop-item">
+          <div class="prop-num">证</div>
+          <div class="prop-body">
+            在导体内部任取一闭合高斯面 $S$。静电平衡时导体内 $\vec{E}=\vec{0}$，故高斯面上电通量
+            $$\oint_S \vec{E}\cdot\mathrm{d}\vec{A} = 0 = \frac{q_{\text{内}}}{\varepsilon_0}$$
+            即面内净电荷 $q_{\text{内}} = 0$。由于此对任意内部闭合面成立，故体积电荷密度处处为零，电荷只能分布在表面。
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- 性质2 -->
+    <div class="card">
+      <div class="card-title">性质 2 &nbsp;表面场强正比于面电荷密度</div>
+      <p>导体表面附近的电场强度与该处面电荷密度成正比，方向垂直表面：</p>
+      $$E = \frac{\sigma}{\varepsilon_0}$$
+      <div class="note-box" style="margin-top:16px;">
+        <span class="note-label">高斯定理证明</span>
+        在导体表面取面积元 $\mathrm{d}s$，包住它取扁形圆柱（"药丸"）高斯面：上底面在导体外紧贴表面（$E_n$ 垂直向外），下底面在导体内（$E=0$），侧面贡献为零。则
+        $$E_n \cdot \mathrm{d}s = \frac{\sigma\,\mathrm{d}s}{\varepsilon_0} \implies E = \frac{\sigma}{\varepsilon_0}$$
+      </div>
+    </div>
+
+    <!-- 例题：感应电荷分布 -->
+    <div class="eg-block">
+      <div class="eg-title">例 1 &nbsp;点电荷 $-Q$ 在接地平面上的感应电荷分布</div>
+      <p>一个点电荷 $-Q$（$Q>0$）距无限大接地导体平面高度为 $h$，求地面上感应电荷的面密度分布 $\sigma(x)$，其中 $x$ 为地面上到 $-Q$ 正投影点的距离。</p>
+      <canvas id="inducedDistCanvas" class="demo-canvas" width="540" height="220"></canvas>
+      <div class="demo-label">点电荷 $-Q$ 在接地平面上方 $h$，感应电荷在平面上积聚</div>
+      <div class="sol-steps">
+        <div class="sol-step">
+          <strong>方法一：直接用高斯定理</strong><br>
+          地面为等势面（$V=0$），表面附近 $E\perp$ 地面（由静电平衡条件）。在地面取面积元 $\mathrm{d}s$，包它取扁形高斯圆柱，上底紧贴地面外侧，下底在导体内。则
+          $$E_n = \frac{\sigma}{\varepsilon_0}$$
+          而导体表面外侧的 $E_n$ 由点电荷 $-Q$ 及其感应电荷共同产生，等价地（电像法），等于点电荷 $-Q$ 与像电荷 $+Q$（在平面下方 $h$ 处）共同在地面上方产生的法向分量。
+        </div>
+        <div class="sol-step">
+          <strong>方法二（电像法）等效计算 $E_n$</strong><br>
+          像电荷 $+Q$ 在平面下方 $h$ 处，与 $-Q$ 关于平面对称。地面上离投影点距离 $x$ 处，$-Q$ 到该点距离为 $r = \sqrt{x^2+h^2}$，$+Q$ 同理。利用叠加，法向（竖直向上为正）分量：
+          $$E_n = \frac{(-Q)}{4\pi\varepsilon_0 r^2}\cdot\frac{-h}{r} + \frac{(+Q)}{4\pi\varepsilon_0 r^2}\cdot\frac{-h}{r} = \frac{-Qh}{2\pi\varepsilon_0(x^2+h^2)^{3/2}}$$
+          （两者的竖直分量都指向 $-Q$ 方向，即向上，叠加后方向向上，但因为 $-Q$ 在上方，场指向 $-Q$，即指向地面，符号取负表示向下进入导体。）
+        </div>
+        <div class="sol-step">
+          <strong>得到面密度：</strong>
+          $$\sigma = \varepsilon_0 E_n = \frac{-Qh}{2\pi(x^2+h^2)^{3/2}}$$
+          $\sigma < 0$ 表示感应电荷为负（与 $-Q$ 同号，因为地面上的正电荷被排斥到远处，近处积聚负电荷）。
+        </div>
+        <div class="ans-box">
+          <span class="ans-label">答：</span>
+          $\sigma(x) = \dfrac{-Qh}{2\pi(x^2+h^2)^{3/2}}$
+        </div>
+      </div>
+    </div>
+
+    <!-- 性质3 -->
+    <div class="card">
+      <div class="card-title">性质 3 &nbsp;孤立导体表面电荷密度正比于曲率</div>
+      <p>对孤立（不受外部导体影响的）导体，其表面各点的面电荷密度 $\sigma$ 与该点处曲率 $\kappa = 1/R$（$R$ 为主曲率半径）成正比：</p>
+      $$\sigma \propto \frac{1}{R}$$
+      <p style="margin-top:10px;">这直接导致：<span class="hl">曲率大（尖锐）处 $\sigma$ 大，场强 $E = \sigma/\varepsilon_0$ 也大</span>，即"<span class="hl">尖端效应</span>"。当尖端处场强超过空气的击穿场强（约 $3\times10^6\ \mathrm{V/m}$）时，空气被电离，产生<span class="hl-purple">电晕放电</span>（尖端放电）。</p>
+      <div class="note-box" style="margin-top:14px;">
+        <span class="note-label">尖端放电的应用</span>
+        避雷针利用尖端效应，在雷暴时将大气中的感应电荷通过尖端缓慢放电中和，或在雷击发生时为雷电流提供低阻通路，保护建筑物。高压设备的电极则要设计得圆滑，以避免意外击穿。
+      </div>
+    </div>
+
+    <!-- 例题：两球相连 -->
+    <div class="eg-block">
+      <div class="eg-title">例 2 &nbsp;细导线相连的两导体球——验证 $\sigma\propto 1/R$</div>
+      <p>两个导体球半径分别为 $r$ 和 $R$（$r < R$），用细长导线相连，总电量为 $Q$，忽略导线上的电荷。求两球表面的电荷面密度之比 $\sigma_1/\sigma_2$。</p>
+      <canvas id="twoBallCanvas" class="demo-canvas" width="480" height="180"></canvas>
+      <div class="demo-label">两球通过细导线相连，达到静电平衡时两球电势相等</div>
+      <div class="sol-steps">
+        <div class="sol-step">
+          <strong>建立方程：</strong>导线相连后两球构成等势体，电势相等：
+          $$\frac{q_1}{4\pi\varepsilon_0 r} = \frac{q_2}{4\pi\varepsilon_0 R}$$
+          其中 $q_1 + q_2 = Q$。
+        </div>
+        <div class="sol-step">
+          <strong>解得电荷比：</strong>
+          $$\frac{q_1}{r} = \frac{q_2}{R} \implies \frac{q_1}{q_2} = \frac{r}{R}$$
+        </div>
+        <div class="sol-step">
+          <strong>计算面密度比：</strong>
+          $$\frac{\sigma_1}{\sigma_2} = \frac{q_1/(4\pi r^2)}{q_2/(4\pi R^2)} = \frac{q_1}{q_2}\cdot\frac{R^2}{r^2} = \frac{r}{R}\cdot\frac{R^2}{r^2} = \frac{R}{r}$$
+        </div>
+        <div class="ans-box">
+          <span class="ans-label">答：</span>
+          $\dfrac{\sigma_1}{\sigma_2} = \dfrac{R}{r} > 1$，即半径<span class="hl">小球</span>（$r < R$）上的面电荷密度更大，与 $\sigma\propto 1/R$ 一致。
+        </div>
+      </div>
+    </div>
+
+    <!-- 例题：接地金属球附近点电荷 -->
+    <div class="eg-block">
+      <div class="eg-title">例 3 &nbsp;接地金属球附近的点电荷——求感应总电荷</div>
+      <p>一个接地金属球半径为 $R$，附近有一个点电荷 $+q$，点电荷与球心的距离 $d = 2R$。求金属球面上感应电荷的总量 $q'$。</p>
+      <canvas id="groundedBallCanvas" class="demo-canvas" width="480" height="200"></canvas>
+      <div class="demo-label">接地金属球（$V=0$）附近的点电荷 $+q$，感应 $q'$ 分布在球面</div>
+      <div class="sol-steps">
+        <div class="sol-step">
+          <strong>利用球心电势为零：</strong>金属球接地，整个导体电势为零，故球心处电势也为零：
+          $$U_O = U_1 + U_2 = 0$$
+          其中 $U_1$ 是点电荷 $+q$ 在球心产生的电势，$U_2$ 是感应电荷 $q'$ 在球心产生的电势。
+        </div>
+        <div class="sol-step">
+          <strong>计算各项：</strong><br>
+          $U_1 = \dfrac{q}{4\pi\varepsilon_0 \cdot 2R}$（点电荷距球心 $d=2R$）<br><br>
+          $U_2 = \dfrac{q'}{4\pi\varepsilon_0 R}$（感应电荷总量 $q'$ 等效在球心处——对球心而言，球面上分布电荷产生的电势等于总量 $q'$ 集中于球心的电势）
+        </div>
+        <div class="sol-step">
+          <strong>联立求解：</strong>
+          $$\frac{q}{4\pi\varepsilon_0\cdot 2R} + \frac{q'}{4\pi\varepsilon_0 R} = 0$$
+          $$\frac{q}{2} + q' = 0 \implies q' = -\frac{q}{2}$$
+        </div>
+        <div class="ans-box">
+          <span class="ans-label">答：</span>金属球面上感应电荷总量 $q' = -\dfrac{q}{2}$。
+        </div>
+      </div>
+      <div class="blue-box" style="margin-top:14px;">
+        <span class="note-label">方法说明</span>
+        关键在于：对<span class="hl-blue">球心</span>利用电势叠加。球面感应电荷（无论如何分布）在球心处产生的电势，等于将总量 $q'$ 视为集中于球心的点电荷所产生的电势 $q'/(4\pi\varepsilon_0 R)$。这是因为球心到球面上每一点的距离均为 $R$，所以 $\int \frac{\mathrm{d}q'}{4\pi\varepsilon_0 R} = \frac{q'}{4\pi\varepsilon_0 R}$，与分布无关。
+      </div>
+    </div>
+
+  </div><!-- /panel-1 -->
+
+</div><!-- /page -->
+
+<script>
+// ── 粒子背景 ────────────────────────────────────────
+(function () {
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  let W, H, pts = [];
+  function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+  window.addEventListener('resize', resize); resize();
+  const COLORS = ['#818cf8','#38bdf8','#c084fc','#34d399'];
+  function spawn() { return { x: Math.random()*W, y: H+10, r: Math.random()*2.5+0.5, speed: Math.random()*0.5+0.15, color: COLORS[Math.random()*COLORS.length|0], op: Math.random()*0.15+0.04 }; }
+  for (let i=0;i<50;i++){const p=spawn();p.y=Math.random()*H;pts.push(p);}
+  function draw(){ctx.clearRect(0,0,W,H);pts.forEach((p,i)=>{p.y-=p.speed;if(p.y<-10)pts[i]=spawn();ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.color;ctx.globalAlpha=p.op;ctx.fill();});ctx.globalAlpha=1;requestAnimationFrame(draw);}
+  draw();
+})();
+
+// ── Tab 切换 ────────────────────────────────────────
+function switchTab(i) {
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',i===j));
+  document.querySelectorAll('.tab-panel').forEach((p,j)=>p.classList.toggle('active',i===j));
+}
+
+// ── 辅助绘图函数 ────────────────────────────────────
+function arrow(ctx, x1, y1, x2, y2, color, hw=7, hl=13) {
+  const dx = x2-x1, dy = y2-y1, len = Math.hypot(dx,dy);
+  if (len < 1) return;
+  const ux = dx/len, uy = dy/len;
+  ctx.save();
+  ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2-ux*hl,y2-uy*hl); ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2-ux*hl-uy*hw, y2-uy*hl+ux*hw);
+  ctx.lineTo(x2-ux*hl+uy*hw, y2-uy*hl-ux*hw);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+}
+
+// ── 静电感应示意图 ──────────────────────────────────
+(function() {
+  const cv = document.getElementById('inductionCanvas');
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+
+  // 导体矩形
+  const bx = 210, by = 40, bw = 160, bh = 120;
+  ctx.fillStyle = 'rgba(99,102,241,0.18)';
+  ctx.strokeStyle = 'rgba(99,102,241,0.5)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.roundRect(bx, by, bw, bh, 10); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = 'rgba(99,102,241,0.08)';
+
+  // 外部电场箭头 (左侧)
+  ctx.fillStyle = '#fbbf24';
+  ctx.font = '13px "Microsoft YaHei"';
+  ctx.fillText('外电场 E₀', 20, H/2-24);
+  for (let y = by+20; y < by+bh; y += 28) {
+    arrow(ctx, 32, y, 200, y, '#fbbf24');
+  }
+  // 外部电场箭头 (右侧)
+  for (let y = by+20; y < by+bh; y += 28) {
+    arrow(ctx, bx+bw+8, y, W-20, y, '#fbbf24');
+  }
+
+  // 内建电场箭头 (导体内)
+  ctx.fillStyle = '#f87171';
+  ctx.font = '12px "Microsoft YaHei"';
+  ctx.fillText("内建 E'", bx+bw/2-26, by+bh+18);
+  for (let y = by+22; y < by+bh-10; y += 32) {
+    arrow(ctx, bx+bw-30, y, bx+30, y, '#f87171', 5, 10);
+  }
+
+  // 感应电荷标注
+  ctx.fillStyle = '#f87171'; ctx.font = 'bold 16px serif';
+  for (let y = by+22; y < by+bh-10; y += 26) ctx.fillText('−', bx+6, y+6);
+  ctx.fillStyle = '#34d399';
+  for (let y = by+22; y < by+bh-10; y += 26) ctx.fillText('+', bx+bw-18, y+5);
+
+  ctx.fillStyle = '#f87171'; ctx.font = '13px "Microsoft YaHei"'; ctx.fillText('感应−', bx-48, H/2);
+  ctx.fillStyle = '#34d399'; ctx.fillText('感应+', bx+bw+4, H/2);
+
+  // 合场强标注
+  ctx.fillStyle = 'rgba(52,211,153,0.7)'; ctx.font = 'bold 13px "Microsoft YaHei"';
+  ctx.fillText('导体内 E = 0', bx+bw/2-42, H/2+5);
+})();
+
+// ── 电荷分布示意图（空腔+内置电荷）────────────────────
+(function() {
+  const cv = document.getElementById('chargeDistCanvas');
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const cx = W/2, cy = H/2;
+  const R_out = 80, R_in = 50, R_q = 12;
+
+  // 导体壳
+  ctx.fillStyle = 'rgba(99,102,241,0.15)';
+  ctx.beginPath(); ctx.arc(cx, cy, R_out, 0, 2*Math.PI); ctx.fill();
+  ctx.fillStyle = 'rgba(15,12,41,0.85)';
+  ctx.beginPath(); ctx.arc(cx, cy, R_in, 0, 2*Math.PI); ctx.fill();
+  ctx.strokeStyle = 'rgba(99,102,241,0.45)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(cx, cy, R_out, 0, 2*Math.PI); ctx.stroke();
+  ctx.beginPath(); ctx.arc(cx, cy, R_in, 0, 2*Math.PI); ctx.stroke();
+
+  // 内置点电荷
+  ctx.fillStyle = '#fbbf24';
+  ctx.beginPath(); ctx.arc(cx, cy, R_q, 0, 2*Math.PI); ctx.fill();
+  ctx.fillStyle = '#0f0c29'; ctx.font = 'bold 14px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('+q', cx, cy);
+
+  // 内壁感应电荷 -q
+  ctx.fillStyle = '#f87171'; ctx.font = '12px serif'; ctx.textAlign = 'center';
+  const angles = [30,90,150,210,270,330];
+  angles.forEach(a => {
+    const rad = a*Math.PI/180;
+    const x = cx + (R_in+11)*Math.cos(rad), y = cy + (R_in+11)*Math.sin(rad);
+    ctx.fillText('−', x, y);
+  });
+
+  // 外壁感应电荷 +2q
+  ctx.fillStyle = '#34d399';
+  angles.forEach(a => {
+    const rad = (a+15)*Math.PI/180;
+    const x = cx + (R_out-11)*Math.cos(rad), y = cy + (R_out-11)*Math.sin(rad);
+    ctx.fillText('+', x, y);
+  });
+
+  // 标注
+  ctx.fillStyle = '#f87171'; ctx.font = '12px "Microsoft YaHei"'; ctx.textAlign = 'left';
+  ctx.fillText('内壁 −q', cx+R_in+18, cy-8);
+  ctx.fillStyle = '#34d399';
+  ctx.fillText('外壁 +q', cx+R_out+6, cy+8);
+  ctx.fillStyle = rgba(255,255,255,0.4);
+
+  function rgba(r,g,b,a){return `rgba(${r},${g},${b},${a})`;}
+  ctx.fillStyle = 'rgba(255,255,255,0.4)'; ctx.font = '11px "Microsoft YaHei"';
+  ctx.fillText('导体壳', cx+4, cy+R_in/2);
+})();
+
+// ── Eg1 同心球示意图 ─────────────────────────────────
+(function() {
+  const cv = document.getElementById('eg1Canvas');
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const cx = W/2, cy = H/2;
+
+  const R1 = 40, R2 = 90, R3 = 130;
+
+  // 外球壳（导体）
+  ctx.fillStyle = 'rgba(99,102,241,0.15)';
+  ctx.beginPath(); ctx.arc(cx,cy,R3,0,2*Math.PI); ctx.fill();
+  ctx.fillStyle = 'rgba(15,12,41,0.9)';
+  ctx.beginPath(); ctx.arc(cx,cy,R2,0,2*Math.PI); ctx.fill();
+
+  // 内球
+  ctx.fillStyle = 'rgba(56,189,248,0.2)';
+  ctx.beginPath(); ctx.arc(cx,cy,R1,0,2*Math.PI); ctx.fill();
+
+  // 轮廓线
+  [R1,R2,R3].forEach(r => {
+    ctx.strokeStyle = r===R1 ? 'rgba(56,189,248,0.6)' : 'rgba(99,102,241,0.5)';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,2*Math.PI); ctx.stroke();
+  });
+
+  // 半径标注
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1; ctx.setLineDash([3,4]);
+  ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+R3,cy); ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.fillStyle = '#38bdf8'; ctx.font = '13px serif'; ctx.textAlign = 'center';
+  ctx.fillText('R₁', cx+R1/2+2, cy-6);
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.fillText('R₂', cx+R1+(R2-R1)/2, cy-6);
+  ctx.fillText('R₃', cx+R2+(R3-R2)/2, cy-6);
+
+  // 电荷标注
+  ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 12px "Microsoft YaHei"'; ctx.textAlign = 'center';
+  ctx.fillText('+q', cx, cy+4);
+
+  const nAng = 8;
+  for(let i=0;i<nAng;i++){
+    const a = i*2*Math.PI/nAng;
+    const xi = cx+(R2-10)*Math.cos(a), yi = cy+(R2-10)*Math.sin(a);
+    ctx.fillStyle = '#f87171'; ctx.font = '11px serif'; ctx.fillText('−', xi, yi+4);
+    const xo = cx+(R3-10)*Math.cos(a+Math.PI/nAng), yo = cy+(R3-10)*Math.sin(a+Math.PI/nAng);
+    ctx.fillStyle = '#34d399'; ctx.fillText('+', xo, yo+4);
+  }
+
+  // 文字说明
+  ctx.fillStyle = '#f87171'; ctx.font = '12px "Microsoft YaHei"'; ctx.textAlign = 'left';
+  ctx.fillText('内壁 −q', 8, 20);
+  ctx.fillStyle = '#34d399';
+  ctx.fillText('外壁 +2q', 8, 38);
+  ctx.fillStyle = '#38bdf8';
+  ctx.fillText('内球 +q', 8, 56);
+})();
+
+// ── 电像法示意图 ─────────────────────────────────────
+(function() {
+  const cv = document.getElementById('imageCanvas');
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+
+  // 导体平面
+  const py = H/2 + 20;
+  ctx.fillStyle = 'rgba(99,102,241,0.15)';
+  ctx.fillRect(0, py, W, H-py);
+  ctx.strokeStyle = 'rgba(99,102,241,0.5)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(0,py); ctx.lineTo(W,py); ctx.stroke();
+  ctx.fillStyle = 'rgba(99,102,241,0.5)'; ctx.font = '13px "Microsoft YaHei"'; ctx.textAlign = 'right';
+  ctx.fillText('导体（接地平面）', W-10, py+20);
+
+  // 点电荷 +q
+  const qx = W/2, qy = py - 80;
+  ctx.fillStyle = '#fbbf24';
+  ctx.beginPath(); ctx.arc(qx, qy, 12, 0, 2*Math.PI); ctx.fill();
+  ctx.fillStyle = '#0f0c29'; ctx.font = 'bold 12px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('+q', qx, qy);
+  ctx.fillStyle = '#fbbf24'; ctx.textBaseline = 'alphabetic'; ctx.font = '13px "Microsoft YaHei"';
+  ctx.fillText('+q', qx+16, qy-4);
+
+  // 像电荷 -q
+  const iqy = py + 80;
+  ctx.fillStyle = '#f87171';
+  ctx.beginPath(); ctx.arc(qx, iqy, 12, 0, 2*Math.PI); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 12px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('−q', qx, iqy);
+  ctx.fillStyle = '#f87171'; ctx.textBaseline = 'alphabetic'; ctx.font = '13px "Microsoft YaHei"';
+  ctx.fillText('像电荷 −q', qx+16, iqy+4);
+
+  // 虚线连接
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 1; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(qx, qy+12); ctx.lineTo(qx, iqy-12); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // 距离标注
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(qx+30, qy); ctx.lineTo(qx+30, py); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,0.55)'; ctx.font = '12px serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.fillText('d', qx+34, (qy+py)/2);
+  ctx.fillText('d', qx+34, (iqy+py)/2);
+
+  // 场线（近似画几条）
+  ctx.save();
+  ctx.strokeStyle = 'rgba(251,191,36,0.4)'; ctx.lineWidth = 1.2;
+  const nLines = 8;
+  for (let i = 0; i < nLines; i++) {
+    const angle = (i/(nLines-1) - 0.5)*Math.PI*0.7;
+    const ex = qx + 200*Math.sin(angle), ey = py;
+    ctx.beginPath(); ctx.moveTo(qx, qy+12); ctx.quadraticCurveTo(qx+100*Math.sin(angle), qy+40, ex, ey);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  ctx.fillStyle = 'rgba(255,255,255,0.35)'; ctx.font = '12px "Microsoft YaHei"'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  ctx.fillText('场线垂直于导体表面（等势面条件满足）', W/2, H-8);
+})();
+
+// ── 例1感应电荷分布（-Q点电荷在接地平面上方）──────────
+(function() {
+  const cv = document.getElementById('inducedDistCanvas');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+
+  // 接地平面
+  const py = H/2 + 30;
+  ctx.fillStyle = 'rgba(99,102,241,0.15)';
+  ctx.fillRect(0, py, W, H - py);
+  ctx.strokeStyle = 'rgba(99,102,241,0.5)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(W, py); ctx.stroke();
+  ctx.fillStyle = 'rgba(150,130,255,0.6)'; ctx.font = '12px "Microsoft YaHei"'; ctx.textAlign = 'right';
+  ctx.fillText('接地导体平面（V=0）', W - 8, py + 18);
+
+  // 点电荷 -Q
+  const qx = W/2, qy = py - 80;
+  ctx.fillStyle = '#f87171';
+  ctx.beginPath(); ctx.arc(qx, qy, 13, 0, 2*Math.PI); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 12px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('−Q', qx, qy);
+  ctx.fillStyle = '#f87171'; ctx.textBaseline = 'alphabetic'; ctx.font = '13px "Microsoft YaHei"';
+  ctx.fillText('点电荷 −Q', qx + 18, qy - 4);
+
+  // 距离标注 h
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(qx - 30, qy + 13); ctx.lineTo(qx - 30, py); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.font = '13px serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  ctx.fillText('h', qx - 34, (qy + py) / 2);
+
+  // 感应电荷分布（负号，密度随r变化，中心最密）
+  ctx.fillStyle = '#818cf8'; ctx.textBaseline = 'alphabetic';
+  const nSamples = 17;
+  for (let i = 0; i < nSamples; i++) {
+    const frac = (i / (nSamples - 1) - 0.5) * 2; // -1 to 1
+    const x = qx + frac * 220;
+    const dist = Math.abs(frac) * 220;
+    const sigma = 1 / Math.pow(dist * dist / (80 * 80) + 1, 1.5); // normalized σ
+    const size = 9 + sigma * 7;
+    ctx.globalAlpha = 0.3 + sigma * 0.6;
+    ctx.font = `bold ${Math.round(size)}px serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText('−', x, py - 2);
+  }
+  ctx.globalAlpha = 1;
+
+  // x标注
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1; ctx.setLineDash([3, 4]);
+  ctx.beginPath(); ctx.moveTo(qx, py); ctx.lineTo(qx + 140, py - 2); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(255,255,255,0.55)'; ctx.font = '12px serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.fillText('x', qx + 145, py);
+})();
+
+// ── 例2两球相连示意图 ──────────────────────────────────
+(function() {
+  const cv = document.getElementById('twoBallCanvas');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const cy = H / 2;
+
+  const r = 30, R = 58;
+  const cx1 = 130, cx2 = 340;
+
+  // 细导线
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(cx1 + r, cy); ctx.lineTo(cx2 - R, cy); ctx.stroke();
+
+  // 小球 (半径 r)
+  ctx.fillStyle = 'rgba(56,189,248,0.18)';
+  ctx.beginPath(); ctx.arc(cx1, cy, r, 0, 2*Math.PI); ctx.fill();
+  ctx.strokeStyle = 'rgba(56,189,248,0.6)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(cx1, cy, r, 0, 2*Math.PI); ctx.stroke();
+  // 电荷符号
+  ctx.fillStyle = '#34d399'; ctx.font = '11px serif'; ctx.textAlign = 'center';
+  const nSmall = 6;
+  for (let i = 0; i < nSmall; i++) {
+    const a = i * 2 * Math.PI / nSmall;
+    ctx.fillText('+', cx1 + (r - 8) * Math.cos(a), cy + (r - 8) * Math.sin(a) + 4);
+  }
+  ctx.fillStyle = '#38bdf8'; ctx.font = '13px "Microsoft YaHei"'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+  ctx.fillText('半径 r', cx1, cy - r - 6);
+  ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '12px "Microsoft YaHei"'; ctx.textBaseline = 'top';
+  ctx.fillText('q₁', cx1, cy + r + 4);
+
+  // 大球 (半径 R)
+  ctx.fillStyle = 'rgba(99,102,241,0.18)';
+  ctx.beginPath(); ctx.arc(cx2, cy, R, 0, 2*Math.PI); ctx.fill();
+  ctx.strokeStyle = 'rgba(99,102,241,0.6)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(cx2, cy, R, 0, 2*Math.PI); ctx.stroke();
+  const nBig = 10;
+  ctx.fillStyle = '#34d399'; ctx.font = '11px serif'; ctx.textAlign = 'center';
+  for (let i = 0; i < nBig; i++) {
+    const a = i * 2 * Math.PI / nBig;
+    ctx.fillText('+', cx2 + (R - 10) * Math.cos(a), cy + (R - 10) * Math.sin(a) + 4);
+  }
+  ctx.fillStyle = '#818cf8'; ctx.font = '13px "Microsoft YaHei"'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+  ctx.fillText('半径 R', cx2, cy - R - 6);
+  ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.font = '12px "Microsoft YaHei"'; ctx.textBaseline = 'top';
+  ctx.fillText('q₂', cx2, cy + R + 4);
+
+  // 电势相等标注
+  ctx.fillStyle = '#fbbf24'; ctx.font = '13px "Microsoft YaHei"'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('V₁ = V₂', (cx1 + cx2) / 2 + 20, cy - 18);
+})();
+
+// ── 例3接地金属球附近点电荷 ───────────────────────────
+(function() {
+  const cv = document.getElementById('groundedBallCanvas');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const cy = H / 2;
+
+  const R = 60;
+  const ballCx = 160, qx = ballCx + 2 * R, qy = cy;
+
+  // 金属球
+  ctx.fillStyle = 'rgba(99,102,241,0.18)';
+  ctx.beginPath(); ctx.arc(ballCx, cy, R, 0, 2*Math.PI); ctx.fill();
+  ctx.strokeStyle = 'rgba(99,102,241,0.55)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(ballCx, cy, R, 0, 2*Math.PI); ctx.stroke();
+
+  // 感应电荷（聚集在靠近+q侧）
+  const nCharge = 12;
+  for (let i = 0; i < nCharge; i++) {
+    const angle = (i / nCharge) * 2 * Math.PI;
+    const weight = Math.pow(Math.max(0, Math.cos(angle)), 2);
+    const size = 8 + weight * 6;
+    ctx.globalAlpha = 0.25 + weight * 0.65;
+    ctx.fillStyle = '#f87171';
+    ctx.font = `bold ${Math.round(size)}px serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('−', ballCx + (R - 9) * Math.cos(angle), cy + (R - 9) * Math.sin(angle));
+  }
+  ctx.globalAlpha = 1;
+
+  // 球心标注
+  ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.font = '12px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+  ctx.fillText('O', ballCx, cy - 3);
+  ctx.fillStyle = '#818cf8'; ctx.font = '12px "Microsoft YaHei"';
+  ctx.fillText('V = 0 (接地)', ballCx, cy + R + 16);
+
+  // 接地线
+  ctx.strokeStyle = 'rgba(99,102,241,0.4)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(ballCx, cy + R); ctx.lineTo(ballCx, cy + R + 10); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(ballCx - 14, cy + R + 10); ctx.lineTo(ballCx + 14, cy + R + 10); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(ballCx - 8, cy + R + 15); ctx.lineTo(ballCx + 8, cy + R + 15); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(ballCx - 4, cy + R + 20); ctx.lineTo(ballCx + 4, cy + R + 20); ctx.stroke();
+
+  // 距离标注 d=2R
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 1; ctx.setLineDash([3,4]);
+  ctx.beginPath(); ctx.moveTo(ballCx, cy - R - 8); ctx.lineTo(qx, qy - R - 8); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(255,255,255,0.55)'; ctx.font = '12px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+  ctx.fillText('d = 2R', (ballCx + qx) / 2, cy - R - 10);
+
+  // 点电荷 +q
+  ctx.fillStyle = '#fbbf24';
+  ctx.beginPath(); ctx.arc(qx, qy, 13, 0, 2*Math.PI); ctx.fill();
+  ctx.fillStyle = '#0f0c29'; ctx.font = 'bold 12px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('+q', qx, qy);
+  ctx.fillStyle = '#fbbf24'; ctx.font = '13px "Microsoft YaHei"'; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+  ctx.fillText('+q', qx + 16, qy - 4);
+
+  // 场线（从+q指向球面，弯向感应负电荷聚集处）
+  ctx.save();
+  ctx.strokeStyle = 'rgba(251,191,36,0.35)'; ctx.lineWidth = 1.2;
+  for (let i = 0; i < 7; i++) {
+    const angle = ((i / 6) - 0.5) * Math.PI * 0.85;
+    const endX = ballCx + R * Math.cos(angle + Math.PI * 0.05);
+    const endY = cy + R * Math.sin(angle + Math.PI * 0.05);
+    ctx.beginPath(); ctx.moveTo(qx - 13, qy);
+    ctx.quadraticCurveTo((qx + endX) / 2, qy + 60 * Math.sin(angle), endX, endY);
+    ctx.stroke();
+  }
+  ctx.restore();
+})();
+</script>
+
+<!-- ── 笔记工具栏 ── -->
+<style>
+.note-fab {
+  position: fixed; bottom: 28px; right: 28px; z-index: 1000;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+}
+.fab-main {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 22px; box-shadow: 0 4px 20px rgba(99,102,241,0.5);
+  transition: transform 0.2s, box-shadow 0.2s;
+  color: #fff;
+}
+.fab-main:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(99,102,241,0.65); }
+.fab-main.active { background: linear-gradient(135deg, #7c3aed, #a78bfa); transform: rotate(45deg); }
+.fab-menu {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+  opacity: 0; pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.fab-menu.open { opacity: 1; pointer-events: all; transform: translateY(0); }
+.fab-item {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(15,12,41,0.92); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px; padding: 9px 16px 9px 12px;
+  cursor: pointer; white-space: nowrap;
+  backdrop-filter: blur(12px);
+  transition: border-color 0.2s, background 0.2s;
+  font-family: "Microsoft YaHei", sans-serif;
+}
+.fab-item:hover { border-color: rgba(129,140,248,0.4); background: rgba(99,102,241,0.15); }
+.fab-item .fi-icon { font-size: 17px; }
+.fab-item .fi-label { font-size: 13px; color: rgba(255,255,255,0.8); }
+.fab-item.starred .fi-label { color: #fbbf24; }
+.fab-item.starred { border-color: rgba(251,191,36,0.35); }
+.fab-item.read-done .fi-label { color: #34d399; }
+.fab-item.read-done { border-color: rgba(52,211,153,0.35); }
+.note-drawer {
+  position: fixed; bottom: 0; right: 0; left: 0; z-index: 999;
+  background: rgba(10,8,30,0.96);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(20px);
+  padding: 20px 28px 28px;
+  transform: translateY(100%);
+  transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
+}
+.note-drawer.open { transform: translateY(0); }
+.drawer-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.drawer-title { font-size: 14px; font-weight: 700; color: #a5b4fc; font-family: "Microsoft YaHei",sans-serif; letter-spacing: 1px; }
+.drawer-close { font-size: 20px; color: rgba(255,255,255,0.4); cursor: pointer; transition: color 0.2s; line-height: 1; }
+.drawer-close:hover { color: #fff; }
+.drawer-textarea {
+  width: 100%; height: 120px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; padding: 12px 16px;
+  color: #fff; font-size: 14px; font-family: "Microsoft YaHei",sans-serif;
+  resize: vertical; outline: none; line-height: 1.8;
+  transition: border-color 0.2s;
+}
+.drawer-textarea:focus { border-color: rgba(129,140,248,0.5); }
+.drawer-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+.drawer-hint { font-size: 11px; color: rgba(255,255,255,0.25); font-family: "Microsoft YaHei",sans-serif; }
+.drawer-save {
+  background: linear-gradient(135deg, #6366f1, #818cf8); border: none;
+  color: #fff; font-size: 13px; font-weight: 600; padding: 8px 22px; border-radius: 10px;
+  cursor: pointer; font-family: "Microsoft YaHei",sans-serif; transition: opacity 0.2s;
+}
+.drawer-save:hover { opacity: 0.85; }
+.phy-toast {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: rgba(15,12,41,0.95); border: 1px solid rgba(129,140,248,0.3);
+  border-radius: 24px; padding: 10px 22px;
+  font-size: 13px; color: rgba(255,255,255,0.85); font-family: "Microsoft YaHei",sans-serif;
+  z-index: 1100; opacity: 0;
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none; white-space: nowrap;
+}
+.phy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+
+<div class="note-fab">
+  <div class="fab-menu" id="fabMenu">
+    <div class="fab-item" id="fabStar" onclick="toggleStar()">
+      <span class="fi-icon">☆</span>
+      <span class="fi-label">收藏此节</span>
+    </div>
+    <div class="fab-item" id="fabRead" onclick="toggleRead()">
+      <span class="fi-icon">○</span>
+      <span class="fi-label">标记已读</span>
+    </div>
+    <div class="fab-item" onclick="openDrawer()">
+      <span class="fi-icon">📝</span>
+      <span class="fi-label">我的笔记</span>
+    </div>
+  </div>
+  <button class="fab-main" id="fabBtn" onclick="toggleFab()" title="工具">✦</button>
+</div>
+
+<div class="note-drawer" id="noteDrawer">
+  <div class="drawer-header">
+    <div class="drawer-title">📝 我的笔记 · §2-1</div>
+    <div class="drawer-close" onclick="closeDrawer()">×</div>
+  </div>
+  <textarea class="drawer-textarea" id="drawerTA" placeholder="在此记录你的理解、疑问或总结……"></textarea>
+  <div class="drawer-footer">
+    <span class="drawer-hint">自动保存到本地，刷新不丢失</span>
+    <button class="drawer-save" onclick="saveNote()">保存</button>
+  </div>
+</div>
+
+<div class="phy-toast" id="phyToast"></div>
+
+<script>
+(function(){
+  const PID = '2-1';
+  const SK  = 'phy26_note_' + PID;
+  const STK = 'phy26_star_' + PID;
+  const RDK = 'phy26_read_' + PID;
+  let fabOpen = false;
+
+  function showToast(msg) {
+    const t = document.getElementById('phyToast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  window.toggleFab = function() {
+    fabOpen = !fabOpen;
+    document.getElementById('fabMenu').classList.toggle('open', fabOpen);
+    document.getElementById('fabBtn').classList.toggle('active', fabOpen);
+  };
+
+  window.toggleStar = function() {
+    const starred = localStorage.getItem(STK) === '1';
+    if (starred) { localStorage.removeItem(STK); showToast('已取消收藏'); }
+    else { localStorage.setItem(STK, '1'); showToast('⭐ 已收藏此节'); }
+    refreshStarUI();
+  };
+
+  window.toggleRead = function() {
+    const read = localStorage.getItem(RDK) === '1';
+    if (read) { localStorage.removeItem(RDK); showToast('已取消已读标记'); }
+    else { localStorage.setItem(RDK, '1'); showToast('✓ 已标记为已读'); }
+    refreshReadUI();
+  };
+
+  function refreshStarUI() {
+    const starred = localStorage.getItem(STK) === '1';
+    const el = document.getElementById('fabStar');
+    el.querySelector('.fi-icon').textContent = starred ? '★' : '☆';
+    el.querySelector('.fi-label').textContent = starred ? '已收藏' : '收藏此节';
+    el.classList.toggle('starred', starred);
+  }
+
+  function refreshReadUI() {
+    const read = localStorage.getItem(RDK) === '1';
+    const el = document.getElementById('fabRead');
+    el.querySelector('.fi-icon').textContent = read ? '✓' : '○';
+    el.querySelector('.fi-label').textContent = read ? '已读' : '标记已读';
+    el.classList.toggle('read-done', read);
+  }
+
+  window.openDrawer = function() {
+    document.getElementById('drawerTA').value = localStorage.getItem(SK) || '';
+    document.getElementById('noteDrawer').classList.add('open');
+    document.getElementById('fabMenu').classList.remove('open');
+    document.getElementById('fabBtn').classList.remove('active');
+    fabOpen = false;
+    setTimeout(() => document.getElementById('drawerTA').focus(), 350);
+  };
+
+  window.closeDrawer = function() {
+    document.getElementById('noteDrawer').classList.remove('open');
+  };
+
+  window.saveNote = function() {
+    const val = document.getElementById('drawerTA').value.trim();
+    if (val) { localStorage.setItem(SK, val); showToast('✓ 笔记已保存'); }
+    else { localStorage.removeItem(SK); showToast('笔记已清空'); }
+    closeDrawer();
+  };
+
+  let saveTimer;
+  document.getElementById('drawerTA').addEventListener('input', function() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      const val = this.value.trim();
+      if (val) localStorage.setItem(SK, val);
+    }, 1500);
+  });
+
+  refreshStarUI(); refreshReadUI();
+
+  if (localStorage.getItem(SK)) {
+    const noteItem = document.querySelector('.fab-item:last-of-type .fi-icon');
+    if (noteItem) noteItem.textContent = '📋';
+  }
+})();
+</script>
+</body>
+</html>

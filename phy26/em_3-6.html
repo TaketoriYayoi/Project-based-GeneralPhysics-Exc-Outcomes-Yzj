@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3-6 磁场对载流导线的作用 — 电磁学</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Times New Roman","Microsoft YaHei","PingFang SC",serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;color:#fff}
+    canvas#particles{position:fixed;inset:0;pointer-events:none;z-index:0}
+    .topbar{position:relative;z-index:10;display:flex;align-items:center;gap:14px;padding:18px 36px;border-bottom:1px solid rgba(255,255,255,0.07);background:rgba(15,12,41,0.7);backdrop-filter:blur(12px);font-family:"Microsoft YaHei",sans-serif}
+    .back-btn{color:rgba(255,255,255,0.5);font-size:14px;cursor:pointer;text-decoration:none;transition:color .2s}.back-btn:hover{color:#818cf8}
+    .topbar-title{font-size:16px;font-weight:700;letter-spacing:1px}
+    .topbar-sub{margin-left:auto;font-size:12px;color:rgba(255,255,255,0.3)}
+    .tabs{display:flex;gap:10px;margin-bottom:32px;font-family:"Microsoft YaHei",sans-serif;flex-wrap:wrap}
+    .tab{padding:9px 22px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:rgba(255,255,255,0.5);transition:all .2s}
+    .tab.active{background:linear-gradient(135deg,#6366f1,#818cf8);border-color:transparent;color:#fff;box-shadow:0 4px 16px rgba(99,102,241,0.4)}
+    .tab-panel{display:none}.tab-panel.active{display:block}
+    .page{position:relative;z-index:10;max-width:860px;margin:0 auto;padding:36px 24px 80px}
+    .card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:16px;padding:28px 32px;margin-bottom:20px}
+    .card-title{font-size:16px;font-weight:700;color:#818cf8;margin-bottom:14px;display:flex;align-items:center;gap:8px;font-family:"Microsoft YaHei",sans-serif}
+    .card-title::before{content:"";display:inline-block;width:4px;height:18px;border-radius:2px;background:linear-gradient(#6366f1,#818cf8);flex-shrink:0}
+    .card p{font-size:15px;color:rgba(255,255,255,0.8);line-height:2}.card p+p{margin-top:10px}
+    .hl{color:#fbbf24;font-weight:600}.hl-blue{color:#38bdf8;font-weight:600}.hl-green{color:#34d399;font-weight:600}.hl-red{color:#f87171;font-weight:600}.hl-purple{color:#c084fc;font-weight:600}
+    .katex{color:#e2e8f0;font-size:1.05em}.katex-display{margin:14px 0}.katex-display>.katex{color:#93c5fd}
+    .prop-list{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:12px}
+    .prop-item{display:flex;gap:14px;align-items:flex-start;background:rgba(255,255,255,0.03);border-radius:10px;padding:14px 18px;border-left:3px solid #6366f1}
+    .prop-item:nth-child(2){border-left-color:#38bdf8}.prop-item:nth-child(3){border-left-color:#34d399}.prop-item:nth-child(4){border-left-color:#f59e0b}.prop-item:nth-child(5){border-left-color:#f87171}
+    .prop-num{min-width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;font-family:"Microsoft YaHei",sans-serif}
+    .prop-item:nth-child(2) .prop-num{background:linear-gradient(135deg,#0ea5e9,#38bdf8)}.prop-item:nth-child(3) .prop-num{background:linear-gradient(135deg,#10b981,#34d399)}.prop-item:nth-child(4) .prop-num{background:linear-gradient(135deg,#f59e0b,#fbbf24)}.prop-item:nth-child(5) .prop-num{background:linear-gradient(135deg,#ef4444,#f87171)}
+    .prop-body{font-size:14.5px;color:rgba(255,255,255,0.78);line-height:1.9}.prop-body strong{color:#fff;font-family:"Microsoft YaHei",sans-serif}
+    .note-box{background:rgba(251,191,36,0.06);border:1px solid rgba(251,191,36,0.2);border-radius:12px;padding:16px 20px;margin-top:14px;font-size:14px;color:rgba(255,255,255,0.7);line-height:1.9;font-family:"Microsoft YaHei",sans-serif}
+    .note-box .note-label{font-weight:700;color:#fbbf24;margin-bottom:4px;display:block}
+    .green-box{background:rgba(52,211,153,0.06);border:1px solid rgba(52,211,153,0.2);border-radius:12px;padding:16px 20px;margin-top:14px;font-size:14px;color:rgba(255,255,255,0.75);line-height:1.9;font-family:"Microsoft YaHei",sans-serif}
+    .green-box .note-label{font-weight:700;color:#34d399;margin-bottom:4px;display:block}
+    .blue-box{background:rgba(56,189,248,0.06);border:1px solid rgba(56,189,248,0.2);border-radius:12px;padding:16px 20px;margin-top:14px;font-size:14px;color:rgba(255,255,255,0.75);line-height:1.9;font-family:"Microsoft YaHei",sans-serif}
+    .blue-box .note-label{font-weight:700;color:#38bdf8;margin-bottom:4px;display:block}
+    .eg-block{background:rgba(192,132,252,0.05);border:1px solid rgba(192,132,252,0.18);border-radius:14px;padding:24px 28px;margin-bottom:20px}
+    .eg-title{font-size:15px;font-weight:700;color:#c084fc;margin-bottom:14px;font-family:"Microsoft YaHei",sans-serif;display:flex;align-items:center;gap:8px}
+    .eg-title::before{content:"";display:inline-block;width:4px;height:16px;background:linear-gradient(#c084fc,#818cf8);border-radius:2px;flex-shrink:0}
+    .eg-block p{font-size:14.5px;color:rgba(255,255,255,0.8);line-height:2}.eg-block p+p{margin-top:8px}
+    .sol-steps{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+    .sol-step{background:rgba(255,255,255,0.025);border-left:3px solid #6366f1;border-radius:0 8px 8px 0;padding:12px 16px;font-size:14.5px;color:rgba(255,255,255,0.78);line-height:2}
+    .sol-step:nth-child(2){border-left-color:#38bdf8}.sol-step:nth-child(3){border-left-color:#34d399}.sol-step:nth-child(4){border-left-color:#f59e0b}.sol-step:nth-child(5){border-left-color:#f87171}
+    .sol-step strong{color:#fff;font-family:"Microsoft YaHei",sans-serif}
+    .ans-box{background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.25);border-radius:10px;padding:12px 18px;margin-top:12px;font-size:14.5px;color:rgba(255,255,255,0.85);line-height:2}
+    .ans-box .ans-label{color:#fbbf24;font-weight:700;font-family:"Microsoft YaHei",sans-serif}
+    canvas.demo-canvas{display:block;margin:18px auto 0;background:rgba(0,0,0,0.25);border-radius:12px;border:1px solid rgba(255,255,255,0.07)}
+    .demo-label{text-align:center;font-size:12.5px;color:rgba(255,255,255,0.35);font-family:"Microsoft YaHei",sans-serif;margin-top:8px}
+    .sim-ctrl{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+    .sim-btn{padding:7px 20px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);font-size:13px;font-family:"Microsoft YaHei",sans-serif;cursor:pointer;transition:all .2s}
+    .sim-btn:hover{background:rgba(99,102,241,0.25);border-color:rgba(99,102,241,0.5);color:#fff}
+    .sim-btn.active{background:linear-gradient(135deg,#6366f1,#818cf8);border-color:transparent;color:#fff;box-shadow:0 2px 10px rgba(99,102,241,0.4)}
+    .slider-row{display:flex;align-items:center;gap:14px;margin-top:14px;font-family:"Microsoft YaHei",sans-serif;font-size:13px;color:rgba(255,255,255,0.65)}
+    .slider-row input[type=range]{flex:1;accent-color:#818cf8}
+    .slider-val{min-width:60px;text-align:right;color:#fbbf24;font-weight:600}
+  </style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">§3-6 &nbsp;磁场对载流导线的作用</div>
+    <span class="topbar-course">普通物理（卓越班）下册 · 电磁学</span>
+  </div>
+  <div class="topbar-sub">NUSEP26 · 普通物理（卓）下</div>
+</div>
+
+<div class="page">
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(0)">3-6-1 安培力</div>
+    <div class="tab" onclick="switchTab(1)">弯曲导线安培力</div>
+    <div class="tab" onclick="switchTab(2)">3-6-2 磁力矩</div>
+    <div class="tab" onclick="switchTab(3)">3-6-3 运动电荷的磁场</div>
+  </div>
+
+  <!-- ══ Tab 0: 安培力 ══ -->
+  <div class="tab-panel active" id="panel-0">
+    <div class="card">
+      <div class="card-title">安培力公式</div>
+      <p>载流导线电流元 $Id\vec{l}$ 在磁场中所受的力：</p>
+      $$d\vec{F} = Id\vec{l}\times\vec{B}$$
+      <p>最简单情形（均匀磁场，直导线）：$F = BIl\sin\theta$，$\theta = \angle(\vec{l},\vec{B})$</p>
+      <div class="blue-box">
+        <span class="note-label">安培力 vs 洛伦兹力</span>
+        安培力本质是导体内所有自由电子受洛伦兹力的宏观合力。电流元 $Id\vec{l} = nqS\,dl\cdot\vec{v}$，代入洛伦兹力即可推出安培力公式。
+      </div>
+    </div>
+
+    <!-- 仿真：安培力方向 -->
+    <div class="card">
+      <div class="card-title">交互仿真：安培力方向与大小（均匀磁场）</div>
+      <p>拖动滑块改变电流方向与磁场的夹角 $\theta$，直观看到安培力 $F\propto\sin\theta$。</p>
+      <div class="sim-ctrl">
+        <button class="sim-btn" id="btnPauseAmpForce" onclick="toggleAmpForceAnim()">⏸ 暂停</button>
+        <button class="sim-btn" onclick="resetAmpForce()">↻ 重置</button>
+      </div>
+      <div class="slider-row">
+        <span>θ =</span>
+        <input type="range" id="ampForceTheta" min="0" max="180" value="90" oninput="updateAmpForce()">
+        <span class="slider-val" id="ampForceThetaVal">90°</span>
+        <span style="margin-left:8px">F/F_max =</span>
+        <span class="slider-val" id="ampForceFVal">1.000</span>
+      </div>
+      <canvas id="ampForceCanvas" class="demo-canvas" width="620" height="260"></canvas>
+      <div class="demo-label">红：电流方向 I；蓝：磁场 B；绿：安培力 F = BIl sinθ</div>
+    </div>
+
+    <div class="eg-block">
+      <div class="eg-title">例2：斜置载流导线在无限长直导线旁的安培力</div>
+      <p>无限长直载流导线 $I_1$，同一平面内有导线（长 $L$，电流 $I_2$），导线左下角距 $I_1$ 为 $r$，与水平夹角 $\alpha$。求该导线受到的安培力。</p>
+      <div class="sol-steps">
+        <div class="sol-step"><strong>磁场</strong>：$I_1$ 在距离 $x$ 处产生 $\vec{B} = \dfrac{\mu_0 I_1}{2\pi x}(-\hat{k})$（垂直纸面向内）</div>
+        <div class="sol-step"><strong>电流元</strong>：$I_2 d\vec{l} = I_2 dx\,\hat{i} + I_2\tan\alpha\, dx\,\hat{j}$</div>
+        <div class="sol-step"><strong>安培力元</strong>：$d\vec{F} = \dfrac{\mu_0 I_1 I_2}{2\pi x}dx(\hat{j} - \tan\alpha\,\hat{i})$</div>
+        <div class="sol-step"><strong>积分</strong>：从 $r$ 到 $r+L\cos\alpha$ 积分，得 $\vec{F} = \dfrac{\mu_0 I_1 I_2}{2\pi}(\hat{j}-\tan\alpha\,\hat{i})\ln\dfrac{r+L\cos\alpha}{r}$</div>
+      </div>
+      <div class="ans-box"><span class="ans-label">结果：</span>$\vec{F} = \dfrac{\mu_0 I_1 I_2}{2\pi}\ln\!\dfrac{r+L\cos\alpha}{r}\cdot(\hat{j}-\tan\alpha\,\hat{i})$</div>
+    </div>
+  </div>
+
+  <!-- ══ Tab 1: 弯曲导线 ══ -->
+  <div class="tab-panel" id="panel-1">
+    <div class="card">
+      <div class="card-title">均匀磁场中弯曲载流导线的安培力</div>
+      <p>在均匀磁场 $\vec{B}$ 中，弯曲载流导线 $ab$ 所受的安培力等于<span class="hl">等效直导线</span>（连接 $a$、$b$ 两端的直线段 $\vec{L}$）所受的安培力：</p>
+      $$\vec{F} = \int_L d\vec{F} = I\int_L d\vec{l}\times\vec{B} = I\vec{L}\times\vec{B}$$
+      <p>其中 $\vec{L} = \overrightarrow{ab}$（从起点 $a$ 到终点 $b$ 的矢量），与导线的具体形状无关！</p>
+      <div class="green-box">
+        <span class="note-label">推论：闭合载流回路在均匀磁场中的合安培力为零</span>
+        闭合回路 $\vec{L}_{ab} + \vec{L}_{ba} = \vec{0}$，故 $\vec{F}_{合} = I\vec{0}\times\vec{B} = \vec{0}$。但磁力矩一般不为零。
+      </div>
+    </div>
+
+    <!-- 仿真：弯曲导线 -->
+    <div class="card">
+      <div class="card-title">交互仿真：弯曲导线等效直导线受力</div>
+      <p>选择不同形状的弯曲导线（半圆弧、折线、正弦波形），观察安培力始终等于等效直导线受力。</p>
+      <div class="sim-ctrl">
+        <button class="sim-btn active" id="shapeArc" onclick="setShape('arc')">半圆弧</button>
+        <button class="sim-btn" id="shapeZig" onclick="setShape('zig')">折线</button>
+        <button class="sim-btn" id="shapeSin" onclick="setShape('sin')">正弦波</button>
+        <button class="sim-btn" onclick="toggleBField()">🧲 显示B场</button>
+      </div>
+      <canvas id="bentWireCanvas" class="demo-canvas" width="620" height="300"></canvas>
+      <div class="demo-label">黄色虚线：等效直导线 L；橙色箭头：安培力 F = ILBsinθ</div>
+    </div>
+  </div>
+
+  <!-- ══ Tab 2: 磁力矩 ══ -->
+  <div class="tab-panel" id="panel-2">
+    <div class="card">
+      <div class="card-title">载流线圈的磁矩与力矩</div>
+      <p>$N$ 匝面积为 $S$ 的载流线圈，磁矩：$\vec{P}_m = NIS\hat{n}$（$\hat{n}$ 由右手螺旋定则确定）</p>
+      <p>在匀强磁场 $\vec{B}$ 中受到磁力矩：</p>
+      $$\vec{M} = \vec{P}_m\times\vec{B}$$
+      <p>大小：$M = P_m B\sin\theta = NISB\sin\theta$，$\theta=\angle(\hat{n},\vec{B})$</p>
+      <ul class="prop-list">
+        <li class="prop-item"><span class="prop-num">①</span><div class="prop-body">$\theta=0$（$\vec{P}_m\parallel\vec{B}$）：$M=0$，<strong>稳定平衡</strong>（势能最低）</div></li>
+        <li class="prop-item"><span class="prop-num">②</span><div class="prop-body">$\theta=\pi$（$\vec{P}_m$反平行 $\vec{B}$）：$M=0$，<strong>不稳定平衡</strong>（势能最高）</div></li>
+        <li class="prop-item"><span class="prop-num">③</span><div class="prop-body">$\theta=\pi/2$：$M = M_{max} = NBIS$（力矩最大）</div></li>
+      </ul>
+      <div class="note-box">
+        <span class="note-label">磁势能</span>
+        $V_{mp} = -\vec{P}_m\cdot\vec{B} = -P_mB\cos\theta$；磁力矩趋向使 $\theta\to 0$，即线圈转到与 $\vec{B}$ 对齐的位置（势能最低）。
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">磁力的功</div>
+      <p>磁力对运动载流导线所做的功：$W = I\Delta\Phi_m$</p>
+      <p>即电流强度与磁通量增量之积，与路径无关（由于电流 $I$ 恒定）。</p>
+    </div>
+
+    <!-- 仿真：磁力矩 -->
+    <div class="card">
+      <div class="card-title">交互仿真：载流线圈在磁场中的转动</div>
+      <p>拖动滑块设置初始角 $\theta_0$，点击"释放"观察线圈在磁力矩作用下转向平衡位置。右侧显示 $M(\theta)$ 和 $V(\theta)$ 曲线。</p>
+      <div class="slider-row">
+        <span>初始角 θ₀ =</span>
+        <input type="range" id="coilTheta0" min="0" max="175" value="90" oninput="updateCoilAngle()">
+        <span class="slider-val" id="coilTheta0Val">90°</span>
+      </div>
+      <div class="sim-ctrl">
+        <button class="sim-btn active" id="coilRelBtn" onclick="releaseCoil()">▶ 释放线圈</button>
+        <button class="sim-btn" onclick="resetCoilTorque()">↺ 重置</button>
+        <button class="sim-btn" onclick="toggleDamping()">🔧 阻尼</button>
+      </div>
+      <canvas id="coilTorqueCanvas" class="demo-canvas" width="620" height="320"></canvas>
+      <div class="demo-label">左：线圈截面（绿线：磁矩方向）| 右：M(θ) 蓝色，V(θ) 红色</div>
+    </div>
+
+    <div class="eg-block">
+      <div class="eg-title">例题：圆形载流线圈在磁场中的力矩与功</div>
+      <p>半径 $R$ 的圆形线圈，电流 $I$，处于均匀磁场 $B$ 中，线圈平面与 $\vec{B}$ 平行（$\theta=\pi/2$）。（1）求以直径为轴的磁力矩；（2）线圈在力矩作用下转过 $90°$，求功。</p>
+      <div class="sol-steps">
+        <div class="sol-step"><strong>磁矩</strong>：$\vec{P}_m = I\cdot\pi R^2\cdot(-\hat{k})$</div>
+        <div class="sol-step"><strong>力矩（1）</strong>：$M_{max} = P_m B = \pi R^2 IB$，方向由 $\vec{P}_m\times\vec{B}$ 确定</div>
+        <div class="sol-step"><strong>功（2）</strong>：$W = V_{初}-V_{末} = -P_mB\cos(\pi/2)-(-P_mB\cos 0) = \pi R^2 IB$</div>
+      </div>
+      <div class="ans-box"><span class="ans-label">结果：</span>（1）$M = \pi R^2 IB$；（2）$W = \pi R^2 IB$</div>
+    </div>
+  </div>
+
+  <!-- ══ Tab 3: 运动电荷的磁场 ══ -->
+  <div class="tab-panel" id="panel-3">
+    <div class="card">
+      <div class="card-title">运动电荷产生的磁场</div>
+      <p>从毕奥-萨伐尔定律推导单个运动电荷产生的磁场：</p>
+      $$\vec{B} = \frac{\mu_0}{4\pi}\frac{q\vec{v}\times\hat{r}}{r^2}$$
+      <p>推导：$I = nqSv$，元体积中粒子数 $dN = nS\,dl$，由 B-S 定律除以 $dN$ 即得单粒子磁场。</p>
+      <div class="blue-box">
+        <span class="note-label">与电场类比</span>
+        运动电荷的电场：$\vec{E} = \dfrac{q}{4\pi\varepsilon_0}\dfrac{\hat{r}}{r^2}$；磁场：$\vec{B} = \dfrac{\mu_0 q}{4\pi}\dfrac{\vec{v}\times\hat{r}}{r^2} = \dfrac{\vec{v}\times\vec{E}}{c^2}$（在低速极限下）。<br>
+        这再次印证了<strong>磁场是电场的相对论效应</strong>。
+      </div>
+    </div>
+
+    <!-- 仿真：运动电荷的磁场 -->
+    <div class="card">
+      <div class="card-title">交互仿真：运动点电荷产生的磁场分布</div>
+      <p>移动鼠标改变观测点，查看磁场方向（圆形磁力线）和大小。拖动滑块改变电荷速度。</p>
+      <div class="sim-ctrl">
+        <button class="sim-btn" onclick="toggleFieldLines()">📊 磁力线</button>
+      </div>
+      <div class="slider-row">
+        <span>速度 v / c =</span>
+        <input type="range" id="chargeV" min="0.05" max="0.8" step="0.05" value="0.3" oninput="updateCharge()">
+        <span class="slider-val" id="chargeVVal">0.30</span>
+      </div>
+      <canvas id="chargeFieldCanvas" class="demo-canvas" width="620" height="300" style="cursor:crosshair"></canvas>
+      <div class="demo-label">黄点：运动电荷（向右）；圆圈：磁力线（与 v 和 r 的叉积方向）</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">磁场与电场的对称性</div>
+      <table style="width:100%;border-collapse:collapse;margin-top:10px;font-size:13.5px;font-family:'Microsoft YaHei',sans-serif">
+        <thead><tr style="background:rgba(99,102,241,0.2)">
+          <th style="padding:10px;text-align:left;color:#818cf8;border-bottom:1px solid rgba(255,255,255,0.1)">物理量</th>
+          <th style="padding:10px;text-align:left;color:#818cf8;border-bottom:1px solid rgba(255,255,255,0.1)">电场</th>
+          <th style="padding:10px;text-align:left;color:#818cf8;border-bottom:1px solid rgba(255,255,255,0.1)">磁场</th>
+        </tr></thead>
+        <tbody>
+          <tr><td style="padding:9px;color:rgba(255,255,255,0.65);border-bottom:1px solid rgba(255,255,255,0.05)">源</td><td style="padding:9px;color:#e2e8f0;border-bottom:1px solid rgba(255,255,255,0.05)">电荷 $q$</td><td style="padding:9px;color:#e2e8f0;border-bottom:1px solid rgba(255,255,255,0.05)">运动电荷 $q\vec{v}$（电流）</td></tr>
+          <tr style="background:rgba(99,102,241,0.04)"><td style="padding:9px;color:rgba(255,255,255,0.65);border-bottom:1px solid rgba(255,255,255,0.05)">场方程</td><td style="padding:9px;color:#93c5fd;border-bottom:1px solid rgba(255,255,255,0.05)">$\vec{E}=\frac{q\hat{r}}{4\pi\varepsilon_0 r^2}$</td><td style="padding:9px;color:#93c5fd;border-bottom:1px solid rgba(255,255,255,0.05)">$\vec{B}=\frac{\mu_0 q\vec{v}\times\hat{r}}{4\pi r^2}$</td></tr>
+          <tr><td style="padding:9px;color:rgba(255,255,255,0.65);border-bottom:1px solid rgba(255,255,255,0.05)">高斯定理</td><td style="padding:9px;color:#e2e8f0;border-bottom:1px solid rgba(255,255,255,0.05)">$\nabla\cdot\vec{E}=\rho/\varepsilon_0\neq 0$</td><td style="padding:9px;color:#e2e8f0;border-bottom:1px solid rgba(255,255,255,0.05)">$\nabla\cdot\vec{B}=0$</td></tr>
+          <tr style="background:rgba(99,102,241,0.04)"><td style="padding:9px;color:rgba(255,255,255,0.65)">环路定理</td><td style="padding:9px;color:#93c5fd">$\nabla\times\vec{E}=0$（静电场）</td><td style="padding:9px;color:#93c5fd">$\nabla\times\vec{B}=\mu_0\vec{j}$</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Particle BG -->
+<script>
+(function(){
+  const cv=document.getElementById('particles'),cx=cv.getContext('2d');
+  let W,H,pts=[];
+  function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  for(let i=0;i<90;i++)pts.push({x:Math.random()*2000,y:Math.random()*1200,vx:(Math.random()-.5)*0.3,vy:(Math.random()-.5)*0.3,r:Math.random()*1.6+0.4,a:Math.random()*0.5+0.1});
+  (function frame(){cx.clearRect(0,0,W,H);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);cx.fillStyle=`rgba(129,140,248,${p.a})`;cx.fill();});requestAnimationFrame(frame);})();
+})();
+</script>
+
+<script>
+function switchTab(i){
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('active',j===i));
+  document.querySelectorAll('.tab-panel').forEach((p,j)=>p.classList.toggle('active',j===i));
+  const fns=[drawAmpForce,drawBentWire,drawCoilTorque,drawChargeField];
+  if(fns[i]) fns[i]();
+}
+function drawArrow(ctx,x1,y1,x2,y2,col,w=2.5){
+  const dx=x2-x1,dy=y2-y1,l=Math.sqrt(dx*dx+dy*dy);if(l<1)return;
+  ctx.save();ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=w;
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  const a=Math.atan2(dy,dx);ctx.translate(x2,y2);ctx.rotate(a);
+  ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-11,-5);ctx.lineTo(-11,5);ctx.closePath();ctx.fill();
+  ctx.restore();
+}
+</script>
+
+<!-- Tab 0: Ampere force -->
+<script>
+let ampForceTheta=90;
+let ampForcePaused=false;
+
+function toggleAmpForceAnim(){
+  ampForcePaused = !ampForcePaused;
+  document.getElementById('btnPauseAmpForce').textContent = ampForcePaused ? '▶ 播放' : '⏸ 暂停';
+}
+
+function resetAmpForce(){
+  ampForceTheta = 90;
+  document.getElementById('ampForceTheta').value = 90;
+  updateAmpForce();
+}
+
+function updateAmpForce(){
+  ampForceTheta=parseInt(document.getElementById('ampForceTheta').value);
+  const F=Math.abs(Math.sin(ampForceTheta*Math.PI/180));
+  document.getElementById('ampForceThetaVal').textContent=ampForceTheta+'°';
+  document.getElementById('ampForceFVal').textContent=F.toFixed(3);
+  drawAmpForce();
+}
+function drawAmpForce(){
+  const cv=document.getElementById('ampForceCanvas');if(!cv)return;
+  const ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  const cx=W/2,cy=H/2;
+  const rad=ampForceTheta*Math.PI/180;
+
+  // B field background (pointing up = -y screen)
+  for(let x=20;x<W;x+=55){
+    ctx.strokeStyle='rgba(56,189,248,0.15)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(x,H-20);ctx.lineTo(x,20);ctx.stroke();
+    ctx.fillStyle='rgba(56,189,248,0.2)';
+    ctx.beginPath();ctx.moveTo(x,22);ctx.lineTo(x-4,34);ctx.lineTo(x+4,34);ctx.closePath();ctx.fill();
+  }
+  ctx.fillStyle='rgba(56,189,248,0.45)';ctx.font='12px Times New Roman';ctx.textAlign='left';ctx.fillText('B⃗ ↑',8,20);
+
+  // current wire (direction = angle from +x)
+  const Ilen=90;
+  const Ix=cx+Ilen*Math.cos(rad), Iy=cy-Ilen*Math.sin(rad);
+  const Ix0=cx-Ilen*Math.cos(rad), Iy0=cy+Ilen*Math.sin(rad);
+  ctx.strokeStyle='#f87171';ctx.lineWidth=5;
+  ctx.beginPath();ctx.moveTo(Ix0,Iy0);ctx.lineTo(Ix,Iy);ctx.stroke();
+  drawArrow(ctx,cx,cy,Ix,Iy,'#f87171',3);
+  ctx.fillStyle='#f87171';ctx.font='bold 13px Times New Roman';ctx.textAlign='left';
+  ctx.fillText('I',Ix+8,Iy-4);
+
+  // F = I*dl x B: dl along (cos,-sin,0), B along (0,-1,0) [up on screen = -y]
+  // dl x B = (cos,-sin,0) x (0,1,0) [B is +y in math coords] = (-sin*0-0*1, 0*0-cos*0, cos*1-(-sin)*0) = (0,0,cos)
+  // So F is along +z (out of page) when dl has +x component... let's use screen geometry
+  // dl direction: (cos θ, sin θ) in math coords (y up). B = (0,1) math coords.
+  // F = I dl x B = I(cos θ x̂ + sin θ ŷ) x (Bŷ) = I*cos θ * B (x̂ x ŷ) = I*cos θ * B ẑ
+  // Wait, that's wrong. Let me redo:
+  // θ is angle between l-vector and B. B points up (+y math). l direction at angle (90-θ) from +y...
+  // Let's just say: F direction is perpendicular to both l and B, magnitude = IlBsinθ
+  // direction: l x B, where l = (cosα, -sinα, 0) [screen], B = (0, -1, 0) [screen up = -y screen]
+  // Actually simplest: use right-hand rule visually
+  // F perpendicular to wire, in the plane of wire and B
+  // For wire pointing at angle rad from +x screen (right), B pointing up screen (-y screen):
+  // F = I * l_vec x B_vec; l_vec = (cos rad, -sin rad, 0); B_vec = (0, -1, 0)
+  // F_vec = I*((-sin rad * 0 - 0*(-1)), (0*0 - cos rad * 0), (cos rad * (-1) - (-sin rad)*0))
+  //       = I*(0, 0, -cos rad) = out of page if cos rad < 0
+  // Hmm, force is along z (in/out of page), not visible in 2D. Let me change B to point into page.
+  // B into page (z negative), wire in xy plane, then F is in xy plane - better!
+
+  // Redo: B into page = (0,0,-1), wire direction = (cos rad, -sin rad, 0)
+  // F = l x B = (cos r, -sin r, 0) x (0,0,-1) = ((-sin r)(-1)-0, 0-cos r * (-1), 0) = (sin r, cos r, 0)
+  // In screen: F_screen = (sin rad, cos rad) approximately
+  const sinT=Math.sin(rad), cosT=Math.cos(rad);
+  const Fmag=Math.abs(sinT); // sinθ where θ is angle between l and B
+  // actually when B is into page and wire is horizontal (rad=0), θ=90 and F should be max
+  // wire direction = (cos rad, -sin rad), B = z into page
+  // angle between wire and B = 90 (since wire is in xy, B is z): always 90... that's wrong too
+  // Let me just make B horizontal (pointing right), wire at angle rad from horizontal
+  // Then θ = angle between l and B = rad. F = IlBsinθ, perpendicular to both.
+  // B = (1,0,0), l = (cos rad, -sin rad, 0)
+  // F = l x B = (-sin rad * 0 - 0*0, 0*1 - cos rad * 0, cos rad * 0 - (-sin rad)*1) = (0,0,sin rad)
+  // F is out of page! Still z direction. For 2D visualization, let's just show magnitude as arrow perpendicular to wire.
+
+  const Flen=70*Fmag;
+  // F perpendicular to wire, upward component
+  const perpX=-(-Math.sin(rad)); // perpendicular to wire direction
+  const perpY=-(Math.cos(rad));
+  // normalize
+  const perpL=Math.sqrt(perpX*perpX+perpY*perpY);
+  const pnx=perpX/perpL, pny=perpY/perpL;
+
+  if(Flen>3){
+    drawArrow(ctx,cx,cy,cx+pnx*Flen,cy+pny*Flen,'#34d399',3);
+    ctx.fillStyle='#34d399';ctx.font='bold 13px Times New Roman';ctx.textAlign='center';
+    ctx.fillText('F⃗',cx+pnx*Flen+12,cy+pny*Flen-8);
+    ctx.fillStyle='rgba(52,211,153,0.6)';ctx.font='12px "Microsoft YaHei"';
+    ctx.fillText('F = '+Fmag.toFixed(3)+' BIl',cx+pnx*Flen+14,cy+pny*Flen+10);
+  } else {
+    ctx.fillStyle='rgba(52,211,153,0.5)';ctx.font='13px "Microsoft YaHei"';ctx.textAlign='center';
+    ctx.fillText('F = 0（I ∥ B）',cx,cy+70);
+  }
+
+  // angle arc
+  ctx.strokeStyle='rgba(251,191,36,0.5)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.arc(cx,cy,40,0,-rad,rad>0);ctx.stroke();
+  ctx.fillStyle='#fbbf24';ctx.font='12px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText('θ='+ampForceTheta+'°',cx+58*Math.cos(-rad/2),cy+58*Math.sin(-rad/2)+4);
+
+  ctx.fillStyle='rgba(255,255,255,0.25)';ctx.font='12px Times New Roman';ctx.textAlign='left';
+  ctx.fillText('F = BIl sinθ',12,H-14);
+}
+window.addEventListener('DOMContentLoaded',drawAmpForce);
+</script>
+
+<!-- Tab 1: Bent wire -->
+<script>
+let bentShape='arc';
+let showBField=false;
+
+function toggleBField(){
+  showBField = !showBField;
+  drawBentWire();
+}
+
+function setShape(s){
+  bentShape=s;
+  ['arc','zig','sin'].forEach(n=>document.getElementById('shape'+n.charAt(0).toUpperCase()+n.slice(1)).classList.toggle('active',n===s));
+  drawBentWire();
+}
+function drawBentWire(){
+  const cv=document.getElementById('bentWireCanvas');if(!cv)return;
+  const ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+
+  // B field (pointing up) - only if enabled
+  if(showBField){
+    for(let x=15;x<W;x+=50){
+      ctx.strokeStyle='rgba(56,189,248,0.12)';ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(x,H-15);ctx.lineTo(x,15);ctx.stroke();
+    }
+  }
+  ctx.fillStyle='rgba(56,189,248,0.35)';ctx.font='12px Times New Roman';ctx.textAlign='left';ctx.fillText('B⃗ ↑',8,18);
+
+  const ax=150,ay=H/2,bx=W-150,by=H/2;
+  // endpoints
+  ctx.beginPath();ctx.arc(ax,ay,7,0,Math.PI*2);ctx.fillStyle='rgba(251,191,36,0.9)';ctx.fill();
+  ctx.beginPath();ctx.arc(bx,by,7,0,Math.PI*2);ctx.fillStyle='rgba(251,191,36,0.9)';ctx.fill();
+  ctx.fillStyle='rgba(251,191,36,0.7)';ctx.font='13px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText('a',ax,ay-14);ctx.fillText('b',bx,by-14);
+
+  // Draw bent wire
+  ctx.strokeStyle='#818cf8';ctx.lineWidth=3;ctx.beginPath();
+  const L=bx-ax;
+  if(bentShape==='arc'){
+    ctx.arc((ax+bx)/2,ay,L/2,Math.PI,0);
+  } else if(bentShape==='zig'){
+    ctx.moveTo(ax,ay);
+    const nx=5;
+    for(let i=0;i<=nx;i++){
+      const x=ax+L*i/nx;
+      const y=ay+(i%2===0?0:-60);
+      ctx.lineTo(x,y);
+    }
+  } else {
+    ctx.moveTo(ax,ay);
+    const steps=80;
+    for(let i=1;i<=steps;i++){
+      const t=i/steps;
+      const x=ax+L*t;
+      const y=ay-50*Math.sin(t*Math.PI*3);
+      ctx.lineTo(x,y);
+    }
+  }
+  ctx.stroke();
+
+  // Equivalent straight wire (dashed yellow)
+  ctx.strokeStyle='rgba(251,191,36,0.7)';ctx.lineWidth=2.5;ctx.setLineDash([8,5]);
+  ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(bx,by);ctx.stroke();
+  ctx.setLineDash([]);
+
+  // F arrows (uniform B pointing up, wire horizontal L=bx-ax along x)
+  // F = I L x B: L = (L,0,0), B = (0,1,0), F = (0,0,L) - out of page, not visible
+  // Let's show F perpendicular to L in the plane: here L is horizontal, B is vertical
+  // F = ILx B: horizontal x vertical = out of page -> show as dot/circle symbol
+  // Let's just show magnitude as vertical arrow (representative)
+  const Flen=55;
+  drawArrow(ctx,(ax+bx)/2,ay,(ax+bx)/2,ay-Flen,'rgba(52,211,153,0.9)',3);
+  ctx.fillStyle='rgba(52,211,153,0.8)';ctx.font='bold 13px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText('F = ILB',W/2,ay-Flen-12);
+
+  ctx.fillStyle='rgba(255,255,255,0.35)';ctx.font='12px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText('无论弯曲形状如何，安培力 F = I|L_ab|B sin θ 恒定',W/2,H-14);
+}
+window.addEventListener('DOMContentLoaded',drawBentWire);
+</script>
+
+<!-- Tab 2: Coil torque -->
+<script>
+let coilTheta0=90, coilThetaCur=90, coilOmega=0, coilPlaying=false, coilRAF=null;
+let dampingEnabled=false;
+
+function toggleDamping(){
+  dampingEnabled = !dampingEnabled;
+}
+
+function updateCoilAngle(){
+  coilTheta0=parseInt(document.getElementById('coilTheta0').value);
+  document.getElementById('coilTheta0Val').textContent=coilTheta0+'°';
+  resetCoilTorque();
+}
+
+function resetCoilTorque(){
+  coilThetaCur=coilTheta0; coilOmega=0; coilPlaying=false;
+  if(coilRAF){cancelAnimationFrame(coilRAF);coilRAF=null;}
+  drawCoilTorque();
+}
+
+function releaseCoil(){
+  coilThetaCur=coilTheta0; coilOmega=0; coilPlaying=true;
+  document.getElementById('coilRelBtn').textContent='⏸ 暂停';
+  animateCoil();
+}
+function resetCoil(){
+  coilThetaCur=coilTheta0; coilOmega=0; coilPlaying=false;
+  document.getElementById('coilRelBtn').textContent='▶ 释放线圈';
+  drawCoilTorque();
+}
+function animateCoil(){
+  if(!coilPlaying)return;
+  const dt=0.03;
+  const M=-Math.sin(coilThetaCur*Math.PI/180); // restoring torque
+  const I=0.5; // moment of inertia (normalized)
+  const damping = dampingEnabled ? 0.15 : 0.06;
+  coilOmega += M/I*dt - damping*coilOmega;
+  coilThetaCur += coilOmega*dt*180/Math.PI*10;
+  if(Math.abs(coilThetaCur)<1 && Math.abs(coilOmega)<0.5){
+    coilThetaCur=0; coilOmega=0; coilPlaying=false;
+    document.getElementById('coilRelBtn').textContent='▶ 释放线圈';
+  }
+  drawCoilTorque();
+  if(coilPlaying) coilRAF=requestAnimationFrame(animateCoil);
+}
+function drawCoilTorque(){
+  const cv=document.getElementById('coilTorqueCanvas');if(!cv)return;
+  const ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+  const LP=W*0.42, cx=LP/2, cy=H/2;
+  const theta=coilThetaCur*Math.PI/180;
+
+  // B field arrows (pointing right)
+  for(let y=20;y<H;y+=50){
+    ctx.strokeStyle='rgba(56,189,248,0.15)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(20,y);ctx.lineTo(LP-10,y);ctx.stroke();
+  }
+  ctx.fillStyle='rgba(56,189,248,0.4)';ctx.font='12px Times New Roman';ctx.textAlign='left';ctx.fillText('B⃗ →',22,18);
+
+  // Coil as a line (edge-on view) - rotates about vertical axis
+  const coilLen=70;
+  const ex=coilLen*Math.cos(theta), ey=coilLen*Math.sin(theta);
+  ctx.strokeStyle='#818cf8';ctx.lineWidth=4;
+  ctx.beginPath();ctx.moveTo(cx-ex,cy-ey);ctx.lineTo(cx+ex,cy+ey);ctx.stroke();
+  // current arrows on coil sides
+  [[cx-ex,cy-ey,1],[cx+ex,cy+ey,-1]].forEach(([x,y,dir])=>{
+    ctx.beginPath();ctx.arc(x,y,8,0,Math.PI*2);
+    ctx.fillStyle='rgba(129,140,248,0.3)';ctx.fill();
+    ctx.strokeStyle='rgba(129,140,248,0.7)';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,0.8)';ctx.font='bold 11px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(dir>0?'⊙':'⊗',x,y+1);ctx.textBaseline='alphabetic';
+  });
+
+  // magnetic moment arrow (perpendicular to coil)
+  const Pmx=70*Math.cos(theta+Math.PI/2), Pmy=70*Math.sin(theta+Math.PI/2);
+  drawArrow(ctx,cx,cy,cx+Pmx,cy+Pmy,'#34d399',2.5);
+  ctx.fillStyle='#34d399';ctx.font='12px Times New Roman';ctx.textAlign='center';
+  ctx.fillText('P⃗_m',cx+Pmx+12,cy+Pmy-4);
+
+  // torque indicator (arc)
+  const M=Math.sin(theta);
+  if(Math.abs(M)>0.05){
+    const arcDir=M>0?-1:1;
+    ctx.strokeStyle='rgba(192,132,252,0.7)';ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(cx,cy,50,theta+Math.PI/2,theta+Math.PI/2+arcDir*0.7,M<0);
+    ctx.stroke();
+    ctx.fillStyle='rgba(192,132,252,0.6)';ctx.font='11px "Microsoft YaHei"';ctx.textAlign='center';
+    ctx.fillText('M',cx+55*Math.cos(theta+Math.PI/2+arcDir*0.35),cy+55*Math.sin(theta+Math.PI/2+arcDir*0.35));
+  }
+
+  ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='12px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText('θ = '+Math.round(coilThetaCur)+'°',cx,H-16);
+  ctx.fillText('M = '+Math.abs(Math.sin(theta)).toFixed(3)+' P_mB',cx,H-34);
+
+  // Divider
+  ctx.strokeStyle='rgba(255,255,255,0.07)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(LP,0);ctx.lineTo(LP,H);ctx.stroke();
+
+  // Right panel: M(θ) and V(θ) curves
+  const RP=LP+12,RW=W-RP-20,padT=30,padB=30,GH=H-padT-padB;
+  ctx.strokeStyle='rgba(255,255,255,0.15)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(RP,padT);ctx.lineTo(RP,padT+GH);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(RP,padT+GH/2);ctx.lineTo(RP+RW,padT+GH/2);ctx.stroke();
+
+  const xMax=Math.PI*2;
+  // M = sinθ curve (blue)
+  ctx.strokeStyle='rgba(56,189,248,0.8)';ctx.lineWidth=2;ctx.beginPath();
+  for(let i=0;i<=200;i++){
+    const t=xMax*i/200;
+    const Mv=Math.sin(t);
+    const sx=RP+t/xMax*RW,sy=padT+GH/2-Mv*GH*0.4;
+    i===0?ctx.moveTo(sx,sy):ctx.lineTo(sx,sy);
+  }
+  ctx.stroke();
+  // V = -cosθ curve (red)
+  ctx.strokeStyle='rgba(248,113,113,0.7)';ctx.lineWidth=2;ctx.setLineDash([5,3]);ctx.beginPath();
+  for(let i=0;i<=200;i++){
+    const t=xMax*i/200;
+    const Vv=-Math.cos(t);
+    const sx=RP+t/xMax*RW,sy=padT+GH/2-Vv*GH*0.4;
+    i===0?ctx.moveTo(sx,sy):ctx.lineTo(sx,sy);
+  }
+  ctx.stroke();ctx.setLineDash([]);
+
+  // current theta marker
+  const cth=(coilThetaCur%360+360)%360*Math.PI/180;
+  const sxC=RP+(cth%(2*Math.PI))/(xMax)*RW;
+  const MvC=Math.sin(coilThetaCur*Math.PI/180);
+  const VvC=-Math.cos(coilThetaCur*Math.PI/180);
+  ctx.beginPath();ctx.arc(sxC,padT+GH/2-MvC*GH*0.4,5,0,Math.PI*2);ctx.fillStyle='#38bdf8';ctx.fill();
+  ctx.beginPath();ctx.arc(sxC,padT+GH/2-VvC*GH*0.4,5,0,Math.PI*2);ctx.fillStyle='#f87171';ctx.fill();
+
+  // x axis labels
+  [0,0.25,0.5,0.75,1.0].forEach(v=>{
+    const t=v*xMax;
+    const sx=RP+v*RW;
+    ctx.fillStyle='rgba(255,255,255,0.25)';ctx.font='9px Arial';ctx.textAlign='center';
+    const label=['0','π/2','π','3π/2','2π'][Math.round(v*4)];
+    ctx.fillText(label,sx,padT+GH+14);
+  });
+  // legend
+  ctx.fillStyle='rgba(56,189,248,0.7)';ctx.font='10px "Microsoft YaHei"';ctx.textAlign='left';
+  ctx.fillText('M = sinθ',RP+4,padT+14);
+  ctx.fillStyle='rgba(248,113,113,0.7)';
+  ctx.fillText('V = -cosθ',RP+4,padT+28);
+}
+window.addEventListener('DOMContentLoaded',()=>{drawCoilTorque();});
+</script>
+
+<!-- Tab 3: Moving charge field -->
+<script>
+let chargeVParam=0.3, chargeMX=310, chargeMY=150;
+let showFieldLines=true;
+
+function toggleFieldLines(){
+  showFieldLines = !showFieldLines;
+  drawChargeField();
+}
+
+function updateCharge(){
+  chargeVParam=parseFloat(document.getElementById('chargeV').value);
+  document.getElementById('chargeVVal').textContent=chargeVParam.toFixed(2);
+  drawChargeField();
+}
+function drawChargeField(){
+  const cv=document.getElementById('chargeFieldCanvas');if(!cv)return;
+  const ctx=cv.getContext('2d'),W=cv.width,H=cv.height;
+  ctx.clearRect(0,0,W,H);
+
+  const qx=W/2,qy=H/2;
+  const v=chargeVParam;
+
+  // field lines (circular, with v-direction arrows) - only if enabled
+  if(showFieldLines){
+    const radii=[40,70,110,155];
+    radii.forEach((r,ri)=>{
+      const alpha=0.7-ri*0.12;
+      ctx.strokeStyle=`rgba(56,189,248,${alpha})`;ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.arc(qx,qy,r,0,Math.PI*2);ctx.stroke();
+      // arrows (CCW since B = v×r, v=+x, r outward, so B is in y-direction at top/bottom)
+      const nArrows=4+ri;
+      for(let i=0;i<nArrows;i++){
+        const ang=i/nArrows*Math.PI*2;
+        const ax=qx+r*Math.cos(ang),ay=qy+r*Math.sin(ang);
+        // B direction: v x r_hat = x_hat x (cos,sin,0) = (0,0,cos)*0 + (0,0,sin)...
+        // v = (1,0,0), r_hat = (cos ang, sin ang, 0)
+        // v x r_hat = (0*0 - 0*sin, 0*cos - 1*0, 1*sin - 0*cos) = (0, 0, sin ang)
+        // If sin ang > 0 (upper half), B is out of page; if sin < 0, B is into page
+        // For 2D visualization, show as circle with dot/cross at field points
+        // Instead, show tangent arrow with direction based on B
+        const tangAng = ang + Math.PI/2; // CCW tangent
+        const sinAng = Math.sin(ang);
+        // B magnitude scales with sin of angle between v and r: sin(angle) = |sin ang| wait...
+        // |B| = mu0*qv*sin(angle_between_v_and_r)/(4pi*r^2)
+        // angle between v=(1,0) and r=(cos,sin) is ang itself (measured from +x)
+        // sin(ang_between) = |sin ang| but direction needs cross product
+        const Bmag = Math.abs(Math.sin(ang));
+        const bAlpha=0.3+Bmag*0.5;
+        // draw tangent arrow (direction based on sin ang sign)
+        const dir = Math.sin(ang) >= 0 ? 1 : -1; // CCW if upper half (B out), CW if lower
+        const aTang = ang + dir*Math.PI/2;
+        const len=10+Bmag*8;
+        ctx.strokeStyle=`rgba(56,189,248,${bAlpha})`;ctx.lineWidth=1.5;
+        ctx.beginPath();ctx.moveTo(ax,ay);ctx.lineTo(ax+len*Math.cos(aTang),ay+len*Math.sin(aTang));ctx.stroke();
+        ctx.fillStyle=`rgba(56,189,248,${bAlpha})`;
+        ctx.beginPath();
+        ctx.moveTo(ax+len*Math.cos(aTang),ay+len*Math.sin(aTang));
+        ctx.lineTo(ax+len*Math.cos(aTang)-6*Math.cos(aTang-0.4),ay+len*Math.sin(aTang)-6*Math.sin(aTang-0.4));
+        ctx.lineTo(ax+len*Math.cos(aTang)-6*Math.cos(aTang+0.4),ay+len*Math.sin(aTang)-6*Math.sin(aTang+0.4));
+        ctx.closePath();ctx.fill();
+      }
+    });
+  }
+
+  // moving charge
+  const grd=ctx.createRadialGradient(qx,qy,0,qx,qy,16);
+  grd.addColorStop(0,'rgba(251,191,36,1)');grd.addColorStop(1,'rgba(251,191,36,0)');
+  ctx.beginPath();ctx.arc(qx,qy,16,0,Math.PI*2);ctx.fillStyle=grd;ctx.fill();
+  ctx.beginPath();ctx.arc(qx,qy,8,0,Math.PI*2);ctx.fillStyle='#fbbf24';ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='bold 12px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('+',qx,qy+1);ctx.textBaseline='alphabetic';
+
+  // velocity arrow
+  drawArrow(ctx,qx,qy,qx+70,qy,'#f87171',3);
+  ctx.fillStyle='#f87171';ctx.font='bold 13px Times New Roman';ctx.textAlign='left';ctx.fillText('v⃗',qx+78,qy+5);
+
+  // field at mouse point
+  if(chargeMX&&chargeMY){
+    const dx=chargeMX-qx,dy=chargeMY-qy;
+    const r2=Math.sqrt(dx*dx+dy*dy);
+    if(r2>20&&r2<250){
+      const Bscale=v/r2/r2*3000;
+      const sinAng=Math.abs(Math.sin(Math.atan2(dy,dx)));
+      const Bv=Bscale*sinAng;
+      ctx.beginPath();ctx.arc(chargeMX,chargeMY,5,0,Math.PI*2);
+      ctx.fillStyle='#34d399';ctx.fill();
+      ctx.fillStyle='rgba(52,211,153,0.7)';ctx.font='11px "Microsoft YaHei"';ctx.textAlign='left';
+      ctx.fillText('B∝'+Bv.toFixed(1),chargeMX+8,chargeMY-4);
+    }
+  }
+
+  // formula
+  ctx.fillStyle='rgba(255,255,255,0.3)';ctx.font='12px Times New Roman';ctx.textAlign='left';
+  ctx.fillText('B = μ₀qv sinθ / (4πr²)',12,H-14);
+  ctx.textAlign='right';
+  ctx.fillText('v/c = '+v.toFixed(2),W-12,H-14);
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const cv=document.getElementById('chargeFieldCanvas');
+  if(!cv)return;
+  cv.addEventListener('mousemove',e=>{
+    const r=cv.getBoundingClientRect();
+    chargeMX=e.clientX-r.left;chargeMY=e.clientY-r.top;
+    drawChargeField();
+  });
+  drawChargeField();
+});
+</script>
+
+<!-- ── 笔记工具栏 ── -->
+<style>
+.note-fab {
+  position: fixed; bottom: 28px; right: 28px; z-index: 1000;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+}
+.fab-main {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #818cf8);
+  border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 22px; box-shadow: 0 4px 20px rgba(99,102,241,0.5);
+  transition: transform 0.2s, box-shadow 0.2s;
+  color: #fff;
+}
+.fab-main:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(99,102,241,0.65); }
+.fab-main.active { background: linear-gradient(135deg, #7c3aed, #a78bfa); transform: rotate(45deg); }
+.fab-menu {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+  opacity: 0; pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.fab-menu.open { opacity: 1; pointer-events: all; transform: translateY(0); }
+.fab-item {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(15,12,41,0.92); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px; padding: 9px 16px 9px 12px;
+  cursor: pointer; white-space: nowrap;
+  backdrop-filter: blur(12px);
+  transition: border-color 0.2s, background 0.2s;
+  font-family: "Microsoft YaHei", sans-serif;
+}
+.fab-item:hover { border-color: rgba(129,140,248,0.4); background: rgba(99,102,241,0.15); }
+.fab-item .fi-icon { font-size: 17px; }
+.fab-item .fi-label { font-size: 13px; color: rgba(255,255,255,0.8); }
+.fab-item.starred .fi-label { color: #fbbf24; }
+.fab-item.starred { border-color: rgba(251,191,36,0.35); }
+.fab-item.read-done .fi-label { color: #34d399; }
+.fab-item.read-done { border-color: rgba(52,211,153,0.35); }
+.note-drawer {
+  position: fixed; bottom: 0; right: 0; left: 0; z-index: 999;
+  background: rgba(10,8,30,0.96);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(20px);
+  padding: 20px 28px 28px;
+  transform: translateY(100%);
+  transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
+}
+.note-drawer.open { transform: translateY(0); }
+.drawer-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.drawer-title { font-size: 14px; font-weight: 700; color: #a5b4fc; font-family: "Microsoft YaHei",sans-serif; letter-spacing: 1px; }
+.drawer-close { font-size: 20px; color: rgba(255,255,255,0.4); cursor: pointer; transition: color 0.2s; line-height: 1; }
+.drawer-close:hover { color: #fff; }
+.drawer-textarea {
+  width: 100%; height: 120px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px; padding: 12px 16px;
+  color: #fff; font-size: 14px; font-family: "Microsoft YaHei",sans-serif;
+  resize: vertical; outline: none; line-height: 1.8;
+  transition: border-color 0.2s;
+}
+.drawer-textarea:focus { border-color: rgba(129,140,248,0.5); }
+.drawer-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+.drawer-hint { font-size: 11px; color: rgba(255,255,255,0.25); font-family: "Microsoft YaHei",sans-serif; }
+.drawer-save {
+  background: linear-gradient(135deg, #6366f1, #818cf8); border: none;
+  color: #fff; font-size: 13px; font-weight: 600; padding: 8px 22px; border-radius: 10px;
+  cursor: pointer; font-family: "Microsoft YaHei",sans-serif; transition: opacity 0.2s;
+}
+.drawer-save:hover { opacity: 0.85; }
+.phy-toast {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: rgba(15,12,41,0.95); border: 1px solid rgba(129,140,248,0.3);
+  border-radius: 24px; padding: 10px 22px;
+  font-size: 13px; color: rgba(255,255,255,0.85); font-family: "Microsoft YaHei",sans-serif;
+  z-index: 1100; opacity: 0;
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none; white-space: nowrap;
+}
+.phy-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+
+<div class="note-fab">
+  <div class="fab-menu" id="fabMenu">
+    <div class="fab-item" id="fabStar" onclick="toggleStar()">
+      <span class="fi-icon">☆</span>
+      <span class="fi-label">收藏此节</span>
+    </div>
+    <div class="fab-item" id="fabRead" onclick="toggleRead()">
+      <span class="fi-icon">○</span>
+      <span class="fi-label">标记已读</span>
+    </div>
+    <div class="fab-item" onclick="openDrawer()">
+      <span class="fi-icon">📝</span>
+      <span class="fi-label">我的笔记</span>
+    </div>
+  </div>
+  <button class="fab-main" id="fabBtn" onclick="toggleFab()" title="工具">✦</button>
+</div>
+
+<div class="note-drawer" id="noteDrawer">
+  <div class="drawer-header">
+    <div class="drawer-title">📝 我的笔记 · §3-6</div>
+    <div class="drawer-close" onclick="closeDrawer()">×</div>
+  </div>
+  <textarea class="drawer-textarea" id="drawerTA" placeholder="在此记录你的理解、疑问或总结……"></textarea>
+  <div class="drawer-footer">
+    <span class="drawer-hint">自动保存到本地，刷新不丢失</span>
+    <button class="drawer-save" onclick="saveNote()">保存</button>
+  </div>
+</div>
+
+<div class="phy-toast" id="phyToast"></div>
+
+<script>
+(function(){
+  const PID = '3-6';
+  const SK  = 'phy26_note_' + PID;
+  const STK = 'phy26_star_' + PID;
+  const RDK = 'phy26_read_' + PID;
+  let fabOpen = false;
+
+  function showToast(msg) {
+    const t = document.getElementById('phyToast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2000);
+  }
+
+  window.toggleFab = function() {
+    fabOpen = !fabOpen;
+    document.getElementById('fabMenu').classList.toggle('open', fabOpen);
+    document.getElementById('fabBtn').classList.toggle('active', fabOpen);
+  };
+
+  window.toggleStar = function() {
+    const starred = localStorage.getItem(STK) === '1';
+    if (starred) { localStorage.removeItem(STK); showToast('已取消收藏'); }
+    else { localStorage.setItem(STK, '1'); showToast('⭐ 已收藏此节'); }
+    refreshStarUI();
+  };
+
+  window.toggleRead = function() {
+    const read = localStorage.getItem(RDK) === '1';
+    if (read) { localStorage.removeItem(RDK); showToast('已取消已读标记'); }
+    else { localStorage.setItem(RDK, '1'); showToast('✓ 已标记为已读'); }
+    refreshReadUI();
+  };
+
+  function refreshStarUI() {
+    const starred = localStorage.getItem(STK) === '1';
+    const el = document.getElementById('fabStar');
+    el.querySelector('.fi-icon').textContent = starred ? '★' : '☆';
+    el.querySelector('.fi-label').textContent = starred ? '已收藏' : '收藏此节';
+    el.classList.toggle('starred', starred);
+  }
+
+  function refreshReadUI() {
+    const read = localStorage.getItem(RDK) === '1';
+    const el = document.getElementById('fabRead');
+    el.querySelector('.fi-icon').textContent = read ? '✓' : '○';
+    el.querySelector('.fi-label').textContent = read ? '已读' : '标记已读';
+    el.classList.toggle('read-done', read);
+  }
+
+  window.openDrawer = function() {
+    document.getElementById('drawerTA').value = localStorage.getItem(SK) || '';
+    document.getElementById('noteDrawer').classList.add('open');
+    document.getElementById('fabMenu').classList.remove('open');
+    document.getElementById('fabBtn').classList.remove('active');
+    fabOpen = false;
+    setTimeout(() => document.getElementById('drawerTA').focus(), 350);
+  };
+
+  window.closeDrawer = function() {
+    document.getElementById('noteDrawer').classList.remove('open');
+  };
+
+  window.saveNote = function() {
+    const val = document.getElementById('drawerTA').value.trim();
+    if (val) { localStorage.setItem(SK, val); showToast('✓ 笔记已保存'); }
+    else { localStorage.removeItem(SK); showToast('笔记已清空'); }
+    closeDrawer();
+  };
+
+  let saveTimer;
+  document.getElementById('drawerTA').addEventListener('input', function() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      const val = this.value.trim();
+      if (val) localStorage.setItem(SK, val);
+    }, 1500);
+  });
+
+  refreshStarUI(); refreshReadUI();
+
+  if (localStorage.getItem(SK)) {
+    const noteItem = document.querySelector('.fab-item:last-of-type .fi-icon');
+    if (noteItem) noteItem.textContent = '📋';
+  }
+})();
+</script>
+</body>
+</html>

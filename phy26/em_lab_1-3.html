@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>实验：高斯定理 — 1-3</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;color:#fff;overflow-x:hidden}
+    .topbar{display:flex;align-items:center;gap:14px;padding:16px 28px;border-bottom:1px solid rgba(255,255,255,0.07);background:rgba(15,12,41,0.7);backdrop-filter:blur(12px)}
+    .back-btn{color:rgba(255,255,255,0.55);font-size:14px;cursor:pointer;text-decoration:none;transition:color .2s}
+    .back-btn:hover{color:#818cf8}
+    .topbar-title-wrap{display:flex;flex-direction:column;gap:2px}
+    .topbar-title{font-size:16px;font-weight:700}
+    .topbar-course{font-size:11px;color:rgba(255,255,255,0.38);letter-spacing:1px}
+    .topbar-sub{margin-left:auto;font-size:12px;color:rgba(255,255,255,0.3)}
+    .layout{display:flex;height:calc(100vh - 57px)}
+    .sidebar{width:250px;flex-shrink:0;background:rgba(255,255,255,0.03);border-right:1px solid rgba(255,255,255,0.07);padding:20px 16px;display:flex;flex-direction:column;gap:16px;overflow-y:auto}
+    .ctrl-group h3{font-size:11px;color:rgba(255,255,255,0.38);letter-spacing:1px;margin-bottom:10px;text-transform:uppercase}
+    .slider-row{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+    .slider-row label{font-size:12.5px;color:rgba(255,255,255,0.6);display:flex;justify-content:space-between}
+    .slider-row label span{color:#818cf8;font-weight:600}
+    input[type=range]{width:100%;accent-color:#818cf8}
+    .divider{height:1px;background:rgba(255,255,255,0.07)}
+    .result-panel{background:rgba(99,102,241,0.06);border:1px solid rgba(99,102,241,0.2);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+    .result-panel h3{font-size:11px;color:rgba(99,102,241,0.7);letter-spacing:1px}
+    .result-row{display:flex;justify-content:space-between;align-items:baseline}
+    .result-label{font-size:12px;color:rgba(255,255,255,0.45)}
+    .result-value{font-size:15px;font-weight:700;color:#818cf8}
+    .result-unit{font-size:11px;color:rgba(255,255,255,0.3);margin-left:3px}
+    .match-box{border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600;text-align:center;margin-top:4px}
+    .match-box.yes{background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.3);color:#34d399}
+    .match-box.no{background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);color:#f87171}
+    .surface-btns{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+    .surface-btn{padding:7px 4px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);font-size:12px;cursor:pointer;text-align:center;color:rgba(255,255,255,0.45);transition:all .18s;font-family:"Microsoft YaHei",sans-serif}
+    .surface-btn.active{background:rgba(99,102,241,0.15);border-color:rgba(99,102,241,0.4);color:#818cf8}
+    .surface-btn:hover:not(.active){background:rgba(255,255,255,0.05)}
+    .info-box{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px;font-size:12px;color:rgba(255,255,255,0.4);line-height:1.8}
+    .canvas-wrap{flex:1;overflow:hidden;display:flex;flex-direction:column;padding:10px;gap:8px}
+    canvas{background:rgba(0,0,0,0.3);display:block;flex:1;width:100%}
+    .formula-bar{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px 20px;font-size:13px;color:rgba(255,255,255,0.55);text-align:center;width:100%;flex-shrink:0}
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">⚡ 实验：高斯定理</div>
+    <span class="topbar-course">普通物理（卓越班）下册 · 电磁学</span>
+  </div>
+  <div class="topbar-sub">§1-3 高斯定理及其应用</div>
+</div>
+<div class="layout">
+  <div class="sidebar">
+    <div class="ctrl-group">
+      <h3>闭合曲面形状</h3>
+      <div class="surface-btns">
+        <div class="surface-btn active" onclick="setSurface(this,'sphere')">球面</div>
+        <div class="surface-btn" onclick="setSurface(this,'cube')">正方体</div>
+        <div class="surface-btn" onclick="setSurface(this,'cylinder')">柱面</div>
+        <div class="surface-btn" onclick="setSurface(this,'ellipse')">椭球面</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="ctrl-group">
+      <h3>电荷配置</h3>
+      <div class="slider-row">
+        <label>q₁ (位置中心) = <span id="q1v">+2</span> μC</label>
+        <input type="range" id="q1s" min="-5" max="5" step="1" value="2" oninput="update()">
+      </div>
+      <div class="slider-row">
+        <label>q₂ (位置中心) = <span id="q2v">0</span> μC</label>
+        <input type="range" id="q2s" min="-5" max="5" step="1" value="0" oninput="update()">
+      </div>
+      <div class="slider-row">
+        <label>q₃ (曲面外) = <span id="q3v">+3</span> μC</label>
+        <input type="range" id="q3s" min="-5" max="5" step="1" value="3" oninput="update()">
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="slider-row">
+      <label>曲面半径 R = <span id="rVal">1.5</span></label>
+      <input type="range" id="rSlider" min="1" max="3" step="0.5" value="1.5" oninput="update()">
+    </div>
+    <div class="divider"></div>
+    <div class="result-panel">
+      <h3>计算结果</h3>
+      <div class="result-row">
+        <span class="result-label">面内总电荷 ΣQ_in</span>
+        <span><span class="result-value" id="resQin">—</span><span class="result-unit">μC</span></span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">电通量 Φ = ΣQ/ε₀</span>
+        <span><span class="result-value" id="resPhi">—</span><span class="result-unit">×10⁵ V·m</span></span>
+      </div>
+      <div class="result-row">
+        <span class="result-label">面外电荷对Φ贡献</span>
+        <span><span class="result-value" id="resOuter">0</span><span class="result-unit">（恒为零）</span></span>
+      </div>
+      <div class="match-box yes" id="matchBox">✓ 高斯定理成立</div>
+    </div>
+    <div class="info-box">
+      q₁, q₂ 在曲面内部<br>
+      q₃ 在曲面外部<br>
+      电通量只与面内电荷有关
+    </div>
+    <div class="report-fab" style="margin-top:auto;padding-top:12px">
+      <button class="report-fab-btn" onclick="openReport()">
+        <span class="rfb-icon">📄</span> 生成实验报告
+      </button>
+    </div>
+  </div>
+
+  <div class="canvas-wrap">
+    <canvas id="gaussCanvas"></canvas>
+    <div class="formula-bar">
+      ∯ E·dA = ΣQ_in / ε₀ &nbsp;（与曲面形状、面外电荷无关）
+    </div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('gaussCanvas');
+const ctx = canvas.getContext('2d');
+const eps0 = 8.854e-12;
+let surfaceType = 'sphere';
+
+function setSurface(el, type) {
+  document.querySelectorAll('.surface-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  surfaceType = type;
+  update();
+}
+
+function update() {
+  const q1 = parseFloat(document.getElementById('q1s').value)*1e-6;
+  const q2 = parseFloat(document.getElementById('q2s').value)*1e-6;
+  const q3 = parseFloat(document.getElementById('q3s').value)*1e-6;
+  const R  = parseFloat(document.getElementById('rSlider').value);
+  document.getElementById('q1v').textContent = (q1*1e6>0?'+':'')+q1*1e6;
+  document.getElementById('q2v').textContent = (q2*1e6>0?'+':'')+q2*1e6;
+  document.getElementById('q3v').textContent = (q3*1e6>0?'+':'')+q3*1e6;
+  document.getElementById('rVal').textContent = R.toFixed(1);
+
+  const Qin = q1+q2;
+  const Phi = Qin/eps0;
+
+  document.getElementById('resQin').textContent = (Qin*1e6>0?'+':'')+(Qin*1e6).toFixed(1);
+  document.getElementById('resPhi').textContent = (Phi/1e5>0?'+':'')+(Phi/1e5).toFixed(2);
+
+  draw(q1, q2, q3, R, Qin, Phi);
+}
+
+function draw(q1, q2, q3, R, Qin, Phi) {
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  const cx=W/2-60, cy=H/2;
+  const pxR = 60+R*30; // radius in pixels
+
+  // draw surface
+  ctx.save();
+  ctx.strokeStyle='rgba(99,102,241,0.7)';
+  ctx.lineWidth=2;
+  ctx.setLineDash([6,4]);
+  if(surfaceType==='sphere') {
+    ctx.beginPath(); ctx.arc(cx,cy,pxR,0,Math.PI*2); ctx.stroke();
+  } else if(surfaceType==='cube') {
+    const s=pxR*1.3;
+    ctx.strokeRect(cx-s/2,cy-s/2,s,s);
+  } else if(surfaceType==='cylinder') {
+    const rr=pxR*0.75, hh=pxR*1.3;
+    ctx.beginPath(); ctx.ellipse(cx,cy-hh/2,rr,rr*0.28,0,0,Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(cx,cy+hh/2,rr,rr*0.28,0,0,Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx-rr,cy-hh/2); ctx.lineTo(cx-rr,cy+hh/2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx+rr,cy-hh/2); ctx.lineTo(cx+rr,cy+hh/2); ctx.stroke();
+  } else if(surfaceType==='ellipse') {
+    ctx.beginPath(); ctx.ellipse(cx,cy,pxR*1.3,pxR*0.75,0,0,Math.PI*2); ctx.stroke();
+  }
+  ctx.restore();
+
+  // surface glow fill
+  ctx.save();
+  const alpha = Math.min(0.07+Math.abs(Qin)*1e5,0.18);
+  const fillCol = Qin>0 ? `rgba(239,68,68,${alpha})` : Qin<0 ? `rgba(56,189,248,${alpha})` : 'rgba(255,255,255,0.03)';
+  ctx.fillStyle = fillCol;
+  ctx.beginPath();
+  if(surfaceType==='sphere') ctx.arc(cx,cy,pxR,0,Math.PI*2);
+  else if(surfaceType==='cube'){const s=pxR*1.3;ctx.rect(cx-s/2,cy-s/2,s,s);}
+  else if(surfaceType==='ellipse') ctx.ellipse(cx,cy,pxR*1.3,pxR*0.75,0,0,Math.PI*2);
+  else {const rr=pxR*0.75,hh=pxR*1.3;ctx.rect(cx-rr,cy-hh/2,rr*2,hh);}
+  ctx.fill();
+  ctx.restore();
+
+  // field lines from/to q1+q2 inside
+  const nLines = 8;
+  for(let i=0;i<nLines;i++) {
+    const ang = (2*Math.PI*i)/nLines;
+    const lineLen = pxR*1.5;
+    const ex=Math.cos(ang), ey=Math.sin(ang);
+    if(Qin===0) continue;
+    const sign = Qin>0 ? 1 : -1;
+    // from center outward if positive
+    const x1=cx+(sign>0?8:lineLen)*ex, y1=cy+(sign>0?8:lineLen)*ey;
+    const x2=cx+(sign>0?lineLen:8)*ex, y2=cy+(sign>0?lineLen:8)*ey;
+    ctx.strokeStyle='rgba(255,210,60,0.5)'; ctx.lineWidth=1.2; ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+    // arrow
+    const ax=x2,ay=y2;
+    ctx.fillStyle='rgba(255,210,60,0.5)';
+    const as=6;
+    ctx.beginPath();
+    ctx.moveTo(ax,ay);
+    ctx.lineTo(ax-as*Math.cos(ang-0.4)*sign,ay-as*Math.sin(ang-0.4)*sign);
+    ctx.lineTo(ax-as*Math.cos(ang+0.4)*sign,ay-as*Math.sin(ang+0.4)*sign);
+    ctx.closePath(); ctx.fill();
+  }
+
+  // draw q1 (inside, slightly offset)
+  drawCharge(ctx, cx-20, cy, q1, 'q₁');
+  // draw q2 (inside)
+  if(q2!==0) drawCharge(ctx, cx+20, cy, q2, 'q₂');
+  // draw q3 (outside)
+  drawCharge(ctx, cx+pxR+80, cy, q3, 'q₃ (面外)');
+
+  // q3 outside — show its field lines cancel
+  if(q3!==0) {
+    const q3x=cx+pxR+80, q3y=cy;
+    const n=6;
+    for(let i=0;i<n;i++){
+      const ang=(2*Math.PI*i)/n;
+      const sign=q3>0?1:-1;
+      const x1=q3x+(sign>0?12:50)*Math.cos(ang), y1=q3y+(sign>0?12:50)*Math.sin(ang);
+      const x2=q3x+(sign>0?50:12)*Math.cos(ang), y2=q3y+(sign>0?50:12)*Math.sin(ang);
+      ctx.strokeStyle='rgba(255,210,60,0.25)';ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+    }
+  }
+
+  // Φ label
+  ctx.fillStyle='rgba(99,102,241,0.8)'; ctx.font='bold 14px "Microsoft YaHei"';
+  ctx.textAlign='center'; ctx.textBaseline='top';
+  const phiStr = (Phi/1e5).toFixed(2);
+  ctx.fillText(`Φ = ${phiStr}×10⁵ V·m`, cx, cy+pxR+16);
+
+  // label: surface type
+  ctx.fillStyle='rgba(99,102,241,0.5)'; ctx.font='12px "Microsoft YaHei"';
+  ctx.textAlign='center'; ctx.textBaseline='top';
+  const stLabel={'sphere':'球形高斯面','cube':'正方体高斯面','cylinder':'柱形高斯面','ellipse':'椭球形高斯面'};
+  ctx.fillText(stLabel[surfaceType], cx, 16);
+
+  // zero label for outer
+  ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.font='12px "Microsoft YaHei"';
+  ctx.textAlign='center';
+  ctx.fillText('q₃ 不影响总电通量', cx+pxR+80, cy+40);
+}
+
+function drawCharge(ctx, x, y, q, label) {
+  if(q===0){
+    ctx.fillStyle='rgba(255,255,255,0.2)';
+    ctx.beginPath();ctx.arc(x,y,10,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='10px sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='bottom';
+    ctx.fillText(label,x,y-12);
+    return;
+  }
+  const color=q>0?'#f87171':'#38bdf8';
+  const r=10+Math.min(Math.abs(q)*1e5,6);
+  ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);
+  ctx.fillStyle=color+'33';ctx.fill();
+  ctx.strokeStyle=color;ctx.lineWidth=2;ctx.stroke();
+  ctx.fillStyle='#fff';ctx.font='bold 13px sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(q>0?'+':'−',x,y+1);
+  ctx.fillStyle='rgba(255,255,255,0.4)';ctx.font='11px "Microsoft YaHei"';
+  ctx.textBaseline='bottom';
+  ctx.fillText(`${label}=${(q*1e6>0?'+':'')}${(q*1e6).toFixed(0)}μC`,x,y-r-2);
+}
+
+function resizeCanvas(){canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;update();}
+window.addEventListener('resize',resizeCanvas);
+setTimeout(resizeCanvas,80);
+</script>
+<!-- ── 实验报告生成器 ── -->
+<style>
+.report-fab { }
+.report-fab-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  border: none; border-radius: 12px; padding: 10px 14px; width: 100%;
+  color: #fff; font-size: 13px; font-weight: 700;
+  font-family: "Microsoft YaHei", sans-serif;
+  cursor: pointer; letter-spacing: 0.5px;
+  box-shadow: 0 4px 20px rgba(52,211,153,0.4);
+  transition: box-shadow 0.2s;
+}
+.report-fab-btn:hover { box-shadow: 0 8px 28px rgba(52,211,153,0.55); }
+.report-fab-btn .rfb-icon { font-size: 17px; }
+
+.report-overlay {
+  position: fixed; inset: 0; z-index: 1200;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.report-overlay.open { display: flex; }
+.report-modal {
+  background: #0e0c24;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  width: min(760px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+  animation: slideUp 0.3s cubic-bezier(0.4,0,0.2,1) both;
+}
+@keyframes slideUp {
+  from { opacity:0; transform: translateY(30px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.rm-header {
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.rm-title { font-size: 17px; font-weight: 700; color: #fff; font-family: "Microsoft YaHei",sans-serif; }
+.rm-title span { color: #34d399; }
+.rm-close { font-size: 22px; color: rgba(255,255,255,0.4); cursor: pointer; line-height:1; transition: color 0.2s; }
+.rm-close:hover { color: #fff; }
+.rm-body { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; }
+.rm-field { display: flex; flex-direction: column; gap: 6px; }
+.rm-label { font-size: 12px; color: rgba(255,255,255,0.45); font-family: "Microsoft YaHei",sans-serif; letter-spacing: 0.5px; }
+.rm-label span { color: #f87171; }
+.rm-input, .rm-textarea {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 10px 14px;
+  color: #fff; font-size: 14px; font-family: "Microsoft YaHei",sans-serif;
+  outline: none; transition: border-color 0.2s; width: 100%;
+}
+.rm-input:focus, .rm-textarea:focus { border-color: rgba(52,211,153,0.5); }
+.rm-textarea { resize: vertical; min-height: 80px; line-height: 1.8; }
+.rm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.rm-section-title {
+  font-size: 12px; font-weight: 700; color: rgba(52,211,153,0.8);
+  letter-spacing: 1px; text-transform: uppercase;
+  border-bottom: 1px solid rgba(52,211,153,0.15);
+  padding-bottom: 8px; margin-top: 4px;
+  font-family: "Microsoft YaHei",sans-serif;
+}
+.rm-footer { padding: 16px 28px 24px; display: flex; gap: 12px; justify-content: flex-end; }
+.rm-btn {
+  padding: 10px 28px; border-radius: 12px; border: none; cursor: pointer;
+  font-size: 14px; font-weight: 700; font-family: "Microsoft YaHei",sans-serif;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.rm-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.rm-btn-cancel { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6); }
+.rm-btn-gen { background: linear-gradient(135deg,#10b981,#34d399); color: #fff; }
+.rm-btn-copy { background: linear-gradient(135deg,#6366f1,#818cf8); color: #fff; display:none; }
+
+.report-output {
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px; padding: 20px 24px; margin: 0 28px 24px;
+  font-family: "Microsoft YaHei", "Times New Roman", serif;
+  font-size: 13.5px; color: rgba(255,255,255,0.85);
+  line-height: 2; white-space: pre-wrap; display: none;
+  max-height: 340px; overflow-y: auto;
+}
+.report-output.show { display: block; }
+</style>
+
+
+<div class="report-overlay" id="reportOverlay" onclick="overlayClick(event)">
+  <div class="report-modal">
+    <div class="rm-header">
+      <div class="rm-title">实验报告 · <span>高斯定理</span></div>
+      <div class="rm-close" onclick="closeReport()">×</div>
+    </div>
+    <div class="rm-body">
+      <div class="rm-section-title">基本信息</div>
+      <div class="rm-row">
+        <div class="rm-field">
+          <div class="rm-label">姓名 <span>*</span></div>
+          <input class="rm-input" id="rName" placeholder="请输入姓名">
+        </div>
+        <div class="rm-field">
+          <div class="rm-label">学号 <span>*</span></div>
+          <input class="rm-input" id="rStuId" placeholder="请输入学号">
+        </div>
+      </div>
+      <div class="rm-row">
+        <div class="rm-field">
+          <div class="rm-label">实验日期</div>
+          <input class="rm-input" id="rDate" type="date">
+        </div>
+        <div class="rm-field">
+          <div class="rm-label">实验伙伴</div>
+          <input class="rm-input" id="rPartner" placeholder="可选">
+        </div>
+      </div>
+      <div class="rm-section-title">实验内容</div>
+      <div class="rm-field">
+        <div class="rm-label">实验目的</div>
+        <textarea class="rm-textarea" id="rPurpose" placeholder="描述本次实验的目的和预期目标……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验步骤与观察</div>
+        <textarea class="rm-textarea" id="rProcess" placeholder="描述你进行的操作步骤和实验过程中的观察……" style="min-height:100px"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验数据记录</div>
+        <textarea class="rm-textarea" id="rData" placeholder="记录关键数据、参数和仿真结果……"></textarea>
+      </div>
+      <div class="rm-section-title">分析与总结</div>
+      <div class="rm-field">
+        <div class="rm-label">结果分析</div>
+        <textarea class="rm-textarea" id="rAnalysis" placeholder="对实验现象和数据进行分析……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">误差分析与思考</div>
+        <textarea class="rm-textarea" id="rError" placeholder="分析可能的误差来源，以及对物理规律的思考……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验结论</div>
+        <textarea class="rm-textarea" id="rConclusion" placeholder="总结本次实验的结论……"></textarea>
+      </div>
+    </div>
+    <div class="report-output" id="reportOutput"></div>
+    <div class="rm-footer">
+      <button class="rm-btn rm-btn-cancel" onclick="closeReport()">取消</button>
+      <button class="rm-btn rm-btn-copy" id="rmCopyBtn" onclick="copyReport()">复制报告</button>
+      <button class="rm-btn rm-btn-gen" onclick="generateReport()">生成报告</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const EXP_NAME = '高斯定理';
+  const EXP_SEC  = '§1-3';
+  const STORE_KEY = 'phy26_report_' + EXP_SEC.replace(/[§\/]/g,'');
+
+  function loadSaved() {
+    const d = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+    if (d.name)       document.getElementById('rName').value      = d.name;
+    if (d.stuId)      document.getElementById('rStuId').value     = d.stuId;
+    if (d.date)       document.getElementById('rDate').value      = d.date;
+    if (d.partner)    document.getElementById('rPartner').value   = d.partner;
+    if (d.purpose)    document.getElementById('rPurpose').value   = d.purpose;
+    if (d.process)    document.getElementById('rProcess').value   = d.process;
+    if (d.data)       document.getElementById('rData').value      = d.data;
+    if (d.analysis)   document.getElementById('rAnalysis').value  = d.analysis;
+    if (d.error)      document.getElementById('rError').value     = d.error;
+    if (d.conclusion) document.getElementById('rConclusion').value= d.conclusion;
+  }
+
+  function saveDraft() {
+    const d = {
+      name:       document.getElementById('rName').value,
+      stuId:      document.getElementById('rStuId').value,
+      date:       document.getElementById('rDate').value,
+      partner:    document.getElementById('rPartner').value,
+      purpose:    document.getElementById('rPurpose').value,
+      process:    document.getElementById('rProcess').value,
+      data:       document.getElementById('rData').value,
+      analysis:   document.getElementById('rAnalysis').value,
+      error:      document.getElementById('rError').value,
+      conclusion: document.getElementById('rConclusion').value,
+    };
+    localStorage.setItem(STORE_KEY, JSON.stringify(d));
+  }
+
+  window.openReport = function() {
+    document.getElementById('reportOverlay').classList.add('open');
+    document.getElementById('reportOutput').classList.remove('show');
+    document.getElementById('rmCopyBtn').style.display = 'none';
+    const dateEl = document.getElementById('rDate');
+    if (!dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
+    loadSaved();
+    const _d = {
+      rPurpose:    '验证高斯定理，研究不同形状高斯面上的电通量与内部电荷量的关系，理解高斯定理的物理意义及其在计算对称电场中的应用。',
+      rProcess:    '选取球形、柱形等不同形状的高斯面，分别包围不同数量的点电荷；计算穿过高斯面的电通量Φ=∮E·dA；改变高斯面大小和形状，观察电通量是否改变；将电荷置于高斯面外，验证其贡献为零。',
+      rData:       '单个点电荷q=1μC，球形高斯面（r=0.5m）：Φ=q/ε₀=1.13×10⁵V·m；同一电荷，高斯面扩大至r=1.0m：Φ不变，仍为1.13×10⁵V·m；高斯面外有电荷时：Φ不变，外部电荷贡献为零；两个等量异号电荷，高斯面包围两者：Φ=0。',
+      rAnalysis:   '高斯定理表明穿过任意闭合曲面的电通量只与面内自由电荷总量有关，与高斯面的形状、大小及面外电荷无关。这是库仑定律和叠加原理的直接推论，适用于计算具有高度对称性的电场分布（球对称、柱对称、平面对称）。',
+      rError:      '仿真中高斯面的数值积分存在离散化误差；实际实验中难以精确测量曲面上各点的电场强度，通常只能在高对称情形下应用高斯定理。',
+      rConclusion: '验证了高斯定理：穿过任意闭合曲面的电通量Φ=Q_enc/ε₀，与高斯面的形状和大小无关，为计算对称电场提供了有效工具。',
+    };
+    Object.entries(_d).forEach(([id, val]) => { const el = document.getElementById(id); if (el && !el.value) el.value = val; });
+  };
+
+  window.closeReport = function() {
+    saveDraft();
+    document.getElementById('reportOverlay').classList.remove('open');
+  };
+
+  window.overlayClick = function(e) {
+    if (e.target === document.getElementById('reportOverlay')) closeReport();
+  };
+
+  window.generateReport = function() {
+    const name       = document.getElementById('rName').value.trim();
+    const stuId      = document.getElementById('rStuId').value.trim();
+    const date       = document.getElementById('rDate').value || '—';
+    const partner    = document.getElementById('rPartner').value.trim() || '—';
+    const purpose    = document.getElementById('rPurpose').value.trim() || '（未填写）';
+    const process    = document.getElementById('rProcess').value.trim() || '（未填写）';
+    const data       = document.getElementById('rData').value.trim() || '（未填写）';
+    const analysis   = document.getElementById('rAnalysis').value.trim() || '（未填写）';
+    const error      = document.getElementById('rError').value.trim() || '（未填写）';
+    const conclusion = document.getElementById('rConclusion').value.trim() || '（未填写）';
+
+    if (!name || !stuId) { alert('请填写姓名和学号'); return; }
+    saveDraft();
+
+    const divider = '─'.repeat(40);
+    const report = [
+      '普通物理（卓越班）下册 · 电磁学',
+      `实验报告：${EXP_NAME}（${EXP_SEC}）`,
+      divider,
+      `姓　　名：${name}　　　学　　号：${stuId}`,
+      `实验日期：${date}　　　实验伙伴：${partner}`,
+      divider,
+      '',
+      '一、实验目的',
+      purpose,
+      '',
+      '二、实验步骤与观察',
+      process,
+      '',
+      '三、实验数据记录',
+      data,
+      '',
+      '四、结果分析',
+      analysis,
+      '',
+      '五、误差分析与思考',
+      error,
+      '',
+      '六、实验结论',
+      conclusion,
+      '',
+      divider,
+      `生成时间：${new Date().toLocaleString('zh-CN')}`,
+      '本报告由 NUSEP26 普通物理（卓越班）实验仿真平台生成',
+    ].join('\n');
+
+    const out = document.getElementById('reportOutput');
+    out.textContent = report;
+    out.classList.add('show');
+    document.getElementById('rmCopyBtn').style.display = 'inline-flex';
+    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+
+  window.copyReport = function() {
+    const text = document.getElementById('reportOutput').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('rmCopyBtn');
+      const orig = btn.textContent;
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => btn.textContent = orig, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      const btn = document.getElementById('rmCopyBtn');
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => btn.textContent = '复制报告', 2000);
+    });
+  };
+
+  ['rName','rStuId','rDate','rPartner','rPurpose','rProcess','rData','rAnalysis','rError','rConclusion']
+    .forEach(id => document.getElementById(id).addEventListener('input', saveDraft));
+})();
+</script>
+
+</body>
+</html>

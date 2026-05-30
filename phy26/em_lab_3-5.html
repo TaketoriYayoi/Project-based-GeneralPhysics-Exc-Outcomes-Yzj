@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>实验：安培环路定理 — 3-5</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Microsoft YaHei","PingFang SC",sans-serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;color:#fff;overflow-x:hidden}
+    .topbar{display:flex;align-items:center;gap:14px;padding:16px 28px;border-bottom:1px solid rgba(255,255,255,0.07);background:rgba(15,12,41,0.7);backdrop-filter:blur(12px)}
+    .back-btn{color:rgba(255,255,255,0.55);font-size:14px;cursor:pointer;text-decoration:none;transition:color .2s}
+    .back-btn:hover{color:#34d399}
+    .topbar-title-wrap{display:flex;flex-direction:column;gap:2px}.topbar-title{font-size:16px;font-weight:700}.topbar-course{font-size:11px;color:rgba(255,255,255,0.38);letter-spacing:1px}
+    .topbar-sub{margin-left:auto;font-size:12px;color:rgba(255,255,255,0.3)}
+    .layout{display:flex;height:calc(100vh - 57px)}
+    .sidebar{width:250px;flex-shrink:0;background:rgba(255,255,255,0.03);border-right:1px solid rgba(255,255,255,0.07);padding:20px 16px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+    .ctrl-group h3{font-size:11px;color:rgba(255,255,255,0.38);letter-spacing:1px;margin-bottom:10px;text-transform:uppercase}
+    .divider{height:1px;background:rgba(255,255,255,0.07)}
+    .config-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+    .config-btn{padding:8px 4px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);font-size:11px;cursor:pointer;text-align:center;color:rgba(255,255,255,0.45);transition:all .18s;font-family:"Microsoft YaHei",sans-serif}
+    .config-btn.active{background:rgba(52,211,153,0.15);border-color:rgba(52,211,153,0.4);color:#34d399}
+    .config-btn:hover:not(.active){background:rgba(255,255,255,0.05)}
+    .slider-row{display:flex;flex-direction:column;gap:4px;margin-bottom:6px}
+    .slider-row label{font-size:12.5px;color:rgba(255,255,255,0.6);display:flex;justify-content:space-between}
+    .slider-row label span{color:#34d399;font-weight:600}
+    input[type=range]{width:100%;accent-color:#34d399}
+    .result-panel{background:rgba(52,211,153,0.05);border:1px solid rgba(52,211,153,0.2);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px}
+    .result-panel h3{font-size:11px;color:rgba(52,211,153,0.7);letter-spacing:1px}
+    .result-row{display:flex;justify-content:space-between;align-items:baseline}
+    .result-label{font-size:12px;color:rgba(255,255,255,0.45)}
+    .result-value{font-size:14px;font-weight:700;color:#34d399}
+    .result-unit{font-size:11px;color:rgba(255,255,255,0.3);margin-left:2px}
+    .verify-box{border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600;text-align:center;background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.3);color:#34d399}
+    .info-box{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:12px;font-size:12px;color:rgba(255,255,255,0.4);line-height:1.8}
+    .canvas-wrap{flex:1;overflow:hidden;display:flex;flex-direction:column;padding:10px;gap:8px}
+    canvas{background:rgba(0,0,0,0.3);display:block;flex:1;width:100%}
+    .formula-bar{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px 20px;font-size:13px;color:rgba(255,255,255,0.55);text-align:center;width:100%;flex-shrink:0}
+  </style>
+</head>
+<body>
+<div class="topbar">
+  <a class="back-btn" href="em.html">← 电磁学</a>
+  <div class="topbar-title-wrap">
+    <div class="topbar-title">⚡ 实验：安培环路定理</div>
+    <span class="topbar-course">普通物理（卓越班）下册 · 电磁学</span>
+  </div>
+  <div class="topbar-sub">§3-5 安培环路定理</div>
+</div>
+<div class="layout">
+  <div class="sidebar">
+    <div class="ctrl-group">
+      <h3>电流配置</h3>
+      <div class="config-grid">
+        <div class="config-btn active" onclick="setConfig(this,'wire')">无限长直导线</div>
+        <div class="config-btn" onclick="setConfig(this,'coax')">同轴电缆</div>
+        <div class="config-btn" onclick="setConfig(this,'sheet')">无限大电流面</div>
+        <div class="config-btn" onclick="setConfig(this,'sol')">螺线管截面</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="slider-row">
+      <label>电流 I = <span id="Ival">4</span> A</label>
+      <input type="range" id="Islider" min="1" max="10" step="1" value="4" oninput="update()">
+    </div>
+    <div class="slider-row">
+      <label>安培环路半径 r = <span id="rVal">1.5</span></label>
+      <input type="range" id="rSlider" min="0.5" max="4" step="0.5" value="1.5" oninput="update()">
+    </div>
+    <div class="divider"></div>
+    <div class="result-panel">
+      <h3>安培定理验证</h3>
+      <div class="result-row"><span class="result-label">∮ B·dl</span><span><span class="result-value" id="resLine">—</span><span class="result-unit">μT·m</span></span></div>
+      <div class="result-row"><span class="result-label">μ₀ ΣI_enc</span><span><span class="result-value" id="resEnc">—</span><span class="result-unit">μT·m</span></span></div>
+      <div class="result-row"><span class="result-label">B 在此处</span><span><span class="result-value" id="resB">—</span><span class="result-unit">μT</span></span></div>
+      <div class="verify-box">∮ B·dl = μ₀ ΣI_enc ✓</div>
+    </div>
+    <div class="info-box">
+      拖动安培环路改变半径<br>
+      颜色越亮 = 磁场越强<br>
+      绿色虚线圆 = 安培环路 L
+    </div>
+    <div class="report-fab" style="margin-top:auto;padding-top:12px">
+      <button class="report-fab-btn" onclick="openReport()">
+        <span class="rfb-icon">📄</span> 生成实验报告
+      </button>
+    </div>
+  </div>
+
+  <div class="canvas-wrap">
+    <canvas id="ampCanvas"></canvas>
+    <div class="formula-bar" id="fbar">∮_L B·dl = μ₀ ΣI_enc</div>
+  </div>
+</div>
+
+<script>
+const canvas=document.getElementById('ampCanvas');
+const ctx=canvas.getContext('2d');
+const mu0=4*Math.PI*1e-7;
+
+let config='wire';
+
+function setConfig(el,c){
+  document.querySelectorAll('.config-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active'); config=c; update();
+}
+
+function update(){
+  const I=parseInt(document.getElementById('Islider').value);
+  const rPx=parseFloat(document.getElementById('rSlider').value)*50;
+  const rM=rPx/1000; // scale
+  document.getElementById('rVal').textContent=parseFloat(document.getElementById('rSlider').value).toFixed(1);
+
+  let B=0, Ienc=I;
+  const W=canvas.width,H=canvas.height,cx=W/2,cy=H/2;
+  const wireR=30; // wire radius in px
+
+  if(config==='wire'){
+    B=mu0*I/(2*Math.PI*rM);
+    Ienc=I;
+    document.getElementById('fbar').textContent=`直导线: B = μ₀I/(2πr) = ${(B*1e6).toFixed(2)} μT`;
+  } else if(config==='coax'){
+    const innerR=40, outerR=80;
+    if(rPx<innerR){B=mu0*I*(rPx/innerR)**2/(2*Math.PI*rM);Ienc=I*(rPx/innerR)**2;}
+    else if(rPx<outerR){B=mu0*I/(2*Math.PI*rM);Ienc=I;}
+    else{B=0;Ienc=0;}
+    document.getElementById('fbar').textContent=`同轴电缆: r内=${(innerR/1000*1000).toFixed(0)}mm, r外=${(outerR/1000*1000).toFixed(0)}mm`;
+  } else if(config==='sheet'){
+    B=mu0*I*0.5; Ienc=I;
+    document.getElementById('fbar').textContent=`无限大电流面: B = μ₀K/2（两侧均匀）`;
+  } else {
+    const solR=90;
+    if(rPx<solR){B=mu0*I*5;Ienc=I;}
+    else{B=0;Ienc=0;}
+    document.getElementById('fbar').textContent=`螺线管: 内部 B = μ₀nI, 外部 B = 0`;
+  }
+
+  const lineInt=B*2*Math.PI*rM;
+  const enc=mu0*Ienc;
+  document.getElementById('resLine').textContent=(lineInt*1e6).toFixed(3);
+  document.getElementById('resEnc').textContent=(enc*1e6).toFixed(3);
+  document.getElementById('resB').textContent=(B*1e6).toFixed(2);
+
+  draw(I,rPx,B,Ienc);
+}
+
+function draw(I,rPx,B,Ienc){
+  const W=canvas.width,H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const cx=W/2,cy=H/2;
+
+  if(config==='wire'){
+    // color map: B ∝ 1/r
+    for(let y=0;y<H;y+=6) for(let x=0;x<W;x+=6){
+      const dx=x-cx,dy=y-cy,r=Math.sqrt(dx*dx+dy*dy);if(r<8)continue;
+      const bm=I/(2*Math.PI*(r/1000));
+      const t=Math.min(bm/1000,1);
+      ctx.fillStyle=`rgba(52,211,153,${t*0.35})`;ctx.fillRect(x,y,6,6);
+    }
+    // concentric B-lines
+    for(let r=40;r<=200;r+=40){
+      ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+      ctx.strokeStyle=`rgba(52,211,153,${0.15+0.5*(1-r/200)})`;ctx.lineWidth=1;ctx.stroke();
+    }
+    // wire cross section
+    ctx.beginPath();ctx.arc(cx,cy,12,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,150,50,0.3)';ctx.fill();
+    ctx.strokeStyle='rgba(255,150,50,0.7)';ctx.lineWidth=2;ctx.stroke();
+    ctx.fillStyle='rgba(255,150,50,0.9)';ctx.font='bold 14px sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('⊙',cx,cy+1);
+
+  } else if(config==='coax'){
+    const inner=40,outer=80;
+    // outer conductor fill
+    ctx.beginPath();ctx.arc(cx,cy,outer,0,Math.PI*2);
+    ctx.fillStyle='rgba(56,189,248,0.1)';ctx.fill();
+    ctx.strokeStyle='rgba(56,189,248,0.5)';ctx.lineWidth=2;ctx.stroke();
+    // inner conductor
+    ctx.beginPath();ctx.arc(cx,cy,inner,0,Math.PI*2);
+    ctx.fillStyle='rgba(255,150,50,0.2)';ctx.fill();
+    ctx.strokeStyle='rgba(255,150,50,0.6)';ctx.lineWidth=2;ctx.stroke();
+    // B-lines only between inner and outer
+    for(let r=50;r<=75;r+=10){
+      ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+      ctx.strokeStyle='rgba(52,211,153,0.4)';ctx.lineWidth=1;ctx.stroke();
+    }
+    ctx.fillStyle='rgba(255,150,50,0.8)';ctx.font='bold 11px sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('⊙',cx,cy+1);
+    ctx.fillStyle='rgba(56,189,248,0.8)';ctx.font='11px "Microsoft YaHei"';
+    ctx.textBaseline='top';ctx.fillText('返回电流',cx,cy+outer+6);
+
+  } else if(config==='sheet'){
+    // horizontal current sheet
+    ctx.fillStyle='rgba(255,150,50,0.15)';ctx.fillRect(0,cy-8,W,16);
+    ctx.strokeStyle='rgba(255,150,50,0.6)';ctx.lineWidth=2;
+    ctx.strokeRect(0,cy-8,W,16);
+    // B parallel to surface, opposite on each side
+    for(let x=60;x<W-60;x+=80){
+      // above: B to left
+      drawAmpArrow(x,cy-50,x-30,cy-50,'rgba(52,211,153,0.7)');
+      // below: B to right
+      drawAmpArrow(x,cy+50,x+30,cy+50,'rgba(52,211,153,0.7)');
+    }
+    ctx.fillStyle='rgba(255,150,50,0.6)';ctx.font='12px "Microsoft YaHei"';
+    ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText('电流面（电流垂直纸面向外）',W/2,cy+22);
+
+  } else {
+    // solenoid cross-section
+    const solR=90;
+    ctx.beginPath();ctx.arc(cx,cy,solR,0,Math.PI*2);
+    ctx.fillStyle='rgba(52,211,153,0.08)';ctx.fill();
+    ctx.strokeStyle='rgba(52,211,153,0.4)';ctx.lineWidth=2;ctx.stroke();
+    // internal B arrows
+    for(let x=-50;x<=50;x+=30){
+      drawAmpArrow(cx+x-15,cy,cx+x+15,cy,'rgba(52,211,153,0.7)');
+    }
+    ctx.fillStyle='rgba(52,211,153,0.5)';ctx.font='12px "Microsoft YaHei"';
+    ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText('螺线管截面，外部 B=0',cx,cy+solR+8);
+    // external: zero
+    ctx.fillStyle='rgba(255,255,255,0.2)';ctx.font='11px "Microsoft YaHei"';
+    ctx.textBaseline='middle';ctx.fillText('B = 0',cx,cy-solR-20);
+  }
+
+  // Ampere loop
+  ctx.beginPath();ctx.arc(cx,cy,rPx,0,Math.PI*2);
+  ctx.strokeStyle='rgba(251,191,36,0.8)';ctx.lineWidth=2;ctx.setLineDash([6,4]);ctx.stroke();
+  ctx.setLineDash([]);
+  // circulation arrow
+  const ang=Math.PI/4;
+  ctx.fillStyle='rgba(251,191,36,0.8)';
+  const ax=cx+rPx*Math.cos(ang),ay=cy+rPx*Math.sin(ang);
+  ctx.font='16px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('↻',ax,ay);
+  // label
+  ctx.fillStyle='rgba(251,191,36,0.7)';ctx.font='bold 12px "Microsoft YaHei"';
+  ctx.textAlign='center';ctx.textBaseline='bottom';
+  ctx.fillText(`安培环路 L, r=${parseFloat(document.getElementById('rSlider').value).toFixed(1)}`,cx,cy-rPx-6);
+  ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='12px "Microsoft YaHei"';
+  ctx.textBaseline='top';
+  ctx.fillText(`∮B·dl = ${(B*2*Math.PI*(rPx/1000)*1e6).toFixed(3)} μT·m`,cx,cy+rPx+8);
+}
+
+function drawAmpArrow(x1,y1,x2,y2,color){
+  ctx.strokeStyle=color;ctx.fillStyle=color;ctx.lineWidth=1.5;ctx.setLineDash([]);
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  const ang=Math.atan2(y2-y1,x2-x1),as=7;
+  ctx.beginPath();ctx.moveTo(x2,y2);
+  ctx.lineTo(x2-as*Math.cos(ang-0.4),y2-as*Math.sin(ang-0.4));
+  ctx.lineTo(x2-as*Math.cos(ang+0.4),y2-as*Math.sin(ang+0.4));
+  ctx.closePath();ctx.fill();
+}
+
+function resizeCanvas(){canvas.width=canvas.offsetWidth;canvas.height=canvas.offsetHeight;update();}
+window.addEventListener('resize',resizeCanvas);
+setTimeout(resizeCanvas,80);
+</script>
+<!-- ── 实验报告生成器 ── -->
+<style>
+.report-fab { }
+.report-fab-btn {
+  display: flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  border: none; border-radius: 12px; padding: 10px 14px; width: 100%;
+  color: #fff; font-size: 13px; font-weight: 700;
+  font-family: "Microsoft YaHei", sans-serif;
+  cursor: pointer; letter-spacing: 0.5px;
+  box-shadow: 0 4px 20px rgba(52,211,153,0.4);
+  transition: box-shadow 0.2s;
+}
+.report-fab-btn:hover { box-shadow: 0 8px 28px rgba(52,211,153,0.55); }
+.report-fab-btn .rfb-icon { font-size: 17px; }
+
+.report-overlay {
+  position: fixed; inset: 0; z-index: 1200;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.report-overlay.open { display: flex; }
+.report-modal {
+  background: #0e0c24;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  width: min(760px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+  animation: slideUp 0.3s cubic-bezier(0.4,0,0.2,1) both;
+}
+@keyframes slideUp {
+  from { opacity:0; transform: translateY(30px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.rm-header {
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.rm-title { font-size: 17px; font-weight: 700; color: #fff; font-family: "Microsoft YaHei",sans-serif; }
+.rm-title span { color: #34d399; }
+.rm-close { font-size: 22px; color: rgba(255,255,255,0.4); cursor: pointer; line-height:1; transition: color 0.2s; }
+.rm-close:hover { color: #fff; }
+.rm-body { padding: 24px 28px; display: flex; flex-direction: column; gap: 16px; }
+.rm-field { display: flex; flex-direction: column; gap: 6px; }
+.rm-label { font-size: 12px; color: rgba(255,255,255,0.45); font-family: "Microsoft YaHei",sans-serif; letter-spacing: 0.5px; }
+.rm-label span { color: #f87171; }
+.rm-input, .rm-textarea {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 10px 14px;
+  color: #fff; font-size: 14px; font-family: "Microsoft YaHei",sans-serif;
+  outline: none; transition: border-color 0.2s; width: 100%;
+}
+.rm-input:focus, .rm-textarea:focus { border-color: rgba(52,211,153,0.5); }
+.rm-textarea { resize: vertical; min-height: 80px; line-height: 1.8; }
+.rm-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.rm-section-title {
+  font-size: 12px; font-weight: 700; color: rgba(52,211,153,0.8);
+  letter-spacing: 1px; text-transform: uppercase;
+  border-bottom: 1px solid rgba(52,211,153,0.15);
+  padding-bottom: 8px; margin-top: 4px;
+  font-family: "Microsoft YaHei",sans-serif;
+}
+.rm-footer { padding: 16px 28px 24px; display: flex; gap: 12px; justify-content: flex-end; }
+.rm-btn {
+  padding: 10px 28px; border-radius: 12px; border: none; cursor: pointer;
+  font-size: 14px; font-weight: 700; font-family: "Microsoft YaHei",sans-serif;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.rm-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.rm-btn-cancel { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6); }
+.rm-btn-gen { background: linear-gradient(135deg,#10b981,#34d399); color: #fff; }
+.rm-btn-copy { background: linear-gradient(135deg,#6366f1,#818cf8); color: #fff; display:none; }
+
+.report-output {
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 12px; padding: 20px 24px; margin: 0 28px 24px;
+  font-family: "Microsoft YaHei", "Times New Roman", serif;
+  font-size: 13.5px; color: rgba(255,255,255,0.85);
+  line-height: 2; white-space: pre-wrap; display: none;
+  max-height: 340px; overflow-y: auto;
+}
+.report-output.show { display: block; }
+</style>
+
+
+<div class="report-overlay" id="reportOverlay" onclick="overlayClick(event)">
+  <div class="report-modal">
+    <div class="rm-header">
+      <div class="rm-title">实验报告 · <span>安培环路定理</span></div>
+      <div class="rm-close" onclick="closeReport()">×</div>
+    </div>
+    <div class="rm-body">
+      <div class="rm-section-title">基本信息</div>
+      <div class="rm-row">
+        <div class="rm-field">
+          <div class="rm-label">姓名 <span>*</span></div>
+          <input class="rm-input" id="rName" placeholder="请输入姓名">
+        </div>
+        <div class="rm-field">
+          <div class="rm-label">学号 <span>*</span></div>
+          <input class="rm-input" id="rStuId" placeholder="请输入学号">
+        </div>
+      </div>
+      <div class="rm-row">
+        <div class="rm-field">
+          <div class="rm-label">实验日期</div>
+          <input class="rm-input" id="rDate" type="date">
+        </div>
+        <div class="rm-field">
+          <div class="rm-label">实验伙伴</div>
+          <input class="rm-input" id="rPartner" placeholder="可选">
+        </div>
+      </div>
+      <div class="rm-section-title">实验内容</div>
+      <div class="rm-field">
+        <div class="rm-label">实验目的</div>
+        <textarea class="rm-textarea" id="rPurpose" placeholder="描述本次实验的目的和预期目标……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验步骤与观察</div>
+        <textarea class="rm-textarea" id="rProcess" placeholder="描述你进行的操作步骤和实验过程中的观察……" style="min-height:100px"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验数据记录</div>
+        <textarea class="rm-textarea" id="rData" placeholder="记录关键数据、参数和仿真结果……"></textarea>
+      </div>
+      <div class="rm-section-title">分析与总结</div>
+      <div class="rm-field">
+        <div class="rm-label">结果分析</div>
+        <textarea class="rm-textarea" id="rAnalysis" placeholder="对实验现象和数据进行分析……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">误差分析与思考</div>
+        <textarea class="rm-textarea" id="rError" placeholder="分析可能的误差来源，以及对物理规律的思考……"></textarea>
+      </div>
+      <div class="rm-field">
+        <div class="rm-label">实验结论</div>
+        <textarea class="rm-textarea" id="rConclusion" placeholder="总结本次实验的结论……"></textarea>
+      </div>
+    </div>
+    <div class="report-output" id="reportOutput"></div>
+    <div class="rm-footer">
+      <button class="rm-btn rm-btn-cancel" onclick="closeReport()">取消</button>
+      <button class="rm-btn rm-btn-copy" id="rmCopyBtn" onclick="copyReport()">复制报告</button>
+      <button class="rm-btn rm-btn-gen" onclick="generateReport()">生成报告</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const EXP_NAME = '安培环路定理';
+  const EXP_SEC  = '§3-5';
+  const STORE_KEY = 'phy26_report_' + EXP_SEC.replace(/[§\/]/g,'');
+
+  function loadSaved() {
+    const d = JSON.parse(localStorage.getItem(STORE_KEY) || '{}');
+    if (d.name)       document.getElementById('rName').value      = d.name;
+    if (d.stuId)      document.getElementById('rStuId').value     = d.stuId;
+    if (d.date)       document.getElementById('rDate').value      = d.date;
+    if (d.partner)    document.getElementById('rPartner').value   = d.partner;
+    if (d.purpose)    document.getElementById('rPurpose').value   = d.purpose;
+    if (d.process)    document.getElementById('rProcess').value   = d.process;
+    if (d.data)       document.getElementById('rData').value      = d.data;
+    if (d.analysis)   document.getElementById('rAnalysis').value  = d.analysis;
+    if (d.error)      document.getElementById('rError').value     = d.error;
+    if (d.conclusion) document.getElementById('rConclusion').value= d.conclusion;
+  }
+
+  function saveDraft() {
+    const d = {
+      name:       document.getElementById('rName').value,
+      stuId:      document.getElementById('rStuId').value,
+      date:       document.getElementById('rDate').value,
+      partner:    document.getElementById('rPartner').value,
+      purpose:    document.getElementById('rPurpose').value,
+      process:    document.getElementById('rProcess').value,
+      data:       document.getElementById('rData').value,
+      analysis:   document.getElementById('rAnalysis').value,
+      error:      document.getElementById('rError').value,
+      conclusion: document.getElementById('rConclusion').value,
+    };
+    localStorage.setItem(STORE_KEY, JSON.stringify(d));
+  }
+
+  window.openReport = function() {
+    document.getElementById('reportOverlay').classList.add('open');
+    document.getElementById('reportOutput').classList.remove('show');
+    document.getElementById('rmCopyBtn').style.display = 'none';
+    const dateEl = document.getElementById('rDate');
+    if (!dateEl.value) dateEl.value = new Date().toISOString().slice(0,10);
+    loadSaved();
+    const _d = {
+      rPurpose:    '验证安培环路定理，研究磁场沿闭合路径的线积分与穿过该路径的电流的关系，理解安培定理在计算对称磁场中的应用。',
+      rProcess:    '选取不同形状的安培环路（圆形、矩形），计算∮B·dl；改变环路大小，观察线积分是否只与穿过环路的电流有关；应用安培定理计算无限长直导线、螺线管内部的磁场；验证∮B·dl=μ₀I_enc。',
+      rData:       '无限长直导线（I=1A），圆形安培环路（r=2cm）：∮B·dl=B·2πr=μ₀I/(2πr)·2πr=μ₀I=1.26μT·m；同一导线，环路扩大至r=4cm：∮B·dl=μ₀I不变；螺线管（n=1000匝/m，I=1A），矩形环路（长L=1cm，穿过n·L=10匝）：∮B·dl=μ₀·10I=12.6μT·m。',
+      rAnalysis:   '安培环路定理∮B·dl=μ₀I_enc表明磁场沿任意闭合路径的线积分只与穿过该路径的总电流有关，与路径的形状和大小无关。这是磁场的基本定理，适用于计算具有高度对称性的磁场（无限长直导线、螺线管、环形线圈）。',
+      rError:      '仿真中安培环路的数值积分存在离散化误差；实际实验中难以精确测量沿路径各点的磁场强度；有限长导线和非理想螺线管会偏离理论值。',
+      rConclusion: '验证了安培环路定理：∮B·dl=μ₀I_enc，线积分只与穿过环路的电流有关，与路径形状无关；安培定理为计算对称磁场提供了有效工具，与高斯定理在电场中的作用类似。',
+    };
+    Object.entries(_d).forEach(([id, val]) => { const el = document.getElementById(id); if (el && !el.value) el.value = val; });
+  };
+
+  window.closeReport = function() {
+    saveDraft();
+    document.getElementById('reportOverlay').classList.remove('open');
+  };
+
+  window.overlayClick = function(e) {
+    if (e.target === document.getElementById('reportOverlay')) closeReport();
+  };
+
+  window.generateReport = function() {
+    const name       = document.getElementById('rName').value.trim();
+    const stuId      = document.getElementById('rStuId').value.trim();
+    const date       = document.getElementById('rDate').value || '—';
+    const partner    = document.getElementById('rPartner').value.trim() || '—';
+    const purpose    = document.getElementById('rPurpose').value.trim() || '（未填写）';
+    const process    = document.getElementById('rProcess').value.trim() || '（未填写）';
+    const data       = document.getElementById('rData').value.trim() || '（未填写）';
+    const analysis   = document.getElementById('rAnalysis').value.trim() || '（未填写）';
+    const error      = document.getElementById('rError').value.trim() || '（未填写）';
+    const conclusion = document.getElementById('rConclusion').value.trim() || '（未填写）';
+
+    if (!name || !stuId) { alert('请填写姓名和学号'); return; }
+    saveDraft();
+
+    const divider = '─'.repeat(40);
+    const report = [
+      '普通物理（卓越班）下册 · 电磁学',
+      `实验报告：${EXP_NAME}（${EXP_SEC}）`,
+      divider,
+      `姓　　名：${name}　　　学　　号：${stuId}`,
+      `实验日期：${date}　　　实验伙伴：${partner}`,
+      divider,
+      '',
+      '一、实验目的',
+      purpose,
+      '',
+      '二、实验步骤与观察',
+      process,
+      '',
+      '三、实验数据记录',
+      data,
+      '',
+      '四、结果分析',
+      analysis,
+      '',
+      '五、误差分析与思考',
+      error,
+      '',
+      '六、实验结论',
+      conclusion,
+      '',
+      divider,
+      `生成时间：${new Date().toLocaleString('zh-CN')}`,
+      '本报告由 NUSEP26 普通物理（卓越班）实验仿真平台生成',
+    ].join('\n');
+
+    const out = document.getElementById('reportOutput');
+    out.textContent = report;
+    out.classList.add('show');
+    document.getElementById('rmCopyBtn').style.display = 'inline-flex';
+    out.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+
+  window.copyReport = function() {
+    const text = document.getElementById('reportOutput').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('rmCopyBtn');
+      const orig = btn.textContent;
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => btn.textContent = orig, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+      const btn = document.getElementById('rmCopyBtn');
+      btn.textContent = '✓ 已复制';
+      setTimeout(() => btn.textContent = '复制报告', 2000);
+    });
+  };
+
+  ['rName','rStuId','rDate','rPartner','rPurpose','rProcess','rData','rAnalysis','rError','rConclusion']
+    .forEach(id => document.getElementById(id).addEventListener('input', saveDraft));
+})();
+</script>
+
+</body>
+</html>
